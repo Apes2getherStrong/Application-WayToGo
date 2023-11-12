@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/bottom_nav_map"
+        android:icon="@drawable/ic_map_24"
+        android:title="@string/map_icon_title"/>
+    <item
+        android:id="@+id/bottom_nav_routes"
+        android:icon="@drawable/ic_route_24"
+        android:title="@string/routes_icon_title"/>
+
+    <item
+        android:id="@+id/bottom_nav_user"
+        android:icon="@drawable/ic_user_24"
+        android:title="@string/user_icon_title"/>
+
+</menu>
