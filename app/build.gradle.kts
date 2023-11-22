@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
 }
 
 android {
@@ -34,6 +36,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -43,8 +48,10 @@ dependencies {
 
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.core:core-ktx:1.9.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx: 2.6.2")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
