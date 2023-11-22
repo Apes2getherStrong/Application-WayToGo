@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val fragment = when (item.itemId) {
 //            R.id.bottom_nav_map -> MapFragment()
-//            R.id.bottom_nav_routes -> RoutesFragment()
+           R.id.bottom_nav_routes -> RoutesFragment()
 //            R.id.bottom_nav_user -> UserFragment()
             else -> return false
         }
