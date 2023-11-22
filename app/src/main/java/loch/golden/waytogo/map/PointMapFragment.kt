@@ -28,6 +28,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
         private const val MAP_BUNDLE_KEY = "map_state"
     }
 
+    //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
@@ -66,8 +67,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
             mapViewModel.cameraPosition = googleMap.cameraPosition
         }
         populateMap()
-
-
     }
 
     private fun populateMap() {
