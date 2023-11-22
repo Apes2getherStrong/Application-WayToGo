@@ -5,9 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import loch.golden.waytogo.adapter.RecyclerViewRouteAdapter
+import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
 import loch.golden.waytogo.routes.DataRoutes
 
