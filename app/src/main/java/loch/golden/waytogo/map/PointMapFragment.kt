@@ -46,7 +46,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         initMapView(savedInstanceState)
         setUpClickListeners()
-
     }
 
 
