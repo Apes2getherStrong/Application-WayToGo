@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import loch.golden.waytogo.R
-import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
+import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.map.MapViewModel
 
 class RoutesFragment : Fragment() {

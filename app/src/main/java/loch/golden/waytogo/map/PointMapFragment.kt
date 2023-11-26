@@ -1,29 +1,30 @@
 package loch.golden.waytogo.map
 
-import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.fragment.app.*
+import android.widget.SeekBar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import loch.golden.waytogo.IOnBackPressed
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
+import java.lang.Exception
 
 
-class PointMapFragment : Fragment(), OnMapReadyCallback {
+class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
+    IOnBackPressed {
 
-    companion object{
+    companion object {
         private const val CAMERA_POSITION_KEY = "camera_position"
         private const val MAP_BUNDLE_KEY = "map_state"
     }
@@ -32,6 +33,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
+
+    private var mp: MediaPlayer? = null
+    private var currentTrack = R.raw.piosenka
+    private var markerDetailsWindowVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +50,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initMapView(savedInstanceState)
-        setUpClickListeners()
+        setUpListeners()
     }
 
 
@@ -55,7 +60,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(mMap: GoogleMap) {
-        googleMap=mMap
+        googleMap = mMap
 
         //this skips if camera position is null
         mapViewModel.cameraPosition?.let {
@@ -65,21 +70,88 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
         googleMap.setOnCameraMoveListener {
             mapViewModel.cameraPosition = googleMap.cameraPosition
         }
+        googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
+        googleMap.setOnInfoWindowClickListener(this)
         populateMap()
     }
 
     private fun populateMap() {
-        for ((index,latlng) in mapViewModel.markerList.withIndex()){
+        for ((index, latlng) in mapViewModel.markerList.withIndex()) {
             googleMap.addMarker(
                 MarkerOptions()
                     .position(latlng)
                     .title("place $index")
+
             )
         }
     }
 
-    private fun setUpClickListeners() {
+    override fun onInfoWindowClick(marker: Marker) {
+        showMarkerDetailsWindow()
+    }
+
+    private fun setUpListeners() {
         binding.buttonAddPoint.setOnClickListener { buttonAddPointListener() }
+        binding.markerDetailsWindowButtonBack.setOnClickListener { hideMarkerDetailsWindow() }
+
+    }
+
+    private fun showMarkerDetailsWindow() {
+        markerDetailsWindowVisible = true
+        binding.markerDetailsWindowContainer.visibility = View.VISIBLE
+        binding.mapView.alpha = 0.5f
+        setUpMediaPlayer(currentTrack)
+        //TODO lock the map maybe add listener that disables this
+    }
+
+    private fun setUpMediaPlayer(trackId: Int) {
+        binding.markerDetailsWindowFabPlay.setOnClickListener {
+            if (mp == null) {
+                mp = MediaPlayer.create(requireContext(), trackId)
+                initSeekBar()
+            }
+            mp?.start()
+        }
+
+        binding.markerDetailsWindowSeekbar.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser)
+                    mp?.seekTo(progress)
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    private fun initSeekBar() {
+        binding.markerDetailsWindowSeekbar.max = mp!!.duration
+
+        val handler = Handler()
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                try {
+                    binding.markerDetailsWindowSeekbar.progress = mp!!.currentPosition
+                    handler.postDelayed(this, 1000)
+                } catch (e: Exception) {
+                    binding.markerDetailsWindowSeekbar.progress = 0
+                }
+            }
+        }, 0)
+    }
+
+
+    private fun hideMarkerDetailsWindow() {
+        markerDetailsWindowVisible = false
+        binding.markerDetailsWindowContainer.visibility = View.GONE
+        binding.mapView.alpha = 1.0f
+        //TODO make the audio bar slide to the bottom of the map
     }
 
     private fun buttonAddPointListener() {
@@ -89,6 +161,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
                 .position(gdansk)
                 .title("gdansk")
         )
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(gdansk))
     }
 
@@ -118,5 +191,19 @@ class PointMapFragment : Fragment(), OnMapReadyCallback {
         super.onDestroy()
         binding.mapView.onDestroy()
     }
+
+    fun OnBackPressed() {
+        if (markerDetailsWindowVisible)
+            markerDetailsWindowVisible = false
+    }
+
+    override fun onBackPressed(): Boolean {
+        return if (markerDetailsWindowVisible) {
+            hideMarkerDetailsWindow()
+            true
+        } else
+            false
+    }
+
 
 }

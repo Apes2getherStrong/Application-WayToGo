@@ -12,16 +12,91 @@
         android:layout_height="match_parent" />
 
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/marker_details_window_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#ECE5D9"
+        android:padding="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.8">
+
+
+        <ImageButton
+            android:id="@+id/marker_details_window_button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_arrow_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/marker_details_window_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/marker_details_window_title"
+            android:id="@+id/marker_details_window_image_container">
+
+            <Button
+                android:layout_width="10dp"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_launcher_background" />
+
+            <Button
+                android:layout_width="10dp"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/marker_details_window_seekbar"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/marker_details_window_image_container" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/marker_details_window_fab_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_arrow_24"
+            app:layout_constraintTop_toBottomOf="@id/marker_details_window_image_container"
+            app:layout_constraintEnd_toStartOf="@id/marker_details_window_seekbar" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     <Button
+        android:id="@+id/button_add_point"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button_add_point"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Add Point"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Add Point"/>
-
-
-
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

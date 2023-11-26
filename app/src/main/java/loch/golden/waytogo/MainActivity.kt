@@ -34,9 +34,18 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             else -> return false
         }
         supportFragmentManager.commit {
-            replace(R.id.frame_content, fragment)
+            replace(R.id.fragment_container_main, fragment)
         }
         return true
+    }
+
+    override fun onBackPressed() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_main)
+        val backPressHandler =(fragment as? IOnBackPressed)
+
+        if (backPressHandler?.onBackPressed() != true) {
+            super.onBackPressed()
+        }
     }
 
 }

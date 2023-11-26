@@ -11,4 +11,6 @@ class MapViewModel : ViewModel() {
         LatLng(34.3520, 0.6466),
         LatLng(18.3520, 36.6466)
     )
+
+
 }
