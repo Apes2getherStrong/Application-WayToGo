@@ -7,9 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
-import loch.golden.waytogo.routes.DataRoutes
+import loch.golden.waytogo.routes.model.Route
 
-class RecyclerViewRouteAdapter constructor(private val routeList: ArrayList<DataRoutes>)
+class RecyclerViewRouteAdapter constructor(private var routeList: List<Route>)
     : RecyclerView.Adapter<RecyclerViewRouteAdapter.RouteViewHolder>(){
 
 
@@ -30,12 +30,17 @@ class RecyclerViewRouteAdapter constructor(private val routeList: ArrayList<Data
         private val titleTextView: TextView = itemView.findViewById(R.id.title_text_view)
         private val descriptionTextView: TextView = itemView.findViewById(R.id.description_text_view)
 
-        fun bind(dataRoute: DataRoutes){
-            titleTextView.text = dataRoute.title
-            descriptionTextView.text = dataRoute.description
-            imageView.setImageResource(dataRoute.image)
+        fun bind(route: Route){
+            titleTextView.text = route.name
+            //descriptionTextView.text = dataRoute.description
+            imageView.setImageResource(route.image)
 
         }
+    }
+
+    fun updateRoutes(newRoutes: List<Route>) {
+        routeList = newRoutes
+        notifyDataSetChanged()
     }
 
 }
