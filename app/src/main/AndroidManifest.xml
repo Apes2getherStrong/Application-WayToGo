@@ -20,7 +20,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="nima" />
+            android:value="AIzaSyBM519H2EYd17ePV6FIWVbHgyh0U3w-VeU" />
 
         <meta-data
             android:name="com.google.android.gms.version"
