@@ -3,6 +3,8 @@ package loch.golden.waytogo.map
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +36,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
 
+    //TODO move media player to viewmodel, it breaks when switching fragments
     private var mp: MediaPlayer? = null
     private var currentTrack = R.raw.piosenka
     private var markerDetailsWindowVisible = false
@@ -91,7 +94,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     private fun setUpListeners() {
-        binding.buttonAddPoint.setOnClickListener { buttonAddPointListener() }
+        //binding.buttonAddPoint.setOnClickListener { buttonAddPointListener() }
         binding.markerDetailsWindowButtonBack.setOnClickListener { hideMarkerDetailsWindow() }
 
     }
@@ -99,20 +102,50 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private fun showMarkerDetailsWindow() {
         markerDetailsWindowVisible = true
         binding.markerDetailsWindowContainer.visibility = View.VISIBLE
+        binding.bottomAudioPlayerContainer.visibility = View.GONE
         binding.mapView.alpha = 0.5f
         setUpMediaPlayer(currentTrack)
         //TODO lock the map maybe add listener that disables this
     }
 
     private fun setUpMediaPlayer(trackId: Int) {
-        binding.markerDetailsWindowFabPlay.setOnClickListener {
+        val playButtonClickListener = View.OnClickListener {
             if (mp == null) {
                 mp = MediaPlayer.create(requireContext(), trackId)
                 initSeekBar()
-            }
-            mp?.start()
+                mp?.start()
+            } else if (mp!!.isPlaying)
+                mp?.pause()
+            else
+                mp?.start()
+            //TODO CHANGE THE ICON ON THE BUTTON
         }
+        binding.markerDetailsWindowFabPlay.setOnClickListener(playButtonClickListener)
+        binding.bottomAudioPlayerFabPlay.setOnClickListener(playButtonClickListener)
 
+    }
+
+    private fun initSeekBar() {
+        binding.markerDetailsWindowSeekbar.max = mp!!.duration
+
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                try {
+                    //update marker details seekbar
+                    binding.markerDetailsWindowSeekbar.progress = mp!!.currentPosition
+
+                    //update bottom custom seekbar
+                    var trackPercentage = mp!!.currentPosition.toDouble() / mp!!.duration
+                    var layoutParams = binding.bottomAudioPlayerCustomSeekbarProgress.layoutParams
+                    layoutParams.width=(resources.displayMetrics.widthPixels * trackPercentage).toInt()
+                    binding.bottomAudioPlayerCustomSeekbarProgress.layoutParams = layoutParams
+                    handler.postDelayed(this, 20)
+                } catch (e: Exception) {
+                    Log.d("Warmbier",e.toString())
+                }
+            }
+        }, 0)
         binding.markerDetailsWindowSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -121,29 +154,18 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
-                TODO("Not yet implemented")
+                // when start tracking
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                TODO("Not yet implemented")
+                //when end tracking
             }
         })
-    }
 
-    private fun initSeekBar() {
-        binding.markerDetailsWindowSeekbar.max = mp!!.duration
-
-        val handler = Handler()
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                try {
-                    binding.markerDetailsWindowSeekbar.progress = mp!!.currentPosition
-                    handler.postDelayed(this, 1000)
-                } catch (e: Exception) {
-                    binding.markerDetailsWindowSeekbar.progress = 0
-                }
-            }
-        }, 0)
+        mp!!.setOnCompletionListener {
+            Log.d("Warmbier", "MEDIA PLAYER HAS FINISHED")
+            //TODO do something when the song ends
+        }
     }
 
 
@@ -151,6 +173,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         markerDetailsWindowVisible = false
         binding.markerDetailsWindowContainer.visibility = View.GONE
         binding.mapView.alpha = 1.0f
+        if (mp != null) {
+            binding.bottomAudioPlayerContainer.visibility = View.VISIBLE
+        }
         //TODO make the audio bar slide to the bottom of the map
     }
 
@@ -190,11 +215,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     override fun onDestroy() {
         super.onDestroy()
         binding.mapView.onDestroy()
-    }
-
-    fun OnBackPressed() {
-        if (markerDetailsWindowVisible)
-            markerDetailsWindowVisible = false
     }
 
     override fun onBackPressed(): Boolean {
