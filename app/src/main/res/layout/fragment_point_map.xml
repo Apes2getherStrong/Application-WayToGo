@@ -6,142 +6,141 @@
     android:layout_height="match_parent">
 
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/map_view"
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/slide_up_panel"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        app:umanoPanelHeight="60dp">
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/marker_details_window_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#ECE5D9"
-        android:padding="4dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.8"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8"
-        tools:visibility="visible">
-
-
-        <ImageButton
-            android:id="@+id/marker_details_window_button_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_back_arrow_24"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/marker_details_window_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Title"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <LinearLayout
-            android:id="@+id/marker_details_window_image_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/marker_details_window_title">
-
-            <Button
-                android:layout_width="10dp"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher_background" />
-
-            <Button
-                android:layout_width="10dp"
-                android:layout_height="match_parent" />
-        </LinearLayout>
-
-        <SeekBar
-            android:id="@+id/marker_details_window_seekbar"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/marker_details_window_image_container" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/marker_details_window_fab_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_back_arrow_24"
-            app:layout_constraintEnd_toStartOf="@id/marker_details_window_seekbar"
-            app:layout_constraintTop_toBottomOf="@id/marker_details_window_image_container" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_audio_player_container"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:background="#ECE5D9" app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/bottom_audio_player_fab_play"
-            style="@style/ShapeAppearanceOverlay.Material3.FloatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"/>
-
-        <RelativeLayout
-            app:layout_constraintBottom_toBottomOf="parent"
+        <!--MAIN-->
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/map_view"
             android:layout_width="match_parent"
-            android:layout_height="3dp">
+            android:layout_height="match_parent" />
 
-            <!-- Background of the progress bar -->
-            <View
+        <!--SLIDE UP PANEL-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.85">
+            <!--BOTTOM PANEL-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bottom_panel_container"
                 android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="#8A8A8A" />
+                android:layout_height="60dp"
+                android:paddingTop="6dp"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Colored portion based on the MediaPlayer progress -->
-            <View
-                android:id="@+id/bottom_audio_player_custom_seekbar_progress"
-                android:layout_width="0dp"
-                android:layout_height="4dp"
-                android:background="#E60909" />
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/bottom_panel_image"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginLeft="8dp"
+                    android:elevation="4dp"
+                    android:src="@drawable/ic_launcher_background"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
 
-        </RelativeLayout>
+                <TextView
+                    android:id="@+id/bottom_panel_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="Title"
+                    android:textSize="28sp"
+                    app:layout_constraintBottom_toBottomOf="@id/bottom_panel_image"
+                    app:layout_constraintStart_toEndOf="@id/bottom_panel_image"
+                    app:layout_constraintTop_toTopOf="@id/bottom_panel_image" />
+
+                <ImageButton
+                    android:id="@+id/bottom_panel_play_button"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:layout_marginRight="8dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_play_arrow_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!--CUSTOM SEEKBAR-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <!-- Background of the progress bar -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:background="#8A8A8A" />
+
+                    <!-- Colored portion based on the MediaPlayer progress -->
+                    <View
+                        android:id="@+id/bottom_panel_custom_seekbar_progress"
+                        android:layout_width="0dp"
+                        android:layout_height="4dp"
+                        android:background="#E60909" />
+                </RelativeLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <!--EXPANDED PANEL-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/expanded_panel_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0"
+                app:layout_constraintTop_toTopOf="parent">
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/expanded_panel_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Title"
+                    android:textSize="28sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/expanded_panel_image"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/ic_launcher_background"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/expanded_panel_title"
+                    app:layout_constraintWidth_percent="0.6"
+                    app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
 
-    <Button
-        android:id="@+id/button_add_point"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Point"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+                <SeekBar
+                    android:id="@+id/expanded_panel_seekbar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/expanded_panel_image"
+                    app:layout_constraintWidth_percent="0.8"
+                    app:layout_goneMarginTop="20dp" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/expanded_panel_play_fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:src="@drawable/ic_play_arrow_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/expanded_panel_seekbar" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

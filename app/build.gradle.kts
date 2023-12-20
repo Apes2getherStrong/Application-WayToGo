@@ -50,7 +50,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
-
+    implementation ("com.sothree.slidinguppanel:library:3.4.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx: 2.6.2")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

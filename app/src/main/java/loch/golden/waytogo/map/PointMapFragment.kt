@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -17,6 +18,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
@@ -24,6 +27,7 @@ import java.lang.Exception
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
+    PanelSlideListener,
     IOnBackPressed {
 
     companion object {
@@ -54,6 +58,16 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         super.onViewCreated(view, savedInstanceState)
         initMapView(savedInstanceState)
         setUpListeners()
+        setUpSlidingUpPanel()
+        setUpMediaPlayer(R.raw.piosenka)
+    }
+
+    private fun setUpSlidingUpPanel() {
+        val slideUpPanel = binding.slideUpPanel
+        slideUpPanel.addPanelSlideListener(this)
+        slideUpPanel.setFadeOnClickListener {
+            slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+        }
     }
 
 
@@ -90,23 +104,19 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     override fun onInfoWindowClick(marker: Marker) {
-        showMarkerDetailsWindow()
+        //showMarkerDetailsWindow()
     }
 
     private fun setUpListeners() {
-        //binding.buttonAddPoint.setOnClickListener { buttonAddPointListener() }
-        binding.markerDetailsWindowButtonBack.setOnClickListener { hideMarkerDetailsWindow() }
-
+        binding.bottomPanelPlayButton.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Siema",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    private fun showMarkerDetailsWindow() {
-        markerDetailsWindowVisible = true
-        binding.markerDetailsWindowContainer.visibility = View.VISIBLE
-        binding.bottomAudioPlayerContainer.visibility = View.GONE
-        binding.mapView.alpha = 0.5f
-        setUpMediaPlayer(currentTrack)
-        //TODO lock the map maybe add listener that disables this
-    }
 
     private fun setUpMediaPlayer(trackId: Int) {
         val playButtonClickListener = View.OnClickListener {
@@ -120,33 +130,43 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 mp?.start()
             //TODO CHANGE THE ICON ON THE BUTTON
         }
-        binding.markerDetailsWindowFabPlay.setOnClickListener(playButtonClickListener)
-        binding.bottomAudioPlayerFabPlay.setOnClickListener(playButtonClickListener)
+        binding.bottomPanelPlayButton.setOnClickListener(playButtonClickListener)
+        binding.expandedPanelPlayFab.setOnClickListener(playButtonClickListener)
 
     }
 
     private fun initSeekBar() {
-        binding.markerDetailsWindowSeekbar.max = mp!!.duration
+        binding.expandedPanelSeekbar.max = mp!!.duration
 
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed(object : Runnable {
             override fun run() {
                 try {
-                    //update marker details seekbar
-                    binding.markerDetailsWindowSeekbar.progress = mp!!.currentPosition
+                    val currentPosition = mp!!.currentPosition.toDouble()
+                    val duration = mp!!.duration.toDouble()
 
-                    //update bottom custom seekbar
-                    var trackPercentage = mp!!.currentPosition.toDouble() / mp!!.duration
-                    var layoutParams = binding.bottomAudioPlayerCustomSeekbarProgress.layoutParams
-                    layoutParams.width=(resources.displayMetrics.widthPixels * trackPercentage).toInt()
-                    binding.bottomAudioPlayerCustomSeekbarProgress.layoutParams = layoutParams
-                    handler.postDelayed(this, 20)
+                    // Update marker details seekbar
+                    binding.expandedPanelSeekbar.progress = currentPosition.toInt()
+
+                    // Update bottom custom seekbar
+                    val trackPercentage = if (duration != 0.0) currentPosition / duration else 0.0
+                    Log.d(
+                        "trackCheck",
+                        "track position $currentPosition track percent $trackPercentage"
+                    )
+                    val layoutParams = binding.bottomPanelCustomSeekbarProgress.layoutParams
+                    layoutParams.width =
+                        (resources.displayMetrics.widthPixels * trackPercentage).toInt()
+                    binding.bottomPanelCustomSeekbarProgress.layoutParams = layoutParams
+
+
+                    handler.postDelayed(this, 1000)
                 } catch (e: Exception) {
-                    Log.d("Warmbier",e.toString())
+                    Log.d("Warmbier", e.toString())
                 }
             }
         }, 0)
-        binding.markerDetailsWindowSeekbar.setOnSeekBarChangeListener(object :
+        binding.expandedPanelSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser)
@@ -169,27 +189,31 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
 
-    private fun hideMarkerDetailsWindow() {
-        markerDetailsWindowVisible = false
-        binding.markerDetailsWindowContainer.visibility = View.GONE
-        binding.mapView.alpha = 1.0f
-        if (mp != null) {
-            binding.bottomAudioPlayerContainer.visibility = View.VISIBLE
-        }
-        //TODO make the audio bar slide to the bottom of the map
+    override fun onPanelSlide(panel: View?, slideOffset: Float) {
+        val maxVisibilitySlideOffset = 0.2f
+        binding.bottomPanelContainer.alpha =
+            1.0f - (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
+        binding.expandedPanelContainer.alpha =
+            (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
     }
 
-    private fun buttonAddPointListener() {
-        val gdansk = LatLng(54.3520, 18.6466)
-        googleMap.addMarker(
-            MarkerOptions()
-                .position(gdansk)
-                .title("gdansk")
-        )
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(gdansk))
+    override fun onPanelStateChanged(
+        panel: View?,
+        previousState: SlidingUpPanelLayout.PanelState?,
+        newState: SlidingUpPanelLayout.PanelState?
+    ) {
+        binding.bottomPanelPlayButton.isClickable =
+            (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.COLLAPSED)
     }
 
+
+    override fun onBackPressed(): Boolean {
+        return if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+            true
+        } else
+            false
+    }
 
     //Forwarding map functions
     override fun onStart() {
@@ -215,14 +239,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     override fun onDestroy() {
         super.onDestroy()
         binding.mapView.onDestroy()
-    }
-
-    override fun onBackPressed(): Boolean {
-        return if (markerDetailsWindowVisible) {
-            hideMarkerDetailsWindow()
-            true
-        } else
-            false
     }
 
 
