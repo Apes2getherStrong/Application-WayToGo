@@ -9,14 +9,17 @@ import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
 import com.google.android.gms.maps.model.Marker
 import loch.golden.waytogo.R
 
-
+//Used for changing the info window on marker press
 class PointInfoWindowAdapter(
     private val context: Context
 ) : InfoWindowAdapter {
 
+    //change the whole window
     override fun getInfoWindow(marker: Marker): View? {
         return null
     }
+
+    //Change the contents of the info window
     override fun getInfoContents(p0: Marker): View? {
         var view: View = LayoutInflater.from(context).inflate(R.layout.layout_marker_window, null)
         val markerImage = view.findViewById<ImageView>(R.id.image_view_marker_image)

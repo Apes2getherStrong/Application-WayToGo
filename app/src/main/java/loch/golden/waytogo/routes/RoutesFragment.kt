@@ -38,10 +38,8 @@ class RoutesFragment : Fragment() {
     }
 
     private fun getRoutes(): ArrayList<DataRoutes> {
-
         return arrayListOf(
             DataRoutes("Przyklad", R.drawable.ic_route_24, "Przyklad")
-
         )
     }
 }

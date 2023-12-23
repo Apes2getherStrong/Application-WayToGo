@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -27,8 +28,7 @@ import java.lang.Exception
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
-    PanelSlideListener,
-    IOnBackPressed {
+    PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
 
     companion object {
         private const val CAMERA_POSITION_KEY = "camera_position"
@@ -46,9 +46,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private var markerDetailsWindowVisible = false
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentPointMapBinding.inflate(inflater, container, false)
         return binding.root
@@ -89,6 +87,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         }
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnInfoWindowClickListener(this)
+        googleMap.setOnMarkerClickListener(this)
         populateMap()
     }
 
@@ -98,25 +97,29 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 MarkerOptions()
                     .position(latlng)
                     .title("place $index")
-
             )
         }
     }
 
-    override fun onInfoWindowClick(marker: Marker) {
-        //showMarkerDetailsWindow()
-    }
 
     private fun setUpListeners() {
         binding.bottomPanelPlayButton.setOnClickListener {
             Toast.makeText(
-                requireContext(),
-                "Siema",
-                Toast.LENGTH_SHORT
+                requireContext(), "Siema", Toast.LENGTH_SHORT
             ).show()
         }
     }
 
+    private fun togglePlayPauseIcons() {
+        if (mp!!.isPlaying) {
+
+            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_pause_24)
+            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_pause_24)
+        } else {
+            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_play_arrow_24)
+            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_play_arrow_24)
+        }
+    }
 
     private fun setUpMediaPlayer(trackId: Int) {
         val playButtonClickListener = View.OnClickListener {
@@ -124,11 +127,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 mp = MediaPlayer.create(requireContext(), trackId)
                 initSeekBar()
                 mp?.start()
-            } else if (mp!!.isPlaying)
-                mp?.pause()
-            else
-                mp?.start()
-            //TODO CHANGE THE ICON ON THE BUTTON
+            } else if (mp!!.isPlaying) mp?.pause()
+            else mp?.start()
+
+            togglePlayPauseIcons()
         }
         binding.bottomPanelPlayButton.setOnClickListener(playButtonClickListener)
         binding.expandedPanelPlayFab.setOnClickListener(playButtonClickListener)
@@ -140,27 +142,29 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed(object : Runnable {
+            val percentList = mutableListOf<Float>()
             override fun run() {
                 try {
-                    val currentPosition = mp!!.currentPosition.toDouble()
-                    val duration = mp!!.duration.toDouble()
+                    val currentPosition = mp!!.currentPosition.toFloat()
+                    val duration = mp!!.duration.toFloat()
 
                     // Update marker details seekbar
                     binding.expandedPanelSeekbar.progress = currentPosition.toInt()
 
                     // Update bottom custom seekbar
-                    val trackPercentage = if (duration != 0.0) currentPosition / duration else 0.0
+                    val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
                     Log.d(
                         "trackCheck",
-                        "track position $currentPosition track percent $trackPercentage"
+                        "track position $currentPosition track percent ${String.format("%.2f", trackPercentage*100)}%"
                     )
+                    percentList.add(trackPercentage)
                     val layoutParams = binding.bottomPanelCustomSeekbarProgress.layoutParams
                     layoutParams.width =
                         (resources.displayMetrics.widthPixels * trackPercentage).toInt()
                     binding.bottomPanelCustomSeekbarProgress.layoutParams = layoutParams
 
 
-                    handler.postDelayed(this, 1000)
+                    handler.postDelayed(this, 50)
                 } catch (e: Exception) {
                     Log.d("Warmbier", e.toString())
                 }
@@ -169,25 +173,34 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.expandedPanelSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser)
-                    mp?.seekTo(progress)
+                if (fromUser) mp?.seekTo(progress)
             }
 
-            override fun onStartTrackingTouch(p0: SeekBar?) {
+            override fun onStartTrackingTouch(seekbar: SeekBar?) {
                 // when start tracking
             }
 
-            override fun onStopTrackingTouch(p0: SeekBar?) {
+            override fun onStopTrackingTouch(seekbar: SeekBar?) {
                 //when end tracking
             }
         })
 
         mp!!.setOnCompletionListener {
             Log.d("Warmbier", "MEDIA PLAYER HAS FINISHED")
-            //TODO do something when the song ends
+            mp?.seekTo(0)
+            togglePlayPauseIcons()
         }
     }
 
+    override fun onMarkerClick(marker: Marker): Boolean {
+        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        return true
+    }
+
+    override fun onInfoWindowClick(marker: Marker) {
+//        marker.hideInfoWindow()
+//        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+    }
 
     override fun onPanelSlide(panel: View?, slideOffset: Float) {
         val maxVisibilitySlideOffset = 0.2f
@@ -211,8 +224,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         return if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
             binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
             true
-        } else
-            false
+        } else false
     }
 
     //Forwarding map functions
@@ -241,5 +253,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.mapView.onDestroy()
     }
 
+    //TODO
+    //center the titles
+    //balance the opacity when expanding panels
+    //decide between infoWindow approach and onMarkerClick approach
+    //audio still behaves werid at the start
 
 }
