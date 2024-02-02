@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
@@ -63,6 +64,7 @@ class LocationManager(
 
     override fun onLocationResult(location: LocationResult) {
         currentLocation = location.lastLocation;
+        Log.d("LocationUpdate",getLatLng().toString())
     }
 
     override fun onLocationAvailability(availability: LocationAvailability) {
