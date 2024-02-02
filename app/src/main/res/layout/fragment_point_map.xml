@@ -14,11 +14,21 @@
         app:umanoPanelHeight="60dp">
 
         <!--MAIN-->
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/map_view"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
+            android:layout_height="match_parent">
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_center_pos"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="center"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <!--SLIDE UP PANEL-->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

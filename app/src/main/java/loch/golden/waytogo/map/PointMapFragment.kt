@@ -1,5 +1,7 @@
 package loch.golden.waytogo.map
 
+import android.annotation.SuppressLint
+import android.location.Location
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +14,10 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
@@ -26,7 +32,6 @@ import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
 import java.lang.Exception
 
-
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
     PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
 
@@ -39,11 +44,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
+    private lateinit var locationManager: LocationManager
 
     //TODO move media player to viewmodel, it breaks when switching fragments
     private var mp: MediaPlayer? = null
     private var currentTrack = R.raw.piosenka
-    private var markerDetailsWindowVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -57,6 +62,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         initMapView(savedInstanceState)
         setUpListeners()
         setUpSlidingUpPanel()
+        locationManager = LocationManager(requireContext(),600,5.0f)
+        locationManager.startLocationTracking()
         setUpMediaPlayer(R.raw.piosenka)
     }
 
@@ -71,9 +78,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun initMapView(savedInstanceState: Bundle?) {
         binding.mapView.onCreate(savedInstanceState)
-        binding.mapView.getMapAsync(this)
-    }
 
+        binding.mapView.getMapAsync(this)
+
+    }
+    @SuppressLint("MissingPermission")
     override fun onMapReady(mMap: GoogleMap) {
         googleMap = mMap
 
@@ -85,6 +94,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         googleMap.setOnCameraMoveListener {
             mapViewModel.cameraPosition = googleMap.cameraPosition
         }
+        googleMap.isMyLocationEnabled = true
+
+
+        //googleMap.moveCamera(CameraUpdateFactory.newLatLng(locationManager.getLatLng()!!))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(7.7749, -122.4194)))
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnInfoWindowClickListener(this)
         googleMap.setOnMarkerClickListener(this)
@@ -107,6 +121,12 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             Toast.makeText(
                 requireContext(), "Siema", Toast.LENGTH_SHORT
             ).show()
+        }
+        binding.buttonCenterPos.setOnClickListener(){
+            locationManager.getLatLng()?.let{
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+                Toast.makeText(requireContext(),it.toString(),Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -155,7 +175,12 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                     val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
                     Log.d(
                         "trackCheck",
-                        "track position $currentPosition track percent ${String.format("%.2f", trackPercentage*100)}%"
+                        "track position $currentPosition track percent ${
+                            String.format(
+                                "%.2f",
+                                trackPercentage * 100
+                            )
+                        }%"
                     )
                     percentList.add(trackPercentage)
                     val layoutParams = binding.bottomPanelCustomSeekbarProgress.layoutParams
