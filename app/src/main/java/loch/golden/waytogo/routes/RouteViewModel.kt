@@ -14,7 +14,6 @@ class RouteViewModel(private val routeRepository: RouteRepository): ViewModel() 
         viewModelScope.launch {
             val response = routeRepository.getRoutes()
             routeResponse.value = response
-
         }
 
     }
