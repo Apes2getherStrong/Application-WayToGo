@@ -14,10 +14,6 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
@@ -45,12 +41,13 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
+    private lateinit var mapMenuManager: MapMenuManager
 
-    private val handler: Handler by lazy{
+    private val handler: Handler by lazy {
         Handler(Looper.getMainLooper())
     }
-    private val seekbarRunnable by lazy{
-        object : Runnable{
+    private val seekbarRunnable by lazy {
+        object : Runnable {
             val percentList = mutableListOf<Float>()
             override fun run() {
                 try {
@@ -102,6 +99,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         setUpSlidingUpPanel()
         locationManager = LocationManager(requireContext(), 600, 5.0f)
         locationManager.startLocationTracking()
+        mapMenuManager = MapMenuManager(
+            requireContext(),
+            binding.fabMapMenu,
+            arrayListOf(binding.mapMenuAddContainer, binding.mapMenuStylesContainer)
+        )
         setUpMediaPlayer(R.raw.piosenka)
     }
 
@@ -156,16 +158,20 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun setUpListeners() {
         binding.bottomPanelPlayButton.setOnClickListener {
-            Toast.makeText(
-                requireContext(), "Siema", Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.buttonCenterPos.setOnClickListener() {
-            locationManager.getLatLng()?.let {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
-                Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
-            }
+        binding.mapMenuAddFab.setOnClickListener() {
+            Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
         }
+        binding.mapMenuStylesFab.setOnClickListener() {
+            Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
+        }
+//        binding.buttonCenterPos.setOnClickListener() {
+//            locationManager.getLatLng()?.let {
+//                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+//                Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
     private fun togglePlayPauseIcons() {
@@ -201,7 +207,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         if (mapViewModel.mp == null)
             return
         binding.expandedPanelSeekbar.max = mapViewModel.mp!!.duration
-        Log.d("lifecycleAlert","initseekbar")
+        Log.d("lifecycleAlert", "initseekbar")
         handler.postDelayed(seekbarRunnable, 0)
         binding.expandedPanelSeekbar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
@@ -263,32 +269,32 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //Forwarding map functions
     override fun onStart() {
         super.onStart()
-        Log.d("LifecycleAlert","onStart")
+        Log.d("LifecycleAlert", "onStart")
         binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("LifecycleAlert","onResume")
+        Log.d("LifecycleAlert", "onResume")
         binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("LifecycleAlert","onPause")
+        Log.d("LifecycleAlert", "onPause")
         binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d("LifecycleAlert","onStop")
+        Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
         handler.removeCallbacks(seekbarRunnable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("LifecycleAlert","onDestroy")
+        Log.d("LifecycleAlert", "onDestroy")
         binding.mapView.onDestroy()
     }
 

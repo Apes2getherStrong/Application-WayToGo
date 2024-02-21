@@ -17,17 +17,73 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <com.google.android.gms.maps.MapView
                 android:id="@+id/map_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-            <Button
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_map_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button_center_pos"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:text="center"/>
+                app:srcCompat="@drawable/ic_menu_24" />
+
+            <LinearLayout
+                android:id="@+id/map_menu_add_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="@id/fab_map_menu"
+                app:layout_constraintTop_toBottomOf="@id/fab_map_menu">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/map_menu_add_fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+
+                    app:srcCompat="@drawable/ic_add_24" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Route" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/map_menu_styles_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="@id/fab_map_menu"
+                app:layout_constraintTop_toBottomOf="@id/map_menu_add_container">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/map_menu_styles_fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+
+                    app:srcCompat="@drawable/ic_brush_24" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Style" />
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
         <!--SLIDE UP PANEL-->
         <androidx.constraintlayout.widget.ConstraintLayout
