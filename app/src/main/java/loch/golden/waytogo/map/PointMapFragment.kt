@@ -1,7 +1,6 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -26,6 +25,9 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
+import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
+import loch.golden.waytogo.map.components.LocationManager
+import loch.golden.waytogo.map.components.MapMenuManager
 import java.lang.Exception
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
@@ -42,47 +44,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
-
-    private val handler: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
-    private val seekbarRunnable by lazy {
-        object : Runnable {
-            val percentList = mutableListOf<Float>()
-            override fun run() {
-                try {
-                    val currentPosition = mapViewModel.mp!!.currentPosition.toFloat()
-                    val duration = mapViewModel.mp!!.duration.toFloat()
-
-                    // Update marker details seekbar
-                    binding.expandedPanelSeekbar.progress = currentPosition.toInt()
-
-                    // Update bottom custom seekbar
-                    val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
-                    Log.d(
-                        "trackCheck",
-                        "track position $currentPosition track percent ${
-                            String.format(
-                                "%.2f",
-                                trackPercentage * 100
-                            )
-                        }%"
-                    )
-                    percentList.add(trackPercentage)
-                    val layoutParams = binding.bottomPanelCustomSeekbarProgress.layoutParams
-                    layoutParams.width =
-                        (resources.displayMetrics.widthPixels * trackPercentage).toInt()
-                    binding.bottomPanelCustomSeekbarProgress.layoutParams = layoutParams
+    private lateinit var seekbarManager: SeekbarManager
 
 
-                    handler.postDelayed(this, 50)
-                } catch (e: Exception) {
-                    Log.d("Warmbier", e.toString())
-                }
-            }
-
-        }
-    }
     //TODO Move the logic to view model only leave updating the visuals
 
     override fun onCreateView(
@@ -103,6 +67,13 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             requireContext(),
             binding.mapMenu.fabMenu,
             arrayListOf(binding.mapMenu.addRouteFab, binding.mapMenu.stylesFab)
+        )
+        seekbarManager = SeekbarManager(
+            requireContext(),
+            mapViewModel,
+            binding.expandedPanelSeekbar,
+            binding.bottomPanelCustomSeekbarProgress,
+            arrayListOf(binding.bottomPanelPlayButton, binding.expandedPanelPlayFab)
         )
         setUpMediaPlayer(R.raw.piosenka)
     }
@@ -186,7 +157,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     private fun setUpMediaPlayer(trackId: Int) {
-        initSeekBar()
         if (mapViewModel.mp != null)
             togglePlayPauseIcons()
         val playButtonClickListener = View.OnClickListener {
@@ -203,33 +173,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     }
 
-    private fun initSeekBar() {
-        if (mapViewModel.mp == null)
-            return
-        binding.expandedPanelSeekbar.max = mapViewModel.mp!!.duration
-        Log.d("lifecycleAlert", "initseekbar")
-        handler.postDelayed(seekbarRunnable, 0)
-        binding.expandedPanelSeekbar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) mapViewModel.mp?.seekTo(progress)
-            }
-
-            override fun onStartTrackingTouch(seekbar: SeekBar?) {
-                // when start tracking
-            }
-
-            override fun onStopTrackingTouch(seekbar: SeekBar?) {
-                //when end tracking
-            }
-        })
-
-        mapViewModel.mp!!.setOnCompletionListener {
-            Log.d("Warmbier", "MEDIA PLAYER HAS FINISHED")
-            mapViewModel.mp?.seekTo(0)
-            togglePlayPauseIcons()
-        }
-    }
 
     override fun onMarkerClick(marker: Marker): Boolean {
         binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
@@ -289,7 +232,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
-        handler.removeCallbacks(seekbarRunnable)
+        seekbarManager.removeCallback()
     }
 
     override fun onDestroy() {

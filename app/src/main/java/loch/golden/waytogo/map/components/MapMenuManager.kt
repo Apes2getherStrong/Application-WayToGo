@@ -1,4 +1,4 @@
-package loch.golden.waytogo.map
+package loch.golden.waytogo.map.components
 
 import android.content.Context
 import android.graphics.Color
@@ -14,8 +14,8 @@ import loch.golden.waytogo.R
 
 class MapMenuManager(
     context: Context,
-    menuButton: FloatingActionButton,
-    menuItems: List<View>
+    private val menuButton: FloatingActionButton,
+    private val menuItems: List<View>
 ) {
     //TODO make the animation go from the top not bottom without affecting the space between them in animation layouts
     private val openAnim: Animation by lazy {
