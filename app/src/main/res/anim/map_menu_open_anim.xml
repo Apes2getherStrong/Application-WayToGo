@@ -14,5 +14,5 @@
     <alpha
         android:duration="800"
         android:fromAlpha="0"
-        android:toAlpha="0" />
+        android:toAlpha="1" />
 </set>

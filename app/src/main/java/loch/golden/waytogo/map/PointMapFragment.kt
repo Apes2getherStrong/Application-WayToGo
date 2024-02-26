@@ -101,8 +101,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         locationManager.startLocationTracking()
         mapMenuManager = MapMenuManager(
             requireContext(),
-            binding.fabMapMenu,
-            arrayListOf(binding.mapMenuAddContainer, binding.mapMenuStylesContainer)
+            binding.mapMenu.fabMenu,
+            arrayListOf(binding.mapMenu.addRouteFab, binding.mapMenu.stylesFab)
         )
         setUpMediaPlayer(R.raw.piosenka)
     }
@@ -160,10 +160,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.bottomPanelPlayButton.setOnClickListener {
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenuAddFab.setOnClickListener() {
+        binding.mapMenu.addRouteFab.setOnClickListener() {
             Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenuStylesFab.setOnClickListener() {
+        binding.mapMenu.stylesFab.setOnClickListener() {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
         }
 //        binding.buttonCenterPos.setOnClickListener() {
@@ -303,5 +303,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //balance the opacity when expanding panels
     //decide between infoWindow approach and onMarkerClick approach
     //audio still behaves werid at the start
+    //move Expanded panel to seperate class and View
 
 }

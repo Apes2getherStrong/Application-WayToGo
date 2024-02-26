@@ -1,6 +1,7 @@
 package loch.golden.waytogo.map
 
 import android.content.Context
+import android.graphics.Color
 import android.opengl.Visibility
 import android.view.View
 import android.view.ViewGroup
@@ -14,51 +15,49 @@ import loch.golden.waytogo.R
 class MapMenuManager(
     context: Context,
     menuButton: FloatingActionButton,
-    menuItems: List<ViewGroup>
+    menuItems: List<View>
 ) {
+    //TODO make the animation go from the top not bottom without affecting the space between them in animation layouts
     private val openAnim: Animation by lazy {
-        AnimationUtils.loadAnimation(
-            context,
-            R.anim.map_menu_open_anim
-        )
+        AnimationUtils.loadAnimation(context, R.anim.map_menu_open_anim)
     }
     private val closeAnim: Animation by lazy {
-        AnimationUtils.loadAnimation(
-            context,
-            R.anim.map_menu_close_anim
-        )
+        AnimationUtils.loadAnimation(context, R.anim.map_menu_close_anim)
     }
-    private var isMenuOpen: Boolean = false
+
+    private var isMenuOpen: Boolean = true
 
     init {
         menuButton.setOnClickListener() {
 
             isMenuOpen = !isMenuOpen
-            Toast.makeText(context, isMenuOpen.toString(), Toast.LENGTH_SHORT).show()
+
             for (menuItem in menuItems) {
                 setVisibility(menuItem)
                 setAnimation(menuItem)
+                setClickable(menuItem)
             }
         }
     }
 
-    private fun setAnimation(menuItem: ViewGroup) {
-        if (isMenuOpen)
+    private fun setClickable(menuItem: View) {
+        menuItem.isClickable = !isMenuOpen
+    }
+
+    private fun setAnimation(menuItem: View) {
+        if (!isMenuOpen) {
             menuItem.startAnimation(openAnim)
-        else
+        } else {
             menuItem.startAnimation(closeAnim)
+        }
     }
 
-    private fun setVisibility(menuItem: ViewGroup) {
-        if (isMenuOpen) {
-            menuItem.forEach { childView ->
-                childView.visibility = View.VISIBLE
-            }
-        }
-        else {
-            menuItem.forEach { childView ->
-                childView.visibility = View.INVISIBLE
-            }
+    private fun setVisibility(menuItem: View) {
+        if (!isMenuOpen) {
+            menuItem.visibility = View.VISIBLE
+
+        } else {
+            menuItem.visibility = View.INVISIBLE
         }
     }
 }
