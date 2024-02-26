@@ -1,34 +1,33 @@
-package loch.golden.waytogo.map
+package loch.golden.waytogo.map.components
 
-import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import android.util.DisplayMetrics
 import android.util.Log
-import android.util.TypedValue
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.SeekBar
 import loch.golden.waytogo.R
+import loch.golden.waytogo.map.MapViewModel
 
 
 class SeekbarManager(
-    context: Context,
+    private val context: Context,
     private val mapViewModel: MapViewModel,
     private val seekbar: SeekBar,
     private val customSeekbar: View,
     private val playPauseButtons: List<ImageButton>
 ) {
+
     private val handler: Handler by lazy {
         Handler(Looper.getMainLooper())
     }
+
     private val screenWidth by lazy {
-        val a=context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density;
-        Log.d("Display Metrics",a.toString())
-        a
+        Log.d("DisplayMetrics", context.resources.displayMetrics.widthPixels.toString())
+        context.resources.displayMetrics.widthPixels
+
     }
     private val seekbarRunnable by lazy {
         object : Runnable {
@@ -43,14 +42,12 @@ class SeekbarManager(
 
                     // Update bottom custom seekbar
                     val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
-                    val dp = (screenWidth * trackPercentage).toInt()
-                    val pixels = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        dp.toFloat(),
-                        context.resources.displayMetrics
-                    ).toInt()
+                    val pixels = (screenWidth * trackPercentage).toInt()
+                    Log.d("PercentPixel",pixels.toString())
                     percentList.add(trackPercentage)
                     customSeekbar.layoutParams.width = pixels
+                    customSeekbar.requestLayout()
+                    Log.d("PixelWidth",customSeekbar.layoutParams.width.toString())
 
 
                     //how often to refresh the seekbar
@@ -63,11 +60,31 @@ class SeekbarManager(
         }
     }
 
-    init {
-        togglePlayPauseIcons()
-        if (mapViewModel.mp!!.isPlaying) // maybe change to if null
-            initSeekbar()
 
+    init {
+        setUpMediaPlayer(R.raw.piosenka)
+        if (mapViewModel.mp != null) {
+            togglePlayPauseIcons()
+            initSeekbar()
+        }
+    }
+
+    private fun setUpMediaPlayer(trackId: Int) {
+        val playButtonClickListener = View.OnClickListener {
+            if (mapViewModel.mp == null) {
+                mapViewModel.mp = MediaPlayer.create(context, trackId)
+                mapViewModel.mp?.start()
+                initSeekbar()
+            } else if (mapViewModel.mp!!.isPlaying)
+                mapViewModel.mp?.pause()
+            else
+                mapViewModel.mp?.start()
+            togglePlayPauseIcons()
+        }
+
+        for (button in playPauseButtons) {
+            button.setOnClickListener(playButtonClickListener)
+        }
     }
 
     private fun initSeekbar() {

@@ -1,15 +1,11 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
-import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,7 +24,7 @@ import loch.golden.waytogo.databinding.FragmentPointMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
-import java.lang.Exception
+import loch.golden.waytogo.map.components.SeekbarManager
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
     PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
@@ -75,7 +71,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             binding.bottomPanelCustomSeekbarProgress,
             arrayListOf(binding.bottomPanelPlayButton, binding.expandedPanelPlayFab)
         )
-        setUpMediaPlayer(R.raw.piosenka)
     }
 
     private fun setUpSlidingUpPanel() {
@@ -156,22 +151,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         }
     }
 
-    private fun setUpMediaPlayer(trackId: Int) {
-        if (mapViewModel.mp != null)
-            togglePlayPauseIcons()
-        val playButtonClickListener = View.OnClickListener {
-            if (mapViewModel.mp == null) {
-                mapViewModel.mp = MediaPlayer.create(requireContext(), trackId)
-                mapViewModel.mp?.start()
-            } else if (mapViewModel.mp!!.isPlaying) mapViewModel.mp?.pause()
-            else mapViewModel.mp?.start()
-            togglePlayPauseIcons()
-        }
 
-        binding.bottomPanelPlayButton.setOnClickListener(playButtonClickListener)
-        binding.expandedPanelPlayFab.setOnClickListener(playButtonClickListener)
-
-    }
 
 
     override fun onMarkerClick(marker: Marker): Boolean {
