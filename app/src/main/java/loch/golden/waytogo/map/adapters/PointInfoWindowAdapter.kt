@@ -1,4 +1,4 @@
-package loch.golden.waytogo.map
+package loch.golden.waytogo.map.adapters
 
 import android.content.Context
 import android.view.LayoutInflater

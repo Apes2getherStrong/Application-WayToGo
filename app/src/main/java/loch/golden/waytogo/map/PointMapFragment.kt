@@ -1,23 +1,14 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
-import android.location.Location
-import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
@@ -30,7 +21,10 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
-import java.lang.Exception
+import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
+import loch.golden.waytogo.map.components.LocationManager
+import loch.golden.waytogo.map.components.MapMenuManager
+import loch.golden.waytogo.map.components.SeekbarManager
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
     PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
@@ -45,48 +39,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var binding: FragmentPointMapBinding
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
-
-    private val handler: Handler by lazy{
-        Handler(Looper.getMainLooper())
-    }
-    private val seekbarRunnable by lazy{
-        object : Runnable{
-            val percentList = mutableListOf<Float>()
-            override fun run() {
-                try {
-                    val currentPosition = mapViewModel.mp!!.currentPosition.toFloat()
-                    val duration = mapViewModel.mp!!.duration.toFloat()
-
-                    // Update marker details seekbar
-                    binding.expandedPanelSeekbar.progress = currentPosition.toInt()
-
-                    // Update bottom custom seekbar
-                    val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
-                    Log.d(
-                        "trackCheck",
-                        "track position $currentPosition track percent ${
-                            String.format(
-                                "%.2f",
-                                trackPercentage * 100
-                            )
-                        }%"
-                    )
-                    percentList.add(trackPercentage)
-                    val layoutParams = binding.bottomPanelCustomSeekbarProgress.layoutParams
-                    layoutParams.width =
-                        (resources.displayMetrics.widthPixels * trackPercentage).toInt()
-                    binding.bottomPanelCustomSeekbarProgress.layoutParams = layoutParams
-
-
-                    handler.postDelayed(this, 50)
-                } catch (e: Exception) {
-                    Log.d("Warmbier", e.toString())
-                }
-            }
-
-        }
-    }
-    //TODO Move the logic to view model only leave updating the visuals
+    private lateinit var mapMenuManager: MapMenuManager
+    private lateinit var seekbarManager: SeekbarManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -102,7 +56,18 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         setUpSlidingUpPanel()
         locationManager = LocationManager(requireContext(), 600, 5.0f)
         locationManager.startLocationTracking()
-        setUpMediaPlayer(R.raw.piosenka)
+        mapMenuManager = MapMenuManager(
+            requireContext(),
+            binding.mapMenu.fabMenu,
+            arrayListOf(binding.mapMenu.addRouteFab, binding.mapMenu.stylesFab)
+        )
+        seekbarManager = SeekbarManager(
+            requireContext(),
+            mapViewModel,
+            binding.expandedPanelSeekbar,
+            binding.bottomPanelCustomSeekbarProgress,
+            arrayListOf(binding.bottomPanelPlayButton, binding.expandedPanelPlayFab)
+        )
     }
 
     private fun setUpSlidingUpPanel() {
@@ -156,73 +121,20 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun setUpListeners() {
         binding.bottomPanelPlayButton.setOnClickListener {
-            Toast.makeText(
-                requireContext(), "Siema", Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.buttonCenterPos.setOnClickListener() {
-            locationManager.getLatLng()?.let {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
-                Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
-            }
+        binding.mapMenu.addRouteFab.setOnClickListener() {
+            Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun togglePlayPauseIcons() {
-        if (mapViewModel.mp!!.isPlaying) {
-
-            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_pause_24)
-            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_pause_24)
-        } else {
-            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_play_arrow_24)
-            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_play_arrow_24)
+        binding.mapMenu.stylesFab.setOnClickListener() {
+            Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun setUpMediaPlayer(trackId: Int) {
-        initSeekBar()
-        if (mapViewModel.mp != null)
-            togglePlayPauseIcons()
-        val playButtonClickListener = View.OnClickListener {
-            if (mapViewModel.mp == null) {
-                mapViewModel.mp = MediaPlayer.create(requireContext(), trackId)
-                mapViewModel.mp?.start()
-            } else if (mapViewModel.mp!!.isPlaying) mapViewModel.mp?.pause()
-            else mapViewModel.mp?.start()
-            togglePlayPauseIcons()
-        }
-
-        binding.bottomPanelPlayButton.setOnClickListener(playButtonClickListener)
-        binding.expandedPanelPlayFab.setOnClickListener(playButtonClickListener)
-
-    }
-
-    private fun initSeekBar() {
-        if (mapViewModel.mp == null)
-            return
-        binding.expandedPanelSeekbar.max = mapViewModel.mp!!.duration
-        Log.d("lifecycleAlert","initseekbar")
-        handler.postDelayed(seekbarRunnable, 0)
-        binding.expandedPanelSeekbar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) mapViewModel.mp?.seekTo(progress)
-            }
-
-            override fun onStartTrackingTouch(seekbar: SeekBar?) {
-                // when start tracking
-            }
-
-            override fun onStopTrackingTouch(seekbar: SeekBar?) {
-                //when end tracking
-            }
-        })
-
-        mapViewModel.mp!!.setOnCompletionListener {
-            Log.d("Warmbier", "MEDIA PLAYER HAS FINISHED")
-            mapViewModel.mp?.seekTo(0)
-            togglePlayPauseIcons()
-        }
+//        binding.buttonCenterPos.setOnClickListener() {
+//            locationManager.getLatLng()?.let {
+//                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+//                Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
@@ -263,32 +175,32 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //Forwarding map functions
     override fun onStart() {
         super.onStart()
-        Log.d("LifecycleAlert","onStart")
+        Log.d("LifecycleAlert", "onStart")
         binding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("LifecycleAlert","onResume")
+        Log.d("LifecycleAlert", "onResume")
         binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("LifecycleAlert","onPause")
+        Log.d("LifecycleAlert", "onPause")
         binding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d("LifecycleAlert","onStop")
+        Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
-        handler.removeCallbacks(seekbarRunnable)
+        seekbarManager.removeCallback()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("LifecycleAlert","onDestroy")
+        Log.d("LifecycleAlert", "onDestroy")
         binding.mapView.onDestroy()
     }
 
@@ -297,5 +209,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //balance the opacity when expanding panels
     //decide between infoWindow approach and onMarkerClick approach
     //audio still behaves werid at the start
+    //move Expanded panel to seperate class and View
+    //When switching to map fragment again it cetners in the sea !
+    //fix Location Manager
 
 }
