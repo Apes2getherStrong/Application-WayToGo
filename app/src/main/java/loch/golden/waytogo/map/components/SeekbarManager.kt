@@ -27,8 +27,8 @@ class SeekbarManager(
     private val screenWidth by lazy {
         Log.d("DisplayMetrics", context.resources.displayMetrics.widthPixels.toString())
         context.resources.displayMetrics.widthPixels
-
     }
+
     private val seekbarRunnable by lazy {
         object : Runnable {
             val percentList = mutableListOf<Float>() // this is for debugging

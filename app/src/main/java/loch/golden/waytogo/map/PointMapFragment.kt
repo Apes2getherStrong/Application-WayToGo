@@ -42,9 +42,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
 
-
-    //TODO Move the logic to view model only leave updating the visuals
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -140,20 +137,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 //        }
     }
 
-    private fun togglePlayPauseIcons() {
-        if (mapViewModel.mp!!.isPlaying) {
-
-            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_pause_24)
-            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_pause_24)
-        } else {
-            binding.bottomPanelPlayButton.setImageResource(R.drawable.ic_play_arrow_24)
-            binding.expandedPanelPlayFab.setImageResource(R.drawable.ic_play_arrow_24)
-        }
-    }
-
-
-
-
     override fun onMarkerClick(marker: Marker): Boolean {
         binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
         return true
@@ -227,5 +210,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //decide between infoWindow approach and onMarkerClick approach
     //audio still behaves werid at the start
     //move Expanded panel to seperate class and View
+    //When switching to map fragment again it cetners in the sea !
+    //fix Location Manager
 
 }
