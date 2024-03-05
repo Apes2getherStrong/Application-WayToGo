@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,24 +33,44 @@ class RoutesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupSearchView()
+        initSearchView()
+        initRecyclerView()
+        initViewModel()
+
+        //binding.recyclerViewRoutes.addOnScrollListener(Rec)
+
+    }
+    private fun initRecyclerView() {
         recyclerViewRouteAdapter = RecyclerViewRouteAdapter(ArrayList())
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
+    }
 
-        //val routeList = getRoutes()
+    private fun initViewModel() {
         val repository = RouteRepository()
         val routeViewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
         //pobierz routa
-        routeViewModel.getRoutes()
-        //obserwowanie i aktualizacja view adaptera
-        routeViewModel.routeResponse.observe(viewLifecycleOwner, Observer { response ->
-            recyclerViewRouteAdapter.updateRoutes(response)
-        })
+        routeViewModel.getRoutes(pageNumber = 0, pageSize = 6000)
+        observeRouteResponse()
     }
 
-    private fun setupSearchView() {
+    private fun observeRouteResponse() {
+        routeViewModel.routeResponse.observe(viewLifecycleOwner, Observer { response ->
+            if (response.isSuccessful) {
+                Log.d("Test", response.body()?.content.toString())
+                response.body()?.content?.forEach { route ->
+                    Log.d("Test nazwa", route.name)
+                }
+                val routes = response.body()?.content ?: emptyList()
+                recyclerViewRouteAdapter.updateRoutes(routes)
+
+            } else {
+                Log.d("Error response", response.errorBody().toString())
+            }
+        })
+    }
+    private fun initSearchView() {
 
         searchView = binding.searchView
 
@@ -67,25 +88,12 @@ class RoutesFragment : Fragment() {
 
     private fun search(query: String?) {
         query?.let { searchedQuery ->
-            val filteredRoutes = routeViewModel.routeResponse.value?.filter { route ->
+            val response = routeViewModel.routeResponse.value?.body()
+            val filteredRoutes = response?.content?.filter { route ->
                 route.name.contains(searchedQuery, ignoreCase = true)
             }
-
-            if (filteredRoutes.isNullOrEmpty()) {
-//                Toast.makeText(
-//                    requireContext(), "Nie znaleziono tras o takiej nazwie", Toast.LENGTH_SHORT
-//                ).show()
-            } else {
-                filteredRoutes.let { recyclerViewRouteAdapter.updateRoutes(it) }
-            }
+            filteredRoutes?.let { recyclerViewRouteAdapter.updateRoutes(it) }
         }
     }
-
-//    private fun getRoutes(): ArrayList<DataRoutes> {
-//
-//        return arrayListOf(
-//            DataRoutes("Przyklad", R.drawable.ic_route_24, "Przyklad")
-//
-//        )
-//    }
 }
+
