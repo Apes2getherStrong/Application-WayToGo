@@ -123,10 +123,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.bottomPanelPlayButton.setOnClickListener {
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenu.addRouteFab.setOnClickListener() {
+        binding.mapMenu.addRouteFab.setOnClickListener {
             Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenu.stylesFab.setOnClickListener() {
+        binding.mapMenu.stylesFab.setOnClickListener {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
         }
 //        binding.buttonCenterPos.setOnClickListener() {

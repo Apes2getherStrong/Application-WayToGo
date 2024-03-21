@@ -62,7 +62,7 @@ class LocationManager(
     }
 
     override fun onLocationResult(location: LocationResult) {
-        currentLocation = location.lastLocation;
+        currentLocation = location.lastLocation
         Log.d("LocationUpdate",getLatLng().toString())
     }
 

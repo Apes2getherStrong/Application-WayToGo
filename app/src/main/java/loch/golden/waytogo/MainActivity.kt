@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        getPermission();
+        getPermission()
         binding.bottomNav.setOnItemSelectedListener(this)
     }
 

@@ -28,7 +28,7 @@ class MapMenuManager(
     private var isMenuOpen: Boolean = true
 
     init {
-        menuButton.setOnClickListener() {
+        menuButton.setOnClickListener {
 
             isMenuOpen = !isMenuOpen
 

@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes
+package loch.golden.waytogo.routes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
