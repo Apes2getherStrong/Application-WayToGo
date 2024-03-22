@@ -3,12 +3,17 @@ package loch.golden.waytogo.map
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.appolica.interactiveinfowindow.InfoWindow
+import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
+import com.appolica.interactiveinfowindow.InfoWindowManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
@@ -19,12 +24,13 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
-import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
 import loch.golden.waytogo.map.components.SeekbarManager
+import loch.golden.waytogo.routes.RoutesFragment
+
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
     PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
@@ -34,6 +40,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         private const val MAP_BUNDLE_KEY = "map_state"
     }
 
+    private val RECYCLER_VIEW = "RECYCLER_VIEW_MARKER"
+
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var binding: FragmentPointMapBinding
@@ -41,6 +49,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
+    private lateinit var infoWindowManager: InfoWindowManager
+    private lateinit var creationWindow: InfoWindow
+    private var inCreationMode = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,8 +65,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         initMapView(savedInstanceState)
         setUpListeners()
         setUpSlidingUpPanel()
-        locationManager = LocationManager(requireContext(), 600, 5.0f)
-        locationManager.startLocationTracking()
+//        locationManager = LocationManager(requireContext(), 600, 5.0f)
+//        locationManager.startLocationTracking()
         mapMenuManager = MapMenuManager(
             requireContext(),
             binding.mapMenu.fabMenu,
@@ -68,6 +79,13 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             binding.bottomPanelCustomSeekbarProgress,
             arrayListOf(binding.bottomPanelPlayButton, binding.expandedPanelPlayFab)
         )
+
+        infoWindowManager = InfoWindowManager(childFragmentManager)
+        infoWindowManager.setHideOnFling(true)
+        infoWindowManager.onParentViewCreated(binding.mapViewContainer,savedInstanceState)
+
+
+
     }
 
     private fun setUpSlidingUpPanel() {
@@ -81,13 +99,15 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun initMapView(savedInstanceState: Bundle?) {
         binding.mapView.onCreate(savedInstanceState)
-        binding.mapView.getMapAsync(this)
+        //binding.mapView.getMapAsync(this)
 
     }
 
     @SuppressLint("MissingPermission")
     override fun onMapReady(mMap: GoogleMap) {
+
         googleMap = mMap
+        infoWindowManager.onMapReady(googleMap)
 
         //this skips if camera position is null
         mapViewModel.cameraPosition?.let {
@@ -101,20 +121,30 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
 
         //googleMap.moveCamera(CameraUpdateFactory.newLatLng(locationManager.getLatLng()!!))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(7.7749, -122.4194)))
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnInfoWindowClickListener(this)
         googleMap.setOnMarkerClickListener(this)
+
+        val marker1 =
+            googleMap.addMarker(MarkerOptions().position(LatLng(5.0, 5.0)).snippet(RECYCLER_VIEW))
+
+        val offsetX = 50
+        val offsetY = 100
+
+        val markerSpec = MarkerSpecification(offsetX, offsetY)
+
+        creationWindow = InfoWindow(marker1, markerSpec, CreationFragment())
         populateMap()
     }
 
     private fun populateMap() {
         for ((index, latlng) in mapViewModel.markerList.withIndex()) {
-            googleMap.addMarker(
+            val marker = googleMap.addMarker(
                 MarkerOptions()
                     .position(latlng)
                     .title("place $index")
             )
+
         }
     }
 
@@ -124,7 +154,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
         binding.mapMenu.addRouteFab.setOnClickListener() {
-            Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
+            setUpRouteCreation()
         }
         binding.mapMenu.stylesFab.setOnClickListener() {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
@@ -137,8 +167,24 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 //        }
     }
 
+    private fun setUpRouteCreation() {
+        inCreationMode = !inCreationMode
+    }
+
     override fun onMarkerClick(marker: Marker): Boolean {
-        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        if (inCreationMode) {
+            var infoWindow: InfoWindow? = null
+            when (marker.snippet) {
+                RECYCLER_VIEW -> infoWindow = creationWindow
+            }
+
+            if (infoWindow != null) {
+                infoWindowManager.toggle(infoWindow, true)
+            }
+        }
+        else {
+            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        }
         return true
     }
 
@@ -178,30 +224,32 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         Log.d("LifecycleAlert", "onStart")
         binding.mapView.onStart()
     }
-
     override fun onResume() {
         super.onResume()
         Log.d("LifecycleAlert", "onResume")
         binding.mapView.onResume()
     }
-
     override fun onPause() {
         super.onPause()
         Log.d("LifecycleAlert", "onPause")
         binding.mapView.onPause()
     }
-
     override fun onStop() {
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
         seekbarManager.removeCallback()
     }
-
     override fun onDestroy() {
         super.onDestroy()
         Log.d("LifecycleAlert", "onDestroy")
+        infoWindowManager.onDestroy()
         binding.mapView.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
     }
 
     //TODO
@@ -212,5 +260,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //move Expanded panel to seperate class and View
     //When switching to map fragment again it cetners in the sea !
     //fix Location Manager
+    //create the route creation lol
 
 }
