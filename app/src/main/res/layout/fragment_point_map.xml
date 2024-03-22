@@ -19,9 +19,9 @@
             android:layout_height="match_parent">
 
             <com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout
+                android:id="@+id/map_view_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/map_view_container">
+                android:layout_height="match_parent">
 
                 <com.google.android.gms.maps.MapView
                     android:id="@+id/map_view"
@@ -32,6 +32,14 @@
             <include
                 android:id="@+id/map_menu"
                 layout="@layout/component_map_menu" />
+
+            <Button
+                android:id="@+id/button_add_marker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="add_marker"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
         <!--SLIDE UP PANEL-->

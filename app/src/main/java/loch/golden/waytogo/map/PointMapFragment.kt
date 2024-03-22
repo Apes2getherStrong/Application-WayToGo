@@ -3,9 +3,7 @@ package loch.golden.waytogo.map
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -18,7 +16,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -28,8 +25,9 @@ import loch.golden.waytogo.databinding.FragmentPointMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
+import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.components.SeekbarManager
-import loch.golden.waytogo.routes.RoutesFragment
+import loch.golden.waytogo.map.creation.MarkerCreationFragment
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
@@ -38,9 +36,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     companion object {
         private const val CAMERA_POSITION_KEY = "camera_position"
         private const val MAP_BUNDLE_KEY = "map_state"
+        private val markerSpec = MarkerSpecification(0, 100)
+
     }
 
-    private val RECYCLER_VIEW = "RECYCLER_VIEW_MARKER"
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
@@ -50,8 +49,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
-    private lateinit var creationWindow: InfoWindow
+    private val routeCreationManager: RouteCreationManager by lazy {
+        RouteCreationManager(requireContext())
+    }
     private var inCreationMode = false
+    private val markerList: MutableList<Marker?> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -82,8 +84,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
         infoWindowManager = InfoWindowManager(childFragmentManager)
         infoWindowManager.setHideOnFling(true)
-        infoWindowManager.onParentViewCreated(binding.mapViewContainer,savedInstanceState)
-
+        infoWindowManager.onParentViewCreated(binding.mapViewContainer, savedInstanceState)
 
 
     }
@@ -99,7 +100,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun initMapView(savedInstanceState: Bundle?) {
         binding.mapView.onCreate(savedInstanceState)
-        //binding.mapView.getMapAsync(this)
+        binding.mapView.getMapAsync(this)
 
     }
 
@@ -125,15 +126,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         googleMap.setOnInfoWindowClickListener(this)
         googleMap.setOnMarkerClickListener(this)
 
-        val marker1 =
-            googleMap.addMarker(MarkerOptions().position(LatLng(5.0, 5.0)).snippet(RECYCLER_VIEW))
-
-        val offsetX = 50
-        val offsetY = 100
-
-        val markerSpec = MarkerSpecification(offsetX, offsetY)
-
-        creationWindow = InfoWindow(marker1, markerSpec, CreationFragment())
         populateMap()
     }
 
@@ -144,45 +136,64 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                     .position(latlng)
                     .title("place $index")
             )
-
+            markerList.add(marker)
         }
     }
 
+    private fun clearMap() {
+        for (marker in markerList)
+            marker?.remove()
+    }
 
     private fun setUpListeners() {
         binding.bottomPanelPlayButton.setOnClickListener {
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenu.addRouteFab.setOnClickListener() {
-            setUpRouteCreation()
+        binding.mapMenu.addRouteFab.setOnClickListener {
+            toggleRouteCreation()
         }
-        binding.mapMenu.stylesFab.setOnClickListener() {
+        binding.mapMenu.stylesFab.setOnClickListener {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
         }
-//        binding.buttonCenterPos.setOnClickListener() {
-//            locationManager.getLatLng()?.let {
-//                googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
-//                Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
-//            }
-//        }
+        binding.buttonAddMarker.setOnClickListener {
+            if (inCreationMode) {
+                val markerId = routeCreationManager.getCurrentId()
+                val marker = googleMap.addMarker(
+                    MarkerOptions()
+                        .position(googleMap.projection.visibleRegion.latLngBounds.center)
+                        .draggable(true)
+                        .snippet("$markerId")
+                        .title("Added $markerId")
+                )
+                val markerSpec = MarkerSpecification(0, 100)
+                routeCreationManager.addMarker(
+                    marker,
+                    InfoWindow(marker, markerSpec, MarkerCreationFragment(marker))
+                )
+
+
+            }
+
+        }
     }
 
-    private fun setUpRouteCreation() {
+    private fun toggleRouteCreation() {
         inCreationMode = !inCreationMode
+        if(inCreationMode) {
+            googleMap.setOnMarkerDragListener(routeCreationManager)
+            clearMap()
+        }
+        else{
+            googleMap.setOnMarkerDragListener(null)
+            populateMap()
+        }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
+        Toast.makeText(requireContext(), marker.title, Toast.LENGTH_SHORT).show()
         if (inCreationMode) {
-            var infoWindow: InfoWindow? = null
-            when (marker.snippet) {
-                RECYCLER_VIEW -> infoWindow = creationWindow
-            }
-
-            if (infoWindow != null) {
-                infoWindowManager.toggle(infoWindow, true)
-            }
-        }
-        else {
+            infoWindowManager.toggle(routeCreationManager.getInfoWindow(marker.snippet!!))
+        } else {
             binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
         }
         return true
@@ -224,22 +235,26 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         Log.d("LifecycleAlert", "onStart")
         binding.mapView.onStart()
     }
+
     override fun onResume() {
         super.onResume()
         Log.d("LifecycleAlert", "onResume")
         binding.mapView.onResume()
     }
+
     override fun onPause() {
         super.onPause()
         Log.d("LifecycleAlert", "onPause")
         binding.mapView.onPause()
     }
+
     override fun onStop() {
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
         seekbarManager.removeCallback()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         Log.d("LifecycleAlert", "onDestroy")
