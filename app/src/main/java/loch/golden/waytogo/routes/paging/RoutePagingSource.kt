@@ -32,15 +32,11 @@ class RoutePagingSource(private val repository: RouteRepository) : PagingSource<
 
     }
     override fun getRefreshKey(state: PagingState<Int, Route>): Int? {
-        val anchorPosition = state.anchorPosition ?: return null
-        val closestPage = state.closestPageToPosition(anchorPosition) ?: return null
-        val prevKey = closestPage.prevKey
-        val nextKey = closestPage.nextKey
 
-        return when {
-            prevKey != null -> prevKey + 1
-            nextKey != null -> nextKey - 1
-            else -> null
+        return state.anchorPosition?.let {anchorPosition ->
+            val closestPage = state.closestPageToPosition(anchorPosition)
+            closestPage?.prevKey?.plus(1) ?: closestPage?.nextKey?.minus(1)
+
         }
 
     }

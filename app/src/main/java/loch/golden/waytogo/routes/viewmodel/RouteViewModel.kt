@@ -18,10 +18,10 @@ import retrofit2.Response
 class RouteViewModel(private val routeRepository: RouteRepository): ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
-    fun getRoutes(): Flow<PagingData<Route>> {
+    fun getRoutes(pageNumber: Int, pageSize: Int): Flow<PagingData<Route>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20,
+                pageSize = pageSize,
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {RoutePagingSource(routeRepository)}

@@ -14,7 +14,7 @@ import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.model.RouteListResponse
 import loch.golden.waytogo.routes.viewmodel.RouteViewHolder
 
-class RecyclerViewRouteAdapter(private var routeList: List<Route>) :
+class RecyclerViewRouteAdapter() :
         PagingDataAdapter<Route,RouteViewHolder>(ROUTE_DIFF_CALLBACK) {
 
     private var onClickListener: OnClickListener? = null
@@ -33,11 +33,6 @@ class RecyclerViewRouteAdapter(private var routeList: List<Route>) :
 //                onClickListener!!.onClick()
 //            }
 //        }
-    }
-
-    fun updateRoutes(newRoutes: List<Route>) {
-        routeList = newRoutes
-        notifyDataSetChanged()
     }
     companion object {
         private val ROUTE_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Route>() {
