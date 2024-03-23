@@ -21,7 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
-import loch.golden.waytogo.databinding.FragmentPointMapBinding
+import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
@@ -44,14 +44,16 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
-    private lateinit var binding: FragmentPointMapBinding
+    private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
+
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
+
     private val routeCreationManager: RouteCreationManager by lazy {
-        RouteCreationManager(requireContext())
+        RouteCreationManager(requireContext(),infoWindowManager)
     }
     private var inCreationMode = false
     private val markerList: MutableList<Marker?> = mutableListOf()
@@ -59,7 +61,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPointMapBinding.inflate(inflater, container, false)
+        binding = FragmentMapBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -165,13 +167,13 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                         .position(googleMap.projection.visibleRegion.latLngBounds.center)
                         .draggable(true)
                         .snippet("$markerId")
-                        .title("Added $markerId")
+                        .title("Point $markerId")
                 )
                 val markerSpec = MarkerSpecification(0, 100)
                 val infoWindow = InfoWindow(
                     marker,
                     markerSpec,
-                    MarkerCreationFragment(marker, routeCreationManager)
+                    MarkerCreationFragment(marker, routeCreationManager, binding)
                 )
                 routeCreationManager.addMarker(
                     marker, infoWindow
@@ -272,12 +274,11 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     //TODO
-    //center the titles
+    //center the titles in expanded panel when scrolling
     //balance the opacity when expanding panels
     //decide between infoWindow approach and onMarkerClick approach
     //audio still behaves werid at the start
     //move Expanded panel to seperate class and View
-    //When switching to map fragment again it cetners in the sea !
     //fix Location Manager
     //create the route creation lol
 

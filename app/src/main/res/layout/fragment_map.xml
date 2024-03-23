@@ -50,7 +50,8 @@
             <!--BOTTOM PANEL-->
             <include
                 android:id="@+id/bottom_panel"
-                layout="@layout/map_component_bottom_panel" />
+                layout="@layout/map_component_bottom_panel"
+                />
             <!--EXPANDED PANEL-->
 
             <include

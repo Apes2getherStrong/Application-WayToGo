@@ -6,21 +6,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
 import com.google.android.gms.maps.Projection
 import com.google.android.gms.maps.model.Marker
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import loch.golden.waytogo.R
+import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.databinding.FragmentMarkerCreationBinding
 
 
 class MarkerCreationFragment(
     private val marker: Marker?,
-    private val routeCreationManager: RouteCreationManager
+    private val routeCreationManager: RouteCreationManager,
+    private val mapBinding: FragmentMapBinding
 ) : Fragment() {
 
     private lateinit var binding: FragmentMarkerCreationBinding
+    private val id by lazy{
+        marker?.snippet
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -37,12 +45,12 @@ class MarkerCreationFragment(
         binding.buttonDelete.setOnClickListener {
             routeCreationManager.removeMarker(marker)
         }
+        binding.buttonEdit.setOnClickListener {
+            mapBinding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            routeCreationManager.hideInfoWindow(marker?.snippet!!)
+        }
 
     }
 
-    override fun onDestroy() {
-        Toast.makeText(requireContext(), "DYing righnt now", Toast.LENGTH_SHORT).show()
-        super.onDestroy()
-    }
 
 }
