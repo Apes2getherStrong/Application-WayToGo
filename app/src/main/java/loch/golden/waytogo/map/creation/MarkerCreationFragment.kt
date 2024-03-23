@@ -15,7 +15,10 @@ import com.google.android.gms.maps.model.Marker
 import loch.golden.waytogo.databinding.FragmentMarkerCreationBinding
 
 
-class MarkerCreationFragment(private val marker: Marker?) : Fragment() {
+class MarkerCreationFragment(
+    private val marker: Marker?,
+    private val routeCreationManager: RouteCreationManager
+) : Fragment() {
 
     private lateinit var binding: FragmentMarkerCreationBinding
 
@@ -30,6 +33,9 @@ class MarkerCreationFragment(private val marker: Marker?) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.checlkbox.setOnClickListener {
             marker?.isDraggable = !binding.checlkbox.isChecked
+        }
+        binding.buttonDelete.setOnClickListener {
+            routeCreationManager.removeMarker(marker)
         }
 
     }

@@ -28,6 +28,7 @@ import loch.golden.waytogo.map.components.MapMenuManager
 import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.components.SeekbarManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
+import java.lang.ref.WeakReference
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
@@ -77,9 +78,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         seekbarManager = SeekbarManager(
             requireContext(),
             mapViewModel,
-            binding.expandedPanelSeekbar,
-            binding.bottomPanelCustomSeekbarProgress,
-            arrayListOf(binding.bottomPanelPlayButton, binding.expandedPanelPlayFab)
+            binding.expandedPanel.seekbar,
+            binding.bottomPanel.customSeekbarProgress,
+            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
         )
 
         infoWindowManager = InfoWindowManager(childFragmentManager)
@@ -146,7 +147,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     private fun setUpListeners() {
-        binding.bottomPanelPlayButton.setOnClickListener {
+        binding.bottomPanel.playButton.setOnClickListener {
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
         binding.mapMenu.addRouteFab.setOnClickListener {
@@ -154,6 +155,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         }
         binding.mapMenu.stylesFab.setOnClickListener {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
+
         }
         binding.buttonAddMarker.setOnClickListener {
             if (inCreationMode) {
@@ -166,12 +168,15 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                         .title("Added $markerId")
                 )
                 val markerSpec = MarkerSpecification(0, 100)
-                routeCreationManager.addMarker(
+                val infoWindow = InfoWindow(
                     marker,
-                    InfoWindow(marker, markerSpec, MarkerCreationFragment(marker))
+                    markerSpec,
+                    MarkerCreationFragment(marker, routeCreationManager)
                 )
+                routeCreationManager.addMarker(
+                    marker, infoWindow
 
-
+                )
             }
 
         }
@@ -179,11 +184,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     private fun toggleRouteCreation() {
         inCreationMode = !inCreationMode
-        if(inCreationMode) {
+        if (inCreationMode) {
             googleMap.setOnMarkerDragListener(routeCreationManager)
             clearMap()
-        }
-        else{
+        } else {
             googleMap.setOnMarkerDragListener(null)
             populateMap()
         }
@@ -206,9 +210,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
     override fun onPanelSlide(panel: View?, slideOffset: Float) {
         val maxVisibilitySlideOffset = 0.2f
-        binding.bottomPanelContainer.alpha =
+        binding.bottomPanel.container.alpha =
             1.0f - (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
-        binding.expandedPanelContainer.alpha =
+        binding.expandedPanel.container.alpha =
             (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
     }
 
@@ -217,7 +221,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         previousState: SlidingUpPanelLayout.PanelState?,
         newState: SlidingUpPanelLayout.PanelState?
     ) {
-        binding.bottomPanelPlayButton.isClickable =
+        binding.bottomPanel.playButton.isClickable =
             (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.COLLAPSED)
     }
 

@@ -18,6 +18,13 @@ class RouteCreationManager(private val context: Context) : OnMarkerDragListener 
         infoWindowMap[id] = infoWindow
     }
 
+    fun removeMarker(marker: Marker?){
+        val id = marker?.snippet!!
+        creationMarkerMap.remove(id)
+        infoWindowMap[id]?.windowState = InfoWindow.State.HIDDEN
+        marker.remove()
+    }
+
     fun getCurrentId() = markerId++
 
     fun getMarker(id: String) = creationMarkerMap[id]
