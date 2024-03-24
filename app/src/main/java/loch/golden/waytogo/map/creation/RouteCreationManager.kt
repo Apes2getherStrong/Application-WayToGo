@@ -40,10 +40,13 @@ class RouteCreationManager(
     fun getInfoWindow(id: String) = infoWindowMap[id]!!
 
     fun hideInfoWindow(id: String) {
-        infoWindowManager.toggle(infoWindowMap[id]!!)
+        if (infoWindowMap[id]!!.windowState in setOf(InfoWindow.State.SHOWN, InfoWindow.State.SHOWING))
+            infoWindowManager.toggle(infoWindowMap[id]!!)
     }
 
     override fun onMarkerDrag(marker: Marker) {
+        val id = marker.snippet!!
+        hideInfoWindow(id)
     }
 
     override fun onMarkerDragEnd(marker: Marker) {

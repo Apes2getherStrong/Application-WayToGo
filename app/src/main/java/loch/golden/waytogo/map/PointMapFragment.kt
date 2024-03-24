@@ -1,12 +1,19 @@
 package loch.golden.waytogo.map
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -21,6 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
+import loch.golden.waytogo.Permissions
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
@@ -28,6 +36,8 @@ import loch.golden.waytogo.map.components.MapMenuManager
 import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.components.SeekbarManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
+import java.io.File
+import java.io.IOException
 import java.lang.ref.WeakReference
 
 
@@ -51,12 +61,22 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
-
     private val routeCreationManager: RouteCreationManager by lazy {
-        RouteCreationManager(requireContext(),infoWindowManager)
+        RouteCreationManager(requireContext(), infoWindowManager)
     }
     private var inCreationMode = false
+    private var isRecording = false
+    private lateinit var mediaRecorder: MediaRecorder
+
     private val markerList: MutableList<Marker?> = mutableListOf()
+
+    private val getContent =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            // Handle the returned Uri
+            uri?.let {
+                binding.expandedPanel.creationAddImage.setImageURI(uri)
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -149,9 +169,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     private fun setUpListeners() {
-        binding.bottomPanel.playButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
-        }
         binding.mapMenu.addRouteFab.setOnClickListener {
             toggleRouteCreation()
         }
@@ -180,23 +197,79 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
                 )
             }
+        }
+        binding.expandedPanel.creationAddImage.setOnClickListener {
+            getContent.launch("image/*")
+        }
+
+        binding.expandedPanel.recordButton.setOnClickListener {
+            if (Permissions.isPermissionGranted(requireContext(), Manifest.permission.RECORD_AUDIO))
+                if(!isRecording) startRecording()
+                else stopRecording()
+            else
+                Permissions.requestPermission(
+                    requireActivity(),
+                    Manifest.permission.RECORD_AUDIO,
+                    Permissions.RECORD_AUDIO_REQUEST_CODE
+                )
 
         }
+
     }
+
+    private fun startRecording() {
+        //this would harm backward compatibility
+        mediaRecorder = MediaRecorder().apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            setOutputFile(getOutputFile(requireContext()).absolutePath)
+
+            try {
+                prepare()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+
+            start()
+        }
+        isRecording = true
+    }
+
+    private fun stopRecording(){
+        mediaRecorder.apply {
+            stop()
+            release()
+        }
+
+        isRecording = false
+    }
+
+    private fun getOutputFile(context: Context): File {
+        val folder = File(context.filesDir, "MyRecordings")
+        if (!folder.exists()) {
+            folder.mkdirs()
+        }
+        return File(folder, "recording_${System.currentTimeMillis()}.3gp")
+    }
+
 
     private fun toggleRouteCreation() {
         inCreationMode = !inCreationMode
         if (inCreationMode) {
             googleMap.setOnMarkerDragListener(routeCreationManager)
             clearMap()
+            binding.expandedPanel.normal.visibility = View.GONE
+            binding.expandedPanel.creation.visibility = View.VISIBLE
         } else {
             googleMap.setOnMarkerDragListener(null)
             populateMap()
+            binding.expandedPanel.normal.visibility = View.VISIBLE
+            binding.expandedPanel.creation.visibility = View.GONE
         }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        Toast.makeText(requireContext(), marker.title, Toast.LENGTH_SHORT).show()
         if (inCreationMode) {
             infoWindowManager.toggle(routeCreationManager.getInfoWindow(marker.snippet!!))
         } else {
@@ -223,10 +296,18 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         previousState: SlidingUpPanelLayout.PanelState?,
         newState: SlidingUpPanelLayout.PanelState?
     ) {
-        binding.bottomPanel.playButton.isClickable =
-            (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.COLLAPSED)
-    }
+        if (newState == SlidingUpPanelLayout.PanelState.DRAGGING){
+            binding.bottomPanel.container.visibility = View.VISIBLE
+            binding.expandedPanel.container.visibility = View.VISIBLE
+        }
 
+        if (previousState == SlidingUpPanelLayout.PanelState.DRAGGING) {
+            if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
+                binding.bottomPanel.container.visibility = View.GONE
+            if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
+                binding.expandedPanel.container.visibility = View.GONE
+        }
+    }
 
     override fun onBackPressed(): Boolean {
         return if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
@@ -264,6 +345,9 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     override fun onDestroy() {
         super.onDestroy()
         Log.d("LifecycleAlert", "onDestroy")
+        if (isRecording) {
+            stopRecording()
+        }
         infoWindowManager.onDestroy()
         binding.mapView.onDestroy()
     }
@@ -281,5 +365,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     //move Expanded panel to seperate class and View
     //fix Location Manager
     //create the route creation lol
+    // add cropping from this lib https://github.com/CanHub/Android-Image-Cropper
 
 }

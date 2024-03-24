@@ -17,7 +17,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.databinding.FragmentMarkerCreationBinding
-
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
 
 class MarkerCreationFragment(
     private val marker: Marker?,
@@ -26,7 +27,7 @@ class MarkerCreationFragment(
 ) : Fragment() {
 
     private lateinit var binding: FragmentMarkerCreationBinding
-    private val id by lazy{
+    private val id by lazy {
         marker?.snippet
     }
 
@@ -39,6 +40,7 @@ class MarkerCreationFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.checlkbox.setOnClickListener {
             marker?.isDraggable = !binding.checlkbox.isChecked
         }
@@ -49,7 +51,7 @@ class MarkerCreationFragment(
             mapBinding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
             routeCreationManager.hideInfoWindow(marker?.snippet!!)
         }
-
+        mapBinding.expandedPanel.creationSeekbar.isEnabled = false
     }
 
 
