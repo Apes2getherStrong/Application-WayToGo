@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -25,10 +26,13 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.Permissions
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
@@ -48,7 +52,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         private const val CAMERA_POSITION_KEY = "camera_position"
         private const val MAP_BUNDLE_KEY = "map_state"
         private val markerSpec = MarkerSpecification(0, 100)
-
     }
 
 
@@ -61,22 +64,12 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
-    private val routeCreationManager: RouteCreationManager by lazy {
-        RouteCreationManager(requireContext(), infoWindowManager)
-    }
+    private lateinit var routeCreationManager: RouteCreationManager // TODO do it by lazy or init it later (if possible)
+
     private var inCreationMode = false
-    private var isRecording = false
-    private lateinit var mediaRecorder: MediaRecorder
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
-    private val getContent =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            // Handle the returned Uri
-            uri?.let {
-                binding.expandedPanel.creationAddImage.setImageURI(uri)
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -109,6 +102,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         infoWindowManager.setHideOnFling(true)
         infoWindowManager.onParentViewCreated(binding.mapViewContainer, savedInstanceState)
 
+        routeCreationManager = RouteCreationManager(binding, infoWindowManager, this)
 
     }
 
@@ -198,76 +192,42 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 )
             }
         }
-        binding.expandedPanel.creationAddImage.setOnClickListener {
-            getContent.launch("image/*")
-        }
-
-        binding.expandedPanel.recordButton.setOnClickListener {
-            if (Permissions.isPermissionGranted(requireContext(), Manifest.permission.RECORD_AUDIO))
-                if(!isRecording) startRecording()
-                else stopRecording()
-            else
-                Permissions.requestPermission(
-                    requireActivity(),
-                    Manifest.permission.RECORD_AUDIO,
-                    Permissions.RECORD_AUDIO_REQUEST_CODE
-                )
-
-        }
-
     }
-
-    private fun startRecording() {
-        //this would harm backward compatibility
-        mediaRecorder = MediaRecorder().apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            setOutputFile(getOutputFile(requireContext()).absolutePath)
-
-            try {
-                prepare()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-            start()
-        }
-        isRecording = true
-    }
-
-    private fun stopRecording(){
-        mediaRecorder.apply {
-            stop()
-            release()
-        }
-
-        isRecording = false
-    }
-
-    private fun getOutputFile(context: Context): File {
-        val folder = File(context.filesDir, "MyRecordings")
-        if (!folder.exists()) {
-            folder.mkdirs()
-        }
-        return File(folder, "recording_${System.currentTimeMillis()}.3gp")
-    }
-
 
     private fun toggleRouteCreation() {
-        inCreationMode = !inCreationMode
-        if (inCreationMode) {
-            googleMap.setOnMarkerDragListener(routeCreationManager)
-            clearMap()
-            binding.expandedPanel.normal.visibility = View.GONE
-            binding.expandedPanel.creation.visibility = View.VISIBLE
-        } else {
-            googleMap.setOnMarkerDragListener(null)
-            populateMap()
-            binding.expandedPanel.normal.visibility = View.VISIBLE
-            binding.expandedPanel.creation.visibility = View.GONE
-        }
+        val view = layoutInflater.inflate(R.layout.dialog_route_title, null)
+        val editText = view.findViewById<EditText>(R.id.dialog_input)
+
+        // Set up the MaterialAlertDialogBuilder
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Enter the the route title")
+            .setView(R.layout.dialog_route_title)
+            .setPositiveButton("OK") { dialog, _ ->
+                val title = editText.text.toString()
+                routeCreationManager.setRouteTitle(title)
+                inCreationMode = !inCreationMode
+                if (inCreationMode) {
+                    googleMap.setOnMarkerDragListener(routeCreationManager)
+                    clearMap()
+                    binding.expandedPanel.normal.visibility = View.GONE
+                    binding.expandedPanel.creation.visibility = View.VISIBLE
+                } else {
+                    googleMap.setOnMarkerDragListener(null)
+                    populateMap()
+                    binding.expandedPanel.normal.visibility = View.VISIBLE
+                    binding.expandedPanel.creation.visibility = View.GONE
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+                // Handle cancellation if needed
+            }
+        builder.show()
+
+
     }
+
 
     override fun onMarkerClick(marker: Marker): Boolean {
         if (inCreationMode) {
@@ -296,7 +256,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         previousState: SlidingUpPanelLayout.PanelState?,
         newState: SlidingUpPanelLayout.PanelState?
     ) {
-        if (newState == SlidingUpPanelLayout.PanelState.DRAGGING){
+        if (newState == SlidingUpPanelLayout.PanelState.DRAGGING) {
             binding.bottomPanel.container.visibility = View.VISIBLE
             binding.expandedPanel.container.visibility = View.VISIBLE
         }
@@ -345,9 +305,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     override fun onDestroy() {
         super.onDestroy()
         Log.d("LifecycleAlert", "onDestroy")
-        if (isRecording) {
-            stopRecording()
-        }
+        routeCreationManager.onDestroy()
         infoWindowManager.onDestroy()
         binding.mapView.onDestroy()
     }
