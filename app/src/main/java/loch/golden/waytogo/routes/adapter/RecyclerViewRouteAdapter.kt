@@ -1,21 +1,16 @@
 package loch.golden.waytogo.routes.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
 import loch.golden.waytogo.routes.model.Route
-import loch.golden.waytogo.routes.model.RouteListResponse
 import loch.golden.waytogo.routes.viewmodel.RouteViewHolder
 
-class RecyclerViewRouteAdapter() :
-        PagingDataAdapter<Route,RouteViewHolder>(ROUTE_DIFF_CALLBACK) {
+class RecyclerViewRouteAdapter :
+    PagingDataAdapter<Route, RouteViewHolder>(ROUTE_DIFF_CALLBACK) {
 
     private var onClickListener: OnClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteViewHolder {
@@ -34,6 +29,7 @@ class RecyclerViewRouteAdapter() :
 //            }
 //        }
     }
+
     companion object {
         private val ROUTE_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Route>() {
             override fun areItemsTheSame(oldItem: Route, newItem: Route): Boolean {

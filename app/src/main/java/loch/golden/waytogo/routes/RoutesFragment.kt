@@ -1,7 +1,6 @@
 package loch.golden.waytogo.routes
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
@@ -46,6 +44,7 @@ class RoutesFragment : Fragment() {
         //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
     }
+
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
@@ -62,11 +61,12 @@ class RoutesFragment : Fragment() {
     private fun observeRouteResponse() {
 
         lifecycleScope.launch {
-            viewModel.getRoutes(0,20).collectLatest { pagingData ->
+            viewModel.getRoutes(0, 20).collectLatest { pagingData ->
                 recyclerViewRouteAdapter.submitData(pagingData)
             }
         }
     }
+
     private fun initSearchView() {
 
         searchView = binding.searchView
@@ -86,9 +86,9 @@ class RoutesFragment : Fragment() {
     private fun search(query: String?) {
         query?.let { searchedQuery ->
             lifecycleScope.launch {
-                viewModel.getRoutes(0,20).collectLatest { pagingData ->
+                viewModel.getRoutes(0, 20).collectLatest { pagingData ->
                     val filteredRoutes = pagingData.filter { route ->
-                        route.name.contains(searchedQuery,ignoreCase = true)
+                        route.name.contains(searchedQuery, ignoreCase = true)
                     }
                     recyclerViewRouteAdapter.submitData(filteredRoutes)
                 }

@@ -43,11 +43,11 @@ class SeekbarManager(
                     // Update bottom custom seekbar
                     val trackPercentage = if (duration != 0.0f) currentPosition / duration else 0.0f
                     val pixels = (screenWidth * trackPercentage).toInt()
-                    Log.d("PercentPixel",pixels.toString())
+                    Log.d("PercentPixel", pixels.toString())
                     percentList.add(trackPercentage)
                     customSeekbar.layoutParams.width = pixels
                     customSeekbar.requestLayout()
-                    Log.d("PixelWidth",customSeekbar.layoutParams.width.toString())
+                    Log.d("PixelWidth", customSeekbar.layoutParams.width.toString())
 
 
                     //how often to refresh the seekbar
