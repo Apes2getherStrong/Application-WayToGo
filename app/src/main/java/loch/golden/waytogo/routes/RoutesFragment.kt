@@ -1,21 +1,25 @@
 package loch.golden.waytogo.routes
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.repository.RouteRepository
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
+import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 class RoutesFragment : Fragment() {
 
@@ -24,6 +28,7 @@ class RoutesFragment : Fragment() {
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var routeViewModel: RouteViewModel
     private lateinit var searchView: SearchView
+    private val viewModel by viewModels<RouteViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -36,12 +41,12 @@ class RoutesFragment : Fragment() {
         initSearchView()
         initRecyclerView()
         initViewModel()
-
         //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
     }
+
     private fun initRecyclerView() {
-        recyclerViewRouteAdapter = RecyclerViewRouteAdapter(ArrayList())
+        recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
     }
@@ -50,26 +55,18 @@ class RoutesFragment : Fragment() {
         val repository = RouteRepository()
         val routeViewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
-        //pobierz routa
-        routeViewModel.getRoutes(pageNumber = 0, pageSize = 6000)
         observeRouteResponse()
     }
 
     private fun observeRouteResponse() {
-        routeViewModel.routeResponse.observe(viewLifecycleOwner, Observer { response ->
-            if (response.isSuccessful) {
-                Log.d("Test", response.body()?.content.toString())
-                response.body()?.content?.forEach { route ->
-                    Log.d("Test nazwa", route.name)
-                }
-                val routes = response.body()?.content ?: emptyList()
-                recyclerViewRouteAdapter.updateRoutes(routes)
 
-            } else {
-                Log.d("Error response", response.errorBody().toString())
+        lifecycleScope.launch {
+            viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                recyclerViewRouteAdapter.submitData(pagingData)
             }
-        })
+        }
     }
+
     private fun initSearchView() {
 
         searchView = binding.searchView
@@ -88,11 +85,14 @@ class RoutesFragment : Fragment() {
 
     private fun search(query: String?) {
         query?.let { searchedQuery ->
-            val response = routeViewModel.routeResponse.value?.body()
-            val filteredRoutes = response?.content?.filter { route ->
-                route.name.contains(searchedQuery, ignoreCase = true)
+            lifecycleScope.launch {
+                viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                    val filteredRoutes = pagingData.filter { route ->
+                        route.name.contains(searchedQuery, ignoreCase = true)
+                    }
+                    recyclerViewRouteAdapter.submitData(filteredRoutes)
+                }
             }
-            filteredRoutes?.let { recyclerViewRouteAdapter.updateRoutes(it) }
         }
     }
 }

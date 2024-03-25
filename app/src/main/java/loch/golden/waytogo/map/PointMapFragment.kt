@@ -19,7 +19,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
-import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPointMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
@@ -123,10 +122,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.bottomPanelPlayButton.setOnClickListener {
             Toast.makeText(requireContext(), "Siema", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenu.addRouteFab.setOnClickListener() {
+        binding.mapMenu.addRouteFab.setOnClickListener {
             Toast.makeText(requireContext(), "Add Route", Toast.LENGTH_SHORT).show()
         }
-        binding.mapMenu.stylesFab.setOnClickListener() {
+        binding.mapMenu.stylesFab.setOnClickListener {
             Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
         }
 //        binding.buttonCenterPos.setOnClickListener() {

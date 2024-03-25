@@ -1,14 +1,9 @@
 package loch.golden.waytogo.map.components
 
 import android.content.Context
-import android.graphics.Color
-import android.opengl.Visibility
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Toast
-import androidx.core.view.forEach
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import loch.golden.waytogo.R
 
@@ -28,7 +23,7 @@ class MapMenuManager(
     private var isMenuOpen: Boolean = true
 
     init {
-        menuButton.setOnClickListener() {
+        menuButton.setOnClickListener {
 
             isMenuOpen = !isMenuOpen
 
