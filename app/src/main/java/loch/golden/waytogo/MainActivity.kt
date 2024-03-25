@@ -1,8 +1,11 @@
 package loch.golden.waytogo
 
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
@@ -10,12 +13,10 @@ import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
-import android.Manifest
-import android.content.pm.PackageManager
-import android.widget.Toast
 
 
-class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
+class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
+    ActivityCompat.OnRequestPermissionsResultCallback {
 
     private lateinit var binding: ActivityMainBinding
     private val LOCATION_PERMISSION_REQUEST_CODE = 420692
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        getPermission();
+        getPermission()
         binding.bottomNav.setOnItemSelectedListener(this)
     }
 
