@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/slide_up_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        app:umanoPanelHeight="60dp">
+
+        <!--MAIN-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout
+                android:id="@+id/map_view_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/map_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout>
+
+            <include
+                android:id="@+id/map_menu"
+                layout="@layout/component_map_menu" />
+
+            <Button
+                android:id="@+id/button_add_marker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="add_marker"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!--SLIDE UP PANEL-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.85">
+            <!--BOTTOM PANEL-->
+            <include
+                android:id="@+id/bottom_panel"
+                layout="@layout/map_component_bottom_panel"
+                />
+            <!--EXPANDED PANEL-->
+
+            <include
+                android:id="@+id/expanded_panel"
+                layout="@layout/map_component_expanded_panel" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

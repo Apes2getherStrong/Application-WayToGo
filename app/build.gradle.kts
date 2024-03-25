@@ -55,13 +55,10 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.cardview:cardview:1.0.0")
-    //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
     implementation("com.google.android.gms:play-services-location:21.1.0")
-
-    //Pagination
+    implementation("com.appolica:interactive-info-window-android:1.1.0")
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
     testImplementation("androidx.paging:paging-common-ktx:3.2.1")
 

@@ -13,6 +13,7 @@ class MapViewModel : ViewModel() {
         LatLng(18.3520, 36.6466),
         LatLng(52.373920, 9.735603)
     )
+    
     var mp: MediaPlayer? = null
 
 

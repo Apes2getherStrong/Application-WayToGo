@@ -68,7 +68,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
     }
 
-    //Delete comments when adding fragments 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (binding.bottomNav.selectedItemId == item.itemId)
             return true
@@ -93,5 +92,5 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             super.onBackPressed()
         }
     }
-
+    //TODO on permission decline make the screen tell u need to enable it
 }
