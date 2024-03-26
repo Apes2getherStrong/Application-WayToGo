@@ -15,6 +15,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginEnd
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
@@ -172,7 +174,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         }
         binding.buttonAddMarker.setOnClickListener {
             if (inCreationMode) {
-                val markerId = routeCreationManager.getCurrentId()
+                val markerId = routeCreationManager.generateMarkerId()
                 val marker = googleMap.addMarker(
                     MarkerOptions()
                         .position(googleMap.projection.visibleRegion.latLngBounds.center)
@@ -195,37 +197,39 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     }
 
     private fun toggleRouteCreation() {
-        val view = layoutInflater.inflate(R.layout.dialog_route_title, null)
-        val editText = view.findViewById<EditText>(R.id.dialog_input)
 
-        // Set up the MaterialAlertDialogBuilder
-        val builder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Enter the the route title")
-            .setView(R.layout.dialog_route_title)
-            .setPositiveButton("OK") { dialog, _ ->
-                val title = editText.text.toString()
-                routeCreationManager.setRouteTitle(title)
-                inCreationMode = !inCreationMode
-                if (inCreationMode) {
+        if (!inCreationMode) {
+            val inflater = LayoutInflater.from(requireContext())
+            val view = inflater.inflate(R.layout.dialog_route_title, null)
+
+            val editText = view.findViewById<TextInputEditText>(R.id.dialog_input)
+
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Enter the route title")
+                .setView(view)
+                .setPositiveButton("OK") { dialog, _ ->
+                    val title = editText.text.toString().trim()
+                    Log.d("Warmbier", "In dialog: $title")
+                    routeCreationManager.start(title)
+                    inCreationMode = true
                     googleMap.setOnMarkerDragListener(routeCreationManager)
                     clearMap()
                     binding.expandedPanel.normal.visibility = View.GONE
                     binding.expandedPanel.creation.visibility = View.VISIBLE
-                } else {
-                    googleMap.setOnMarkerDragListener(null)
-                    populateMap()
-                    binding.expandedPanel.normal.visibility = View.VISIBLE
-                    binding.expandedPanel.creation.visibility = View.GONE
+                    dialog.dismiss()
                 }
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-                // Handle cancellation if needed
-            }
-        builder.show()
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
 
-
+        } else {
+            inCreationMode = false
+            googleMap.setOnMarkerDragListener(null)
+            populateMap()
+            binding.expandedPanel.normal.visibility = View.VISIBLE
+            binding.expandedPanel.creation.visibility = View.GONE
+        }
     }
 
 
@@ -315,14 +319,14 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         binding.mapView.onSaveInstanceState(outState)
     }
 
-    //TODO
-    //center the titles in expanded panel when scrolling
-    //balance the opacity when expanding panels
-    //decide between infoWindow approach and onMarkerClick approach
-    //audio still behaves werid at the start
-    //move Expanded panel to seperate class and View
-    //fix Location Manager
-    //create the route creation lol
-    // add cropping from this lib https://github.com/CanHub/Android-Image-Cropper
+//TODO
+//center the titles in expanded panel when scrolling
+//balance the opacity when expanding panels
+//decide between infoWindow approach and onMarkerClick approach
+//audio still behaves werid at the start
+//move Expanded panel to seperate class and View
+//fix Location Manager
+//create the route creation lol
+// add cropping from this lib https://github.com/CanHub/Android-Image-Cropper
 
 }
