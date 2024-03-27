@@ -16,11 +16,22 @@ captures/
 output.json
 
 # IntelliJ
+.idea/caches
+.idea/dictionaries
+.idea/libraries
+.idea/modules
+.idea/compiler.xml
+.idea/gradle.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/modules.xml
+/.idea/assetWizardSettings.xml
 *.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+*.ipr
+*.iws
+out
 
 # Keystore files
 *.jks

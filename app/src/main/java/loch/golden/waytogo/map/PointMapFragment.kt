@@ -209,8 +209,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 .setView(view)
                 .setPositiveButton("OK") { dialog, _ ->
                     val title = editText.text.toString().trim()
-                    Log.d("Warmbier", "In dialog: $title")
-                    routeCreationManager.start(title)
+                    routeCreationManager.startNew(title)
                     inCreationMode = true
                     googleMap.setOnMarkerDragListener(routeCreationManager)
                     clearMap()
@@ -224,11 +223,12 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                 .show()
 
         } else {
-            inCreationMode = false
+            routeCreationManager.clearCreationMarkers()
             googleMap.setOnMarkerDragListener(null)
             populateMap()
             binding.expandedPanel.normal.visibility = View.VISIBLE
             binding.expandedPanel.creation.visibility = View.GONE
+            inCreationMode = false
         }
     }
 
@@ -326,7 +326,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 //audio still behaves werid at the start
 //move Expanded panel to seperate class and View
 //fix Location Manager
-//create the route creation lol
-// add cropping from this lib https://github.com/CanHub/Android-Image-Cropper
+
 
 }
