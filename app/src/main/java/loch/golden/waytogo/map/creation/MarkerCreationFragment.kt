@@ -50,7 +50,7 @@ class MarkerCreationFragment(
         binding.buttonEdit.setOnClickListener {
             mapBinding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
             routeCreationManager.setCurrentMarkerId(marker?.snippet!!)
-            routeCreationManager.hideInfoWindow(marker?.snippet!!)
+            routeCreationManager.hideInfoWindow(marker.snippet!!)
         }
         mapBinding.expandedPanel.creationSeekbar.isEnabled = false
     }
