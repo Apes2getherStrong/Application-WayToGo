@@ -1,21 +1,12 @@
 package loch.golden.waytogo.map
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
-import android.media.MediaRecorder
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.core.view.marginEnd
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -29,22 +20,17 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
-import loch.golden.waytogo.Permissions
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
-import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.components.SeekbarManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
-import java.io.File
-import java.io.IOException
-import java.lang.ref.WeakReference
+import loch.golden.waytogo.map.creation.RouteCreationManager
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
@@ -53,7 +39,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     companion object {
         private const val CAMERA_POSITION_KEY = "camera_position"
         private const val MAP_BUNDLE_KEY = "map_state"
-        private val markerSpec = MarkerSpecification(0, 100)
     }
 
 
@@ -179,7 +164,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                     MarkerOptions()
                         .position(googleMap.projection.visibleRegion.latLngBounds.center)
                         .draggable(true)
-                        .snippet("$markerId")
+                        .snippet(markerId)
                         .title("Point $markerId")
                 )
                 val markerSpec = MarkerSpecification(0, 100)
@@ -323,7 +308,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 //center the titles in expanded panel when scrolling
 //balance the opacity when expanding panels
 //decide between infoWindow approach and onMarkerClick approach
-//audio still behaves werid at the start
+//audio still behaves weird at the start
 //move Expanded panel to seperate class and View
 //fix Location Manager
 

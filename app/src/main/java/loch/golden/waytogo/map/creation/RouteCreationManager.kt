@@ -2,7 +2,6 @@ package loch.golden.waytogo.map.creation
 
 import android.Manifest
 import android.graphics.Color
-import android.media.MediaActionSound
 import android.media.MediaRecorder
 import android.net.Uri
 import android.util.Log
@@ -11,11 +10,12 @@ import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindowManager
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import loch.golden.waytogo.Permissions
-import loch.golden.waytogo.classes.Route
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.PointMapFragment
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
 
@@ -55,18 +55,36 @@ class RouteCreationManager(
 
     private val getContent =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            //TODO save the photo
             //TODO add cropping mechanism from this lib https://github.com/CanHub/Android-Image-Cropper
             uri?.let {
                 binding.expandedPanel.creationAddImage.setImageURI(uri)
+                saveImage(uri)
             }
         }
+
+    private fun saveImage(imageUri: Uri) {
+        try {
+            val inputStream = fragment.requireContext().contentResolver.openInputStream(imageUri)
+            val outputStream = FileOutputStream(getOutputFile(currentMarkerId!!, MediaType.IMAGE))
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            Log.d("Warmbier", "save successful")
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.d("Warmbier", e.toString())
+        }
+    }
 
     fun generateMarkerId() = UUID.randomUUID().toString()
 
 
     init {
-        //TODO make it work if route is already chosen (something with id no folders etc)
+        //TODO Opening the point with id
+        //TODO Fix currentMarker id having !! in saveImage and start Recording
+        //TODO do something with opening the sliding up panel without edit option
         binding.expandedPanel.creationAddImage.setOnClickListener {
             getContent.launch("image/*")
         }
@@ -110,22 +128,18 @@ class RouteCreationManager(
         Log.d("Warmbier", routeId)
         val mainFolder = File(fragment.requireContext().filesDir, CREATION_DIRECTORY)
         if (!mainFolder.exists()) {
-            val created = mainFolder.mkdirs()
+            mainFolder.mkdirs()
         }
         val folder = File(fragment.requireContext().filesDir, "$CREATION_DIRECTORY/${routeId}")
         if (!folder.exists()) {
-            val created = folder.mkdirs()
-            Log.d("Warmbier", "Route folder: $created")
-            val audioCreated = File(
+            File(
                 fragment.requireContext().filesDir,
                 "$CREATION_DIRECTORY/${routeId}/$AUDIO_DIRECTORY"
             ).mkdirs()
-            Log.d("Warmbier", "Audio folder: $audioCreated)")
-            val imageCreated = File(
+            File(
                 fragment.requireContext().filesDir,
                 "$CREATION_DIRECTORY/${routeId}/$IMAGE_DIRECTORY"
             ).mkdirs()
-            Log.d("Warmbier", "Image folder: $imageCreated")
 
         }
 
@@ -145,13 +159,31 @@ class RouteCreationManager(
 
 
     fun removeMarker(marker: Marker?) {
-        //TODO ADD removing audio/image files and confirmation
-        val markerId = marker?.snippet!!
-        creationMarkerMap.remove(markerId)
-        hideInfoWindow(markerId)
-        infoWindowMap.remove(markerId)
-        CreationPrefManager.removeMarker(fragment.requireContext(), routeId, markerId)
-        marker.remove()
+        MaterialAlertDialogBuilder(fragment.requireContext())
+            .setTitle("Delete Marker?")
+            .setMessage(" You can't undo this action")
+            .setPositiveButton("Delete") { dialog, _ ->
+                val markerId = marker?.snippet!!
+                creationMarkerMap.remove(markerId)
+                hideInfoWindow(markerId)
+                infoWindowMap.remove(markerId)
+                CreationPrefManager.removeMarker(fragment.requireContext(), routeId, markerId)
+                deleteFiles(markerId)
+                marker.remove()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }.show()
+    }
+
+    private fun deleteFiles(markerId: String) {
+        val audioFile = getOutputFile(markerId, MediaType.AUDIO)
+        val imageFile = getOutputFile(markerId, MediaType.IMAGE)
+        if (audioFile.exists())
+            audioFile.delete()
+        if (imageFile.exists())
+            imageFile.delete()
     }
 
     fun getInfoWindow(id: String) = infoWindowMap[id]!!
