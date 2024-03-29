@@ -16,6 +16,7 @@ captures/
 output.json
 
 # IntelliJ
+.idea/
 .idea/caches
 .idea/dictionaries
 .idea/libraries
