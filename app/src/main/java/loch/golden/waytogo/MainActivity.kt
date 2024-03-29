@@ -92,5 +92,4 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             super.onBackPressed()
         }
     }
-    //TODO on permission decline make the screen tell u need to enable it
 }

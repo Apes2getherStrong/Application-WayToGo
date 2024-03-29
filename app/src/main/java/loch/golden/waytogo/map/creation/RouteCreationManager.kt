@@ -82,9 +82,9 @@ class RouteCreationManager(
 
 
     init {
-        //TODO Opening the point with id
-        //TODO Fix currentMarker id having !! in saveImage and start Recording
-        //TODO do something with opening the sliding up panel without edit option
+        // TODO Opening the point with id
+        // TODO Fix currentMarker id having !! in saveImage and start Recording
+        // TODO do something with opening the sliding up panel without edit option
         binding.expandedPanel.creationAddImage.setOnClickListener {
             getContent.launch("image/*")
         }
