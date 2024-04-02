@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatCallback
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
@@ -19,35 +20,31 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
     ActivityCompat.OnRequestPermissionsResultCallback {
 
     private lateinit var binding: ActivityMainBinding
-    private val LOCATION_PERMISSION_REQUEST_CODE = 420692
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        getPermission()
+        handlePermissions()
         binding.bottomNav.setOnItemSelectedListener(this)
     }
 
-    private fun getPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Request location permissions
-            ActivityCompat.requestPermissions(
+    private fun handlePermissions() {
+        if (Permissions.isPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION))
+            addMap()
+        else {
+            Permissions.requestPermission(
                 this,
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ),
-                LOCATION_PERMISSION_REQUEST_CODE
+                Permissions.LOCATION_PERMISSION_REQUEST_CODE
             )
-        } else
-            Toast.makeText(this, "elooo", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -55,7 +52,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+        if (requestCode == Permissions.LOCATION_PERMISSION_REQUEST_CODE) {
             // Check if the user granted the location permissions
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted, proceed with map setup
@@ -67,6 +64,9 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             }
         }
     }
+
+
+
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (binding.bottomNav.selectedItemId == item.itemId)
@@ -84,6 +84,13 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         return true
     }
 
+
+    private fun addMap() {
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container_main, PointMapFragment())
+        }
+    }
+
     override fun onBackPressed() {
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_main)
         val backPressHandler = (fragment as? IOnBackPressed)
@@ -92,5 +99,5 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             super.onBackPressed()
         }
     }
-    //TODO on permission decline make the screen tell u need to enable it
+//TODO on permission decline make the screen tell u need to enable it
 }
