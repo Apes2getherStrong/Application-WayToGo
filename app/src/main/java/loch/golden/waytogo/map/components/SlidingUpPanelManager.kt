@@ -53,11 +53,14 @@ class SlidingUpPanelManager(
     }
 
     fun toggleCreation() {
-        binding.expandedPanel.normal.visibility = View.GONE
-        binding.expandedPanel.creation.visibility = View.VISIBLE
-        binding.bottomPanel.normal.visibility = View.GONE
-        binding.bottomPanel.creation.visibility = View.VISIBLE
         inCreationMode = !inCreationMode
+        binding.apply {
+            expandedPanel.normal.visibility = if (inCreationMode) View.GONE else View.VISIBLE
+            expandedPanel.creation.visibility = if (inCreationMode) View.VISIBLE else View.GONE
+            bottomPanel.normal.visibility = if (inCreationMode) View.GONE else View.VISIBLE
+            bottomPanel.creation.visibility = if (inCreationMode) View.VISIBLE else View.GONE
+        }
+
     }
 
     fun openCreationPanel(markerId: String) {
@@ -71,6 +74,7 @@ class SlidingUpPanelManager(
 
     //This was not tested thoroughly
     private fun bottomPanelListener() {
+        //still makes sound tho
         if (inCreationMode)
             return
         else {

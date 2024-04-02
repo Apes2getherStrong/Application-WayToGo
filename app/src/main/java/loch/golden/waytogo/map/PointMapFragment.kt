@@ -202,8 +202,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
             routeCreationManager.clearCreationMarkers()
             googleMap.setOnMarkerDragListener(null)
             populateMap()
-            binding.expandedPanel.normal.visibility = View.VISIBLE
-            binding.expandedPanel.creation.visibility = View.GONE
+            slidingUpPanelManager.toggleCreation()
             inCreationMode = false
         }
     }
