@@ -12,6 +12,7 @@ import androidx.fragment.app.commit
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
 import loch.golden.waytogo.map.PointMapFragment
+import loch.golden.waytogo.routes.PublicRoutesFragment
 import loch.golden.waytogo.routes.RoutesFragment
 
 
