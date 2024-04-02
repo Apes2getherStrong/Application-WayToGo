@@ -29,12 +29,13 @@ import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
 import loch.golden.waytogo.map.components.SeekbarManager
+import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
 
 
-class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
-    PanelSlideListener, OnMarkerClickListener, IOnBackPressed {
+class PointMapFragment : Fragment(), OnMapReadyCallback,
+    OnMarkerClickListener, IOnBackPressed {
 
     companion object {
         private const val CAMERA_POSITION_KEY = "camera_position"
@@ -51,6 +52,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
     private lateinit var mapMenuManager: MapMenuManager
     private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
+    private lateinit var slidingUpPanelManager: SlidingUpPanelManager
     private lateinit var routeCreationManager: RouteCreationManager // TODO do it by lazy or init it later (if possible)
 
     private var inCreationMode = false
@@ -69,7 +71,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         super.onViewCreated(view, savedInstanceState)
         initMapView(savedInstanceState)
         setUpListeners()
-        setUpSlidingUpPanel()
+        slidingUpPanelManager = SlidingUpPanelManager(binding)
 //        locationManager = LocationManager(requireContext(), 600, 5.0f)
 //        locationManager.startLocationTracking()
         mapMenuManager = MapMenuManager(
@@ -91,14 +93,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
         routeCreationManager = RouteCreationManager(binding, infoWindowManager, this)
 
-    }
-
-    private fun setUpSlidingUpPanel() {
-        val slideUpPanel = binding.slideUpPanel
-        slideUpPanel.addPanelSlideListener(this)
-        slideUpPanel.setFadeOnClickListener {
-            slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-        }
     }
 
 
@@ -127,9 +121,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
 
         //googleMap.moveCamera(CameraUpdateFactory.newLatLng(locationManager.getLatLng()!!))
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
-        googleMap.setOnInfoWindowClickListener(this)
         googleMap.setOnMarkerClickListener(this)
-
         populateMap()
     }
 
@@ -198,8 +190,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
                     inCreationMode = true
                     googleMap.setOnMarkerDragListener(routeCreationManager)
                     clearMap()
-                    binding.expandedPanel.normal.visibility = View.GONE
-                    binding.expandedPanel.creation.visibility = View.VISIBLE
+                    slidingUpPanelManager.toggleCreation()
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
@@ -227,36 +218,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnInfoWindowC
         return true
     }
 
-    override fun onInfoWindowClick(marker: Marker) {
-//        marker.hideInfoWindow()
-//        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-    }
-
-    override fun onPanelSlide(panel: View?, slideOffset: Float) {
-        val maxVisibilitySlideOffset = 0.2f
-        binding.bottomPanel.container.alpha =
-            1.0f - (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
-        binding.expandedPanel.container.alpha =
-            (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
-    }
-
-    override fun onPanelStateChanged(
-        panel: View?,
-        previousState: SlidingUpPanelLayout.PanelState?,
-        newState: SlidingUpPanelLayout.PanelState?
-    ) {
-        if (newState == SlidingUpPanelLayout.PanelState.DRAGGING) {
-            binding.bottomPanel.container.visibility = View.VISIBLE
-            binding.expandedPanel.container.visibility = View.VISIBLE
-        }
-
-        if (previousState == SlidingUpPanelLayout.PanelState.DRAGGING) {
-            if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
-                binding.bottomPanel.container.visibility = View.GONE
-            if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
-                binding.expandedPanel.container.visibility = View.GONE
-        }
-    }
 
     override fun onBackPressed(): Boolean {
         return if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
