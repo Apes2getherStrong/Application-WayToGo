@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -9,55 +9,70 @@
     app:layout_constraintTop_toTopOf="parent"
     tools:showIn="@layout/fragment_map">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/image"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginLeft="8dp"
-        android:elevation="4dp"
-        android:src="@drawable/ic_launcher_background"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:text="Title"
-        android:textSize="28sp"
-        app:layout_constraintBottom_toBottomOf="@id/image"
-        app:layout_constraintStart_toEndOf="@id/image"
-        app:layout_constraintTop_toTopOf="@id/image" />
-
-    <ImageButton
-        android:id="@+id/play_button"
-        android:layout_width="46dp"
-        android:layout_height="46dp"
-        android:layout_marginRight="8dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_play_arrow_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!--CUSTOM SEEKBAR-->
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/normal"
         android:layout_width="match_parent"
-        android:layout_height="3dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="match_parent">
 
-        <!-- Background of the progress bar -->
-        <View
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginLeft="8dp"
+            android:elevation="4dp"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="Title"
+            android:textSize="28sp"
+            app:layout_constraintBottom_toBottomOf="@id/image"
+            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintTop_toTopOf="@id/image" />
+
+        <ImageButton
+            android:id="@+id/play_button"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginRight="8dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_play_arrow_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--CUSTOM SEEKBAR-->
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="#8A8A8A" />
+            android:layout_height="3dp"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Colored portion based on the MediaPlayer progress -->
-        <View
-            android:id="@+id/custom_seekbar_progress"
-            android:layout_width="0px"
-            android:layout_height="4dp"
-            android:background="#E60909" />
-    </RelativeLayout>
+            <!-- Background of the progress bar -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:background="#8A8A8A" />
+
+            <!-- Colored portion based on the MediaPlayer progress -->
+            <View
+                android:id="@+id/custom_seekbar_progress"
+                android:layout_width="0px"
+                android:layout_height="4dp"
+                android:background="#E60909" />
+        </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/creation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
