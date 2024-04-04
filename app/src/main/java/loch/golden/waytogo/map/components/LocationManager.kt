@@ -2,8 +2,6 @@ package loch.golden.waytogo.map.components
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
-import android.os.Looper
 import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
@@ -16,58 +14,37 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 
 @SuppressLint("MissingPermission")
-class LocationManager(
-    context: Context,
-    private var timeInterval: Long,
-    private var minimalDistance: Float
-) : LocationCallback() {
-
-    private var request: LocationRequest
-    private var locationClient: FusedLocationProviderClient
-    private var currentLocation: Location? = null
+class LocationManager(context: Context) : LocationCallback() {
+    private val fusedLocationClient: FusedLocationProviderClient
+    private val locationRequest: LocationRequest
+    private var currentLocation: LatLng? = null
 
     init {
-        // getting the location client
-        locationClient = LocationServices.getFusedLocationProviderClient(context)
-        request = createRequest()
-    }
-
-    private fun createRequest(): LocationRequest =
-        // New builder
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, timeInterval).apply {
-            setMinUpdateDistanceMeters(minimalDistance)
-            setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000).apply {
             setWaitForAccurateLocation(true)
+            setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+            setMinUpdateDistanceMeters(0.5f)
         }.build()
-
-    fun changeRequest(timeInterval: Long, minimalDistance: Float) {
-        this.timeInterval = timeInterval
-        this.minimalDistance = minimalDistance
-        createRequest()
-        stopLocationTracking()
-        startLocationTracking()
-    }
-
-    fun getCurrentLocation() = currentLocation
-
-    fun getLatLng() = currentLocation?.let { LatLng(it.latitude, it.longitude) }
-
-    fun startLocationTracking() =
-        locationClient.requestLocationUpdates(request, this, Looper.getMainLooper())
-
-
-    fun stopLocationTracking() {
-        locationClient.flushLocations()
-        locationClient.removeLocationUpdates(this)
     }
 
     override fun onLocationResult(location: LocationResult) {
-        currentLocation = location.lastLocation
-        Log.d("LocationUpdate", getLatLng().toString())
+        currentLocation =
+            LatLng(location.lastLocation!!.latitude, location.lastLocation!!.longitude)
+//        Log.d("Warmbier", "On location result: $currentLocation")
+
     }
 
-    override fun onLocationAvailability(availability: LocationAvailability) {
+    override fun onLocationAvailability(p0: LocationAvailability) {
+        Log.d("Warmbier", "On Location availability")
+    }
 
+    fun startLocationUpdates() {
+        fusedLocationClient.requestLocationUpdates(locationRequest, this, null)
+    }
+
+    fun stopLocationUpdates(){
+        fusedLocationClient.removeLocationUpdates(this)
     }
 
 }

@@ -21,7 +21,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
-import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -36,12 +35,6 @@ import loch.golden.waytogo.map.creation.RouteCreationManager
 
 class PointMapFragment : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener, IOnBackPressed {
-
-    companion object {
-        private const val CAMERA_POSITION_KEY = "camera_position"
-        private const val MAP_BUNDLE_KEY = "map_state"
-    }
-
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
@@ -72,8 +65,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         initMapView(savedInstanceState)
         setUpListeners()
         slidingUpPanelManager = SlidingUpPanelManager(binding)
-//        locationManager = LocationManager(requireContext(), 600, 5.0f)
-//        locationManager.startLocationTracking()
+        locationManager = LocationManager(requireContext())
+        locationManager.startLocationUpdates()
         mapMenuManager = MapMenuManager(
             requireContext(),
             binding.mapMenu.fabMenu,
@@ -108,18 +101,8 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         googleMap = mMap
         infoWindowManager.onMapReady(googleMap)
 
-        //this skips if camera position is null
-        mapViewModel.cameraPosition?.let {
-            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(it))
-        }
 
-        googleMap.setOnCameraMoveListener {
-            mapViewModel.cameraPosition = googleMap.cameraPosition
-        }
         googleMap.isMyLocationEnabled = true
-
-
-        //googleMap.moveCamera(CameraUpdateFactory.newLatLng(locationManager.getLatLng()!!))
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnMarkerClickListener(this)
         populateMap()
@@ -264,12 +247,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         binding.mapView.onSaveInstanceState(outState)
     }
 
-//TODO
-//center the titles in expanded panel when scrolling
-//balance the opacity when expanding panels
-//audio still behaves weird at the start
-//move Expanded panel to seperate class and View
-//fix Location Manager
 
 
 }
