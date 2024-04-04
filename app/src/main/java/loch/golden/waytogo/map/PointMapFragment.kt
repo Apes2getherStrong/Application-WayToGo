@@ -19,11 +19,9 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
-import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.IOnBackPressed
-import loch.golden.waytogo.R
+import loch.golden.waytogo.databinding.DialogRouteTitleBinding
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
@@ -177,15 +175,14 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
 
         if (!inCreationMode) {
             val inflater = LayoutInflater.from(requireContext())
-            val view = inflater.inflate(R.layout.dialog_route_title, null)
+            val dialogBinding = DialogRouteTitleBinding.inflate(inflater)
 
-            val editText = view.findViewById<TextInputEditText>(R.id.dialog_input)
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Enter the route title")
-                .setView(view)
+                .setView(dialogBinding.root)
                 .setPositiveButton("OK") { dialog, _ ->
-                    val title = editText.text.toString().trim()
+                    val title = dialogBinding.editText.text.toString().trim()
                     routeCreationManager.startNew(title)
                     inCreationMode = true
                     googleMap.setOnMarkerDragListener(routeCreationManager)
