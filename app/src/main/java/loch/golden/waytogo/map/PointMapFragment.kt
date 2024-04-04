@@ -267,7 +267,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
 //TODO
 //center the titles in expanded panel when scrolling
 //balance the opacity when expanding panels
-//decide between infoWindow approach and onMarkerClick approach
 //audio still behaves weird at the start
 //move Expanded panel to seperate class and View
 //fix Location Manager

@@ -12,8 +12,6 @@ class MapMenuManager(
     menuButton: FloatingActionButton,
     private val menuItems: List<View>
 ) {
-    //TODO make the animation go from the top not bottom without affecting the space between them in animation layouts
-    //TODO animate the burger to do a little 180 😎
     private val openAnim: Animation by lazy {
         AnimationUtils.loadAnimation(context, R.anim.map_menu_open_anim)
     }
