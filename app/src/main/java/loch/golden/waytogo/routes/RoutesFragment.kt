@@ -5,17 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
-import loch.golden.waytogo.routes.adapter.RoutesViewPagerAdapter
 
-class RoutesFragment : Fragment(), OnTabSelectedListener {
+class RoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentRoutesBinding
-    private lateinit var routesViewPagerAdapter: RoutesViewPagerAdapter
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,23 +23,27 @@ class RoutesFragment : Fragment(), OnTabSelectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        routesViewPagerAdapter = RoutesViewPagerAdapter(this)
-        binding.viewPager.adapter = routesViewPagerAdapter
-        binding.tabLayout.addOnTabSelectedListener(this)
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                binding.tabLayout.getTabAt(position)?.select()
+        binding.viewPager.adapter = RoutesViewPagerAdapter(this)
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            when (position) {
+                0 -> tab.text = "Public Routes"
+                1 -> tab.text = "My Routes"
             }
-        })
+        }.attach()
     }
 
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        binding.viewPager.currentItem = tab!!.position
+    private inner class RoutesViewPagerAdapter(fragment: Fragment) :
+        FragmentStateAdapter(fragment) {
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> PublicRoutesFragment()
+                1 -> MyRoutesFragment()
+                else -> PublicRoutesFragment()
+            }
+        }
+
+        override fun getItemCount(): Int {
+            return 2
+        }
     }
-
-    override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-    override fun onTabReselected(tab: TabLayout.Tab?) {}
-
 }

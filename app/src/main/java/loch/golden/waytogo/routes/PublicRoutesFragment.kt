@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
-import loch.golden.waytogo.databinding.FragmentRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.repository.RouteRepository
