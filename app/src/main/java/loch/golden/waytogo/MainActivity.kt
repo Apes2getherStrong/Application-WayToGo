@@ -126,6 +126,4 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             super.onBackPressed()
         }
     }
-
-
 }
