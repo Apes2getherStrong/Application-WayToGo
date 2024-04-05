@@ -33,7 +33,7 @@ class RecyclerViewRouteAdapter :
     companion object {
         private val ROUTE_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Route>() {
             override fun areItemsTheSame(oldItem: Route, newItem: Route): Boolean {
-                return oldItem.id == newItem.id
+                return oldItem.routeUid == newItem.routeUid
             }
 
             override fun areContentsTheSame(oldItem: Route, newItem: Route): Boolean {
