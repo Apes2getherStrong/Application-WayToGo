@@ -13,6 +13,7 @@ import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
+import loch.golden.waytogo.routes.room.WayToGoDatabase
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
 
         getPermission()
         binding.bottomNav.setOnItemSelectedListener(this)
+
+        //database.getRouteDao()
     }
 
     private fun getPermission() {

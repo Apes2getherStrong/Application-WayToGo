@@ -22,8 +22,4 @@ object Permissions {
             requestCode
         )
     }
-
-
-
-
 }
