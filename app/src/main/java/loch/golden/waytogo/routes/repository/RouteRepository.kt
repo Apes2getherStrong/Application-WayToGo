@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.model.RouteListResponse
-import loch.golden.waytogo.routes.room.RouteDao
+import loch.golden.waytogo.routes.room.dao.RouteDao
 import retrofit2.Response
 
 class RouteRepository(private val routeDao: RouteDao) {
