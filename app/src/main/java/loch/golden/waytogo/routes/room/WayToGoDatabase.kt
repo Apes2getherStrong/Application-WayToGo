@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.room.dao.RouteDao
+import java.util.UUID
 
 @Database(entities = [Route::class], version = 1)
 abstract class WayToGoDatabase : RoomDatabase() {
@@ -27,12 +29,12 @@ abstract class WayToGoDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(routeDao: RouteDao) {
-            routeDao.deleteAllRoutes()
+            routeDao.clearRoutes()
 
             //sprawdzenie czy insert do bazy dziala, sprawdzic w app inspection , database inspector
             val route1 = Route(123,"Test trasy","test")
             routeDao.insertRoute(route1)
-            val route2 = Route(123,"Drugi test trasy","dsadas")
+            val route2 = Route(32,"Drugi test trasy","dsadas")
             routeDao.insertRoute(route2)
         }
 
@@ -52,6 +54,7 @@ abstract class WayToGoDatabase : RoomDatabase() {
                     "way-to-go-database"
                 )
                     .addCallback(WayToGoDatabaseCallback(scope))
+                    .fallbackToDestructiveMigration()
                     .build()
                 DATABASE_INSTANCE = instance
                 instance
