@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
+import loch.golden.waytogo.routes.room.WayToGoDatabase
 import retrofit2.HttpException
 
 class RoutePagingSource(private val repository: RouteRepository) : PagingSource<Int, Route>() {
@@ -16,10 +17,17 @@ class RoutePagingSource(private val repository: RouteRepository) : PagingSource<
             val response = repository.getRoutes(pageNumber, pageSize)
             if (response.isSuccessful) {
                 val routes = response.body()?.content ?: emptyList()
+                val nextKey = if (routes.isEmpty()){
+                    null
+                }else {
+                    // ensure we're not requesting duplicating items beacause initial load size is 3*Pagesize
+                    pageNumber + (pageSize / 20)
+                }
+
                 LoadResult.Page(
                     data = routes,
                     prevKey = if (pageNumber == 1) null else pageNumber - 1,
-                    nextKey = if (routes.isEmpty()) null else pageNumber + 1
+                    nextKey = nextKey
                 )
             } else {
                 LoadResult.Error(Exception("Failed to get routes."))
