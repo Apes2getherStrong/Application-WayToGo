@@ -1,16 +1,18 @@
 package loch.golden.waytogo.routes.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
 import loch.golden.waytogo.routes.model.Route
-import loch.golden.waytogo.routes.viewmodel.RouteViewHolder
 
 class RecyclerViewRouteAdapter :
-    PagingDataAdapter<Route, RouteViewHolder>(ROUTE_DIFF_CALLBACK) {
+    PagingDataAdapter<Route, RecyclerViewRouteAdapter.RouteViewHolder>(ROUTE_DIFF_CALLBACK) {
 
     private var onClickListener: OnClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteViewHolder {
@@ -42,6 +44,22 @@ class RecyclerViewRouteAdapter :
 
         }
     }
+
+    inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val titleTextView: TextView = itemView.findViewById(R.id.title_text_view)
+        private val descriptionTextView: TextView =
+            itemView.findViewById(R.id.description_text_view)
+
+        fun bind(route: Route) {
+            titleTextView.text = route.name
+            descriptionTextView.text = route.description.take(50)
+            //imageView.setImageResource(route.image)
+
+        }
+    }
+
 }
+
+
 
 
