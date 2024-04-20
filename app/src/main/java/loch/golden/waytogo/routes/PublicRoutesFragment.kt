@@ -12,12 +12,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.repository.RouteRepository
+import loch.golden.waytogo.routes.room.WayToGoDatabase
+import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
@@ -29,6 +33,11 @@ class PublicRoutesFragment : Fragment() {
     private lateinit var routeViewModel: RouteViewModel
     private lateinit var searchView: SearchView
     private val viewModel by viewModels<RouteViewModel>()
+    private val appScope = CoroutineScope(SupervisorJob())
+    private val routeDao: RouteDao by lazy {
+        WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -52,7 +61,7 @@ class PublicRoutesFragment : Fragment() {
     }
 
     private fun initViewModel() {
-        val repository = RouteRepository()
+        val repository = RouteRepository(routeDao)
         val routeViewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
         observeRouteResponse()
