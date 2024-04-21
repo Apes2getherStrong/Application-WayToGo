@@ -24,12 +24,14 @@ class RecyclerViewRouteAdapter :
 
     override fun onBindViewHolder(holder: RouteViewHolder, position: Int) {
         val route = getItem(position)
-        route?.let { holder.bind(it) }
-//        holder.itemView.setOnClickListener {
-//            if(onClickListener != null) {
-//                onClickListener!!.onClick()
-//            }
-//        }
+        route?.let { routeItem ->
+            holder.bind(routeItem)
+            holder.itemView.setOnClickListener {
+                if(onClickListener != null) {
+                    onClickListener!!.onItemClick(position,routeItem)
+                }
+            }
+        }
     }
 
     companion object {
@@ -45,7 +47,11 @@ class RecyclerViewRouteAdapter :
         }
     }
 
-    inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun setOnClickListener(onClickListener: OnClickListener) {
+        this.onClickListener = onClickListener
+    }
+
+    inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         private val titleTextView: TextView = itemView.findViewById(R.id.title_text_view)
         private val descriptionTextView: TextView =
             itemView.findViewById(R.id.description_text_view)
@@ -58,8 +64,10 @@ class RecyclerViewRouteAdapter :
         }
     }
 
+    interface OnClickListener {
+        fun onItemClick(position: Int, route: Route)
+    }
+
 }
-
-
 
 
