@@ -64,6 +64,8 @@ dependencies {
 
     //paging
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     testImplementation("androidx.paging:paging-common-ktx:3.2.1")
 
     //junit

@@ -17,7 +17,7 @@ abstract class WayToGoDatabase : RoomDatabase() {
 
     abstract fun getRouteDao() : RouteDao
 
-    private class WayToGoDatabaseCallback (private val scope: CoroutineScope) : RoomDatabase.Callback() {
+    private class WayToGoDatabaseCallback (private val scope: CoroutineScope) : Callback() {
 
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
@@ -47,7 +47,7 @@ abstract class WayToGoDatabase : RoomDatabase() {
         fun getDatabase(context: Context,
                         scope: CoroutineScope) : WayToGoDatabase{
 
-            return DATABASE_INSTANCE ?: kotlin.synchronized(this) {
+            return DATABASE_INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     WayToGoDatabase::class.java,

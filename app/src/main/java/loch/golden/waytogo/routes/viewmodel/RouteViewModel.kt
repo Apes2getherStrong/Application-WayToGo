@@ -1,5 +1,7 @@
 package loch.golden.waytogo.routes.viewmodel
 
+import android.adservices.adid.AdId
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -13,6 +15,7 @@ import kotlinx.coroutines.launch
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
+import retrofit2.Response
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
@@ -21,12 +24,6 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
-    }
-
-    fun fetchAndSaveRoutes() {
-        viewModelScope.launch {
-            routeRepository.fetchAndSaveRoutes(pageNumber = 0, pageSize = 20)
-        }
     }
 
     fun getRoutes(pageNumber: Int, pageSize: Int): Flow<PagingData<Route>> {
@@ -41,6 +38,11 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             .cachedIn(viewModelScope)
     }
 
+    fun getRouteById(routeId: Int,callback: (Route?) -> Unit)  {
+        viewModelScope.launch {
+            routeRepository.getRouteById(routeId)
 
+        }
+    }
 
 }
