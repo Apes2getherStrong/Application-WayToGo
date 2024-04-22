@@ -57,7 +57,7 @@ class RecyclerViewRouteAdapter :
 
         fun bind(route: Route) {
             titleTextView.text = route.name
-            descriptionTextView.text = route.description.take(50)
+            descriptionTextView.text = route.description
             //imageView.setImageResource(route.image)
 
         }

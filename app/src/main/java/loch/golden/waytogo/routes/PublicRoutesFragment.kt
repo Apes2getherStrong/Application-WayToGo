@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,11 +68,16 @@ class PublicRoutesFragment : Fragment() {
 
         recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
             override fun onItemClick(position: Int, route: Route) {
-
+                var id = route.routeUid
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
                 val fr = RouteDetailFragment()
+                fr.arguments = bundle
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container_main, fr)
-                    .commit()
+                    .replace(R.id.fragment_public_dzicz, fr)
+                    .addToBackStack(null)
+                    .commitAllowingStateLoss()
             }
         })
 
