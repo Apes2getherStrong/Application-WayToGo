@@ -1,8 +1,7 @@
 package loch.golden.waytogo.routes.viewmodel
 
-import android.adservices.adid.AdId
-import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -21,6 +20,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
+    val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
 
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
@@ -38,9 +38,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             .cachedIn(viewModelScope)
     }
 
-    fun getRouteById(routeId: Int,callback: (Route?) -> Unit)  {
+    fun getRouteById(routeUid: String)  {
         viewModelScope.launch {
-            routeRepository.getRouteById(routeId)
+            val response = routeRepository.getRouteById(routeUid)
+            myRouteResponse.value = response
 
         }
     }

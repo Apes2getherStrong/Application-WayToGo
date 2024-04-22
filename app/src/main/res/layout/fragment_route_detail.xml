@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/fragment_details"
     tools:context=".routes.RouteDetailFragment">
 
     <LinearLayout
@@ -38,15 +39,13 @@
             android:paddingBottom="8dp"/>
 
 
-        <LinearLayout
-            android:id="@+id/linear_layout_points"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_points"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
             android:padding="16dp"
-            android:layout_marginTop="8dp">
-
-        </LinearLayout>
+             />
 
     </LinearLayout>
 

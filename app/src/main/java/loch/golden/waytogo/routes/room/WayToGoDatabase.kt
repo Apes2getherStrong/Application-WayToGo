@@ -32,10 +32,10 @@ abstract class WayToGoDatabase : RoomDatabase() {
             routeDao.clearRoutes()
 
             //sprawdzenie czy insert do bazy dziala, sprawdzic w app inspection , database inspector
-            val route1 = Route(123,"Test trasy","test")
-            routeDao.insertRoute(route1)
-            val route2 = Route(32,"Drugi test trasy","dsadas")
-            routeDao.insertRoute(route2)
+//            val route1 = Route(123,"Test trasy","test")
+//            routeDao.insertRoute(route1)
+//            val route2 = Route(32,"Drugi test trasy","dsadas")
+//            routeDao.insertRoute(route2)
         }
 
     }

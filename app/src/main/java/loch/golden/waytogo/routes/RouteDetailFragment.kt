@@ -1,18 +1,37 @@
 package loch.golden.waytogo.routes
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
 import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.repository.RouteRepository
+import loch.golden.waytogo.routes.room.WayToGoDatabase
+import loch.golden.waytogo.routes.room.dao.RouteDao
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
+import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 
 class RouteDetailFragment : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
-
+    private lateinit var routeViewModel: RouteViewModel
+    private lateinit var titleTextView: TextView
+    private lateinit var descriptionTextView: TextView
+    private val appScope = CoroutineScope(SupervisorJob())
+    private val routeDao: RouteDao by lazy {
+        WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -21,5 +40,30 @@ class RouteDetailFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        titleTextView = view.findViewById(R.id.route_title)
+        descriptionTextView = view.findViewById(R.id.route_description)
+        val routeId = arguments?.getString("id") ?: ""
+        val repository = RouteRepository(routeDao)
+        val viemModelFactory = RouteViewModelFactory(repository)
+        routeViewModel = ViewModelProvider(this,viemModelFactory)[RouteViewModel::class.java]
+        routeViewModel.getRouteById(routeId)
+        routeViewModel.myRouteResponse.observe(viewLifecycleOwner, Observer { response ->
+            if(response.isSuccessful){
+                titleTextView.text = response.body()?.name;
+                descriptionTextView.text = response.body()?.description;
+                Log.d("Response id", response.body()!!.routeUid)
+                Log.d("Response title", response.body()!!.name)
+
+            }else {
+                Log.d("Response", response.errorBody().toString())
+
+            }
+
+        })
+
+    }
 
 }
