@@ -5,6 +5,6 @@ data class MapLocation(
     val name: String,
     val description: String,
     val coordinates: Coordinates,
-    val createdDate: Any,
-    val updateDate: Any
+    val createdDate: Any?,
+    val updateDate: Any?
 )

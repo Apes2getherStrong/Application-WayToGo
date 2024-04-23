@@ -37,7 +37,6 @@ class PublicRoutesFragment : Fragment() {
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var routeViewModel: RouteViewModel
-    private lateinit var searchView: SearchView
     private val viewModel by viewModels<RouteViewModel>()
     private val appScope = CoroutineScope(SupervisorJob())
     private val routeDao: RouteDao by lazy {
@@ -75,7 +74,7 @@ class PublicRoutesFragment : Fragment() {
                 val fr = RouteDetailFragment()
                 fr.arguments = bundle
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_public_dzicz, fr)
+                    .replace(R.id.fragment_container_main, fr)
                     .addToBackStack(null)
                     .commitAllowingStateLoss()
             }
@@ -103,9 +102,7 @@ class PublicRoutesFragment : Fragment() {
 
     private fun initSearchView() {
 
-        searchView = binding.searchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
