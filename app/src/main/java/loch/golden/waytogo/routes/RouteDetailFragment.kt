@@ -10,10 +10,13 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
+import loch.golden.waytogo.routes.adapter.MapLocationAdapter
+import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.routes.room.WayToGoDatabase
@@ -26,8 +29,7 @@ class RouteDetailFragment : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
     private lateinit var routeViewModel: RouteViewModel
-    private lateinit var titleTextView: TextView
-    private lateinit var descriptionTextView: TextView
+    private lateinit var mapLocationRecyclerView: MapLocationAdapter
     private val appScope = CoroutineScope(SupervisorJob())
     private val routeDao: RouteDao by lazy {
         WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
@@ -42,9 +44,7 @@ class RouteDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        titleTextView = view.findViewById(R.id.route_title)
-        descriptionTextView = view.findViewById(R.id.route_description)
+        //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
         val routeId = arguments?.getString("id") ?: ""
         val repository = RouteRepository(routeDao)
         val viemModelFactory = RouteViewModelFactory(repository)
@@ -52,8 +52,8 @@ class RouteDetailFragment : Fragment() {
         routeViewModel.getRouteById(routeId)
         routeViewModel.myRouteResponse.observe(viewLifecycleOwner, Observer { response ->
             if(response.isSuccessful){
-                titleTextView.text = response.body()?.name;
-                descriptionTextView.text = response.body()?.description;
+                binding.routeTitle.text = response.body()?.name;
+                binding.routeDescription.text = response.body()?.description;
                 Log.d("Response id", response.body()!!.routeUid)
                 Log.d("Response title", response.body()!!.name)
 
@@ -64,6 +64,22 @@ class RouteDetailFragment : Fragment() {
 
         })
 
+        routeViewModel.getMapLocationsByRouteId(routeId)
+
+        routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner, Observer { response ->
+            if(response.isSuccessful){
+
+                val mapLocationAdapter = MapLocationAdapter(response.body()?.content ?: emptyList())
+
+                binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
+
+                binding.recyclerViewPoints.adapter = mapLocationAdapter
+            } else {
+                Log.d("Map Locations Response", response.errorBody().toString())
+            }
+        })
+
     }
+
 
 }

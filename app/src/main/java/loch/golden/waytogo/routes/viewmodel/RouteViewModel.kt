@@ -11,6 +11,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.routes.model.MapLocation
+import loch.golden.waytogo.routes.model.MapLocationListResponse
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
@@ -21,7 +23,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
-
+    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
     }
@@ -43,6 +45,13 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             val response = routeRepository.getRouteById(routeUid)
             myRouteResponse.value = response
 
+        }
+    }
+
+    fun getMapLocationsByRouteId(routeUid: String) {
+        viewModelScope.launch {
+            val response = routeRepository.getMapLocationsByRouteId(routeUid)
+            myMapLocationsResponse.value = response
         }
     }
 
