@@ -74,7 +74,7 @@ class PublicRoutesFragment : Fragment() {
                 val fr = RouteDetailFragment()
                 fr.arguments = bundle
                 parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container_main, fr)
+                    .replace(R.id.frame_content, fr)
                     .addToBackStack(null)
                     .commitAllowingStateLoss()
             }
