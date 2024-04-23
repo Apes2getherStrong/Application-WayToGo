@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
                         startActivity(intent)
 
                     }
-                    setOnDismissListener() {
+                    setOnDismissListener {
                         Log.d("Warmbier", "Im being dismissed :(")
                     }
                 }.create()

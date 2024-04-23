@@ -10,6 +10,4 @@ data class RoutePoint(
     val audioPath: String,
     val photoPath: String
 
-) {
-
-}
+)

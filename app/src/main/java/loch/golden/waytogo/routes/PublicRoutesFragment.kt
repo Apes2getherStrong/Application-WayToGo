@@ -1,24 +1,31 @@
 package loch.golden.waytogo.routes
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
+import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.room.dao.RouteDao
@@ -31,7 +38,6 @@ class PublicRoutesFragment : Fragment() {
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
     private val mapViewModel by activityViewModels<MapViewModel>()
     private lateinit var routeViewModel: RouteViewModel
-    private lateinit var searchView: SearchView
     private val viewModel by viewModels<RouteViewModel>()
     private val appScope = CoroutineScope(SupervisorJob())
     private val routeDao: RouteDao by lazy {
@@ -50,6 +56,7 @@ class PublicRoutesFragment : Fragment() {
         initSearchView()
         initRecyclerView()
         initViewModel()
+
         //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
     }
@@ -58,6 +65,31 @@ class PublicRoutesFragment : Fragment() {
         recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
+
+        recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
+            override fun onItemClick(position: Int, route: Route) {
+                val id = route.routeUid
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
+                val fr = RouteDetailFragment()
+                fr.arguments = bundle
+                val parentFragment = parentFragment as RoutesFragment
+                val transaction = parentFragment.childFragmentManager.beginTransaction()
+
+                val previousFragment = parentFragment.childFragmentManager.findFragmentById(R.id.fragment_public_routes)
+                if (previousFragment != null) {
+                    transaction.remove(previousFragment)
+                }
+
+
+                transaction.replace(R.id.fragment_public_routes,fr)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+        })
+
     }
 
     private fun initViewModel() {
@@ -71,16 +103,16 @@ class PublicRoutesFragment : Fragment() {
 
         lifecycleScope.launch {
             viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+
                 recyclerViewRouteAdapter.submitData(pagingData)
+
             }
         }
     }
 
     private fun initSearchView() {
 
-        searchView = binding.searchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
@@ -104,5 +136,6 @@ class PublicRoutesFragment : Fragment() {
             }
         }
     }
+
 }
 
