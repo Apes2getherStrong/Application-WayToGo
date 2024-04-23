@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -67,16 +68,25 @@ class PublicRoutesFragment : Fragment() {
 
         recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
             override fun onItemClick(position: Int, route: Route) {
-                var id = route.routeUid
+                val id = route.routeUid
                 val bundle = Bundle().apply {
                     putString("id", id)
                 }
                 val fr = RouteDetailFragment()
                 fr.arguments = bundle
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.frame_content, fr)
-                    .addToBackStack(null)
-                    .commitAllowingStateLoss()
+                val parentFragment = parentFragment as RoutesFragment
+                val transaction = parentFragment.childFragmentManager.beginTransaction()
+
+                val previousFragment = parentFragment.childFragmentManager.findFragmentById(R.id.fragment_public_routes)
+                if (previousFragment != null) {
+                    transaction.remove(previousFragment)
+                }
+
+
+                transaction.replace(R.id.fragment_public_routes,fr)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
             }
         })
 
