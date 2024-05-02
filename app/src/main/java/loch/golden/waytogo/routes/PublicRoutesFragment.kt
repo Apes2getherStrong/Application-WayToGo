@@ -5,23 +5,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
-import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
@@ -32,7 +27,7 @@ import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
-class PublicRoutesFragment : Fragment() {
+class PublicRoutesFragment() : Fragment() {
 
     private lateinit var binding: FragmentPublicRoutesBinding
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
@@ -44,10 +39,12 @@ class PublicRoutesFragment : Fragment() {
         WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
     }
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentPublicRoutesBinding.inflate(inflater, container, false)
+        Log.d("Warmbier",container?.id.toString())
         return binding.root
     }
 
@@ -61,6 +58,8 @@ class PublicRoutesFragment : Fragment() {
 
     }
 
+
+
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
@@ -73,20 +72,8 @@ class PublicRoutesFragment : Fragment() {
                     putString("id", id)
                 }
                 val fr = RouteDetailFragment()
-                fr.arguments = bundle
-                val parentFragment = parentFragment as RoutesFragment
-                val transaction = parentFragment.childFragmentManager.beginTransaction()
-
-                val previousFragment = parentFragment.childFragmentManager.findFragmentById(R.id.fragment_public_routes)
-                if (previousFragment != null) {
-                    transaction.remove(previousFragment)
-                }
-
-
-                transaction.replace(R.id.fragment_public_routes,fr)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                fr.arguments = bundle // Set the arguments bundle to the fragment
+                (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
             }
         })
 
@@ -136,6 +123,9 @@ class PublicRoutesFragment : Fragment() {
             }
         }
     }
+
+
+
 
 }
 
