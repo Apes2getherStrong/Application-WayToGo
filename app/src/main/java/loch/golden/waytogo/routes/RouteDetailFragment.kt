@@ -6,18 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.viewModels
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
-import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
-import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.room.dao.RouteDao
@@ -42,9 +38,20 @@ class RouteDetailFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
+        // dzieki gogi za notatke
+
+        //handle back press
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                changeBackFragment()
+            }
+        })
+
+
         val routeId = arguments?.getString("id") ?: ""
         val repository = RouteRepository(routeDao)
         val viemModelFactory = RouteViewModelFactory(repository)
@@ -79,7 +86,17 @@ class RouteDetailFragment : Fragment() {
             }
         })
 
+        binding.backButton.setOnClickListener{
+            changeBackFragment()
+        }
+
     }
+
+
+    private fun changeBackFragment(){
+        (parentFragment as? RoutesFragment)?.replaceFragment(0,PublicRoutesFragment())
+    }
+
 
 
 }

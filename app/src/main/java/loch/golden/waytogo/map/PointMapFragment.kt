@@ -7,12 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
 import com.appolica.interactiveinfowindow.InfoWindowManager
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -20,7 +20,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
-import loch.golden.waytogo.IOnBackPressed
 import loch.golden.waytogo.databinding.DialogRouteTitleBinding
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
@@ -33,7 +32,7 @@ import loch.golden.waytogo.map.creation.RouteCreationManager
 
 
 class PointMapFragment : Fragment(), OnMapReadyCallback,
-    OnMarkerClickListener, IOnBackPressed {
+    OnMarkerClickListener {
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel by activityViewModels<MapViewModel>()
@@ -63,6 +62,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         super.onViewCreated(view, savedInstanceState)
         initMapView(savedInstanceState)
         setUpListeners()
+        handleBackPress()
         slidingUpPanelManager = SlidingUpPanelManager(binding)
         locationManager = LocationManager(requireContext())
         locationManager.startLocationUpdates()
@@ -198,12 +198,17 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         return true
     }
 
-
-    override fun onBackPressed(): Boolean {
-        return if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-            true
-        } else false
+    private fun handleBackPress() {
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+                }else{
+                    isEnabled = false
+                    activity?.onBackPressed()
+                }
+            }
+        })
     }
 
     //Forwarding map functions
