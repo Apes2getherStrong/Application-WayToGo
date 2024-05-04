@@ -55,4 +55,13 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
+    fun postRoute(route : Route) {
+        viewModelScope.launch {
+            routeRepository.postRoute(route)
+
+        }
+    }
+
 }
+
+//TODO przerobic na flow a nie livadata

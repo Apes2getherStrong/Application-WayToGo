@@ -31,5 +31,9 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun getMapLocationsByRouteId(routeId: String): Response<MapLocationListResponse> {
         return RetrofitInstance.apiService.getMapLocationsByRouteId(routeId)
     }
+
+    suspend fun postRoute(route: Route): Response<Route> {
+        return RetrofitInstance.apiService.postRoute(route);
+    }
 }
 
