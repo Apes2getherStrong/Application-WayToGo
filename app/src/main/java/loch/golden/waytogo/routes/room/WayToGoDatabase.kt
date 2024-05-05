@@ -4,15 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.room.dao.RouteDao
-import java.util.UUID
 
-@Database(entities = [Route::class], version = 1)
+@Database(entities = [Route::class], version = 1, exportSchema = false)
 abstract class WayToGoDatabase : RoomDatabase() {
 
     abstract fun getRouteDao() : RouteDao

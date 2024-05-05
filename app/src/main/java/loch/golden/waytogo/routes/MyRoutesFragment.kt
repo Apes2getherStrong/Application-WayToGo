@@ -8,25 +8,34 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
-import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
-import loch.golden.waytogo.map.creation.CreationPrefManager
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.repository.RouteRepository
+import loch.golden.waytogo.routes.room.WayToGoDatabase
+import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
+import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.io.File
 
 class MyRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentMyRoutesBinding
-    private lateinit var routeViewModel: RouteViewModel
+    private val routeViewModel: RouteViewModel by viewModels {
+        RouteViewModelFactory(routeRepository)
+    }
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
-
+    private val appScope = CoroutineScope(SupervisorJob())
+    private val database by lazy { WayToGoDatabase.getDatabase(this,appScope)}
+    private val routeRepository by lazy { RouteRepository(database.getRouteDao())}
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

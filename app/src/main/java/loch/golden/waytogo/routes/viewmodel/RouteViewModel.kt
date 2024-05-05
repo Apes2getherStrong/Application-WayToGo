@@ -22,10 +22,15 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
+
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
     val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
+    }
+
+    fun updateRoute(route: Route) = viewModelScope.launch {
+        routeRepository.updateRoute(route)
     }
 
     fun getRoutes(pageNumber: Int, pageSize: Int): Flow<PagingData<Route>> {

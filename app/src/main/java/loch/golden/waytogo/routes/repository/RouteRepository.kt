@@ -20,6 +20,11 @@ class RouteRepository(private val routeDao: RouteDao) {
         routeDao.insertRoute(route)
     }
 
+    @WorkerThread
+    suspend fun updateRoute(route: Route) {
+        routeDao.insertRoute(route)
+    }
+
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {
         return RetrofitInstance.apiService.getRoutes(pageNumber, pageSize)
     }
