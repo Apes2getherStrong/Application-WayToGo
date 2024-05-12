@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
+import loch.golden.waytogo.routes.adapter.SimpleMyRoutesAdapter
 import loch.golden.waytogo.routes.model.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.routes.room.WayToGoDatabase
@@ -30,12 +31,11 @@ class MyRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentMyRoutesBinding
     private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory(routeRepository)
+        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
-    private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
-    private val appScope = CoroutineScope(SupervisorJob())
-    private val database by lazy { WayToGoDatabase.getDatabase(this,appScope)}
-    private val routeRepository by lazy { RouteRepository(database.getRouteDao())}
+    private lateinit var recyclerViewRouteAdapter: SimpleMyRoutesAdapter
+    private var allRoutes: List<Route> = emptyList()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -53,21 +53,27 @@ class MyRoutesFragment : Fragment() {
         initRecyclerView()
     }
     private fun initRecyclerView() {
-        recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
-        binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
-        binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
+        recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
+        binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter
+        binding.recyclerViewMyRoutes.layoutManager = LinearLayoutManager(requireContext())
 
-        recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
-            override fun onItemClick(position: Int, route: Route) {
-                val id = route.routeUid
-                val bundle = Bundle().apply {
-                    putString("id", id)
-                }
-                val fr = RouteDetailFragment()
-                fr.arguments = bundle // Set the arguments bundle to the fragment
-                (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
-            }
-        })
+
+        routeViewModel.allRoutes.observe(viewLifecycleOwner) { routes ->
+            allRoutes = routes
+            recyclerViewRouteAdapter.setRoutes(routes)
+        }
+
+//        recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
+//            override fun onItemClick(position: Int, route: Route) {
+//                val id = route.routeUid
+//                val bundle = Bundle().apply {
+//                    putString("id", id)
+//                }
+//                val fr = RouteDetailFragment()
+//                fr.arguments = bundle // Set the arguments bundle to the fragment
+//                (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
+//            }
+//        })
 
     }
 
@@ -86,14 +92,10 @@ class MyRoutesFragment : Fragment() {
     }
     private fun search(query: String?) {
         query?.let { searchedQuery ->
-            lifecycleScope.launch {
-                routeViewModel.getRoutes(0, 20).collectLatest { pagingData ->
-                    val filteredRoutes = pagingData.filter { route ->
-                        route.name.contains(searchedQuery, ignoreCase = true)
-                    }
-                    recyclerViewRouteAdapter.submitData(filteredRoutes)
-                }
+            val filteredRoutes = allRoutes.filter { route ->
+                route.name.contains(searchedQuery,ignoreCase = true )
             }
+            recyclerViewRouteAdapter.setRoutes(filteredRoutes)
         }
     }
 

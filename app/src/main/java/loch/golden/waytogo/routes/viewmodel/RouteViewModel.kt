@@ -21,10 +21,10 @@ import retrofit2.Response
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
-    val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
-
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
     val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
+    val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
+
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
     }

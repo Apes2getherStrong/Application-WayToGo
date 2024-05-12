@@ -54,8 +54,8 @@ class RouteDetailFragment : Fragment() {
 
         val routeId = arguments?.getString("id") ?: ""
         val repository = RouteRepository(routeDao)
-        val viemModelFactory = RouteViewModelFactory(repository)
-        routeViewModel = ViewModelProvider(this,viemModelFactory)[RouteViewModel::class.java]
+        val viewModelFactory = RouteViewModelFactory(repository)
+        routeViewModel = ViewModelProvider(this,viewModelFactory)[RouteViewModel::class.java]
         routeViewModel.getRouteById(routeId)
         routeViewModel.myRouteResponse.observe(viewLifecycleOwner, Observer { response ->
             if(response.isSuccessful){
