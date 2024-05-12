@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
 import com.appolica.interactiveinfowindow.InfoWindowManager
@@ -20,28 +21,29 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import loch.golden.waytogo.classes.MapPoint
+import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.DialogRouteTitleBinding
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
-import loch.golden.waytogo.map.components.SeekbarManager
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
 
 
-class PointMapFragment : Fragment(), OnMapReadyCallback,
+class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener {
 
     //viewmodel tied to parent activity - MainActivity
-    private val mapViewModel by activityViewModels<MapViewModel>()
+    private lateinit var mapViewModel: MapViewModel
     private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
 
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
-    private lateinit var seekbarManager: SeekbarManager
+    //private lateinit var seekbarManager: SeekbarManager
     private lateinit var infoWindowManager: InfoWindowManager
     private lateinit var slidingUpPanelManager: SlidingUpPanelManager
     private lateinit var routeCreationManager: RouteCreationManager // TODO do it by lazy or init it later (if possible)
@@ -60,9 +62,10 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mapViewModel = ViewModelProvider(requireActivity()).get(loch.golden.waytogo.map.MapViewModel::class.java)
         initMapView(savedInstanceState)
         setUpListeners()
-        handleBackPress()
+
         slidingUpPanelManager = SlidingUpPanelManager(binding)
         locationManager = LocationManager(requireContext())
         locationManager.startLocationUpdates()
@@ -71,13 +74,13 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
             binding.mapMenu.fabMenu,
             arrayListOf(binding.mapMenu.addRouteFab, binding.mapMenu.stylesFab)
         )
-        seekbarManager = SeekbarManager(
-            requireContext(),
-            mapViewModel,
-            binding.expandedPanel.seekbar,
-            binding.bottomPanel.customSeekbarProgress,
-            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
-        )
+//        seekbarManager = SeekbarManager(
+//            requireContext(),
+//            mapViewModel,
+//            binding.expandedPanel.seekbar,
+//            binding.bottomPanel.customSeekbarProgress,
+//            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
+//        )
 
         infoWindowManager = InfoWindowManager(childFragmentManager)
         infoWindowManager.setHideOnFling(true)
@@ -104,15 +107,18 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         googleMap.isMyLocationEnabled = true
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnMarkerClickListener(this)
-        populateMap()
+        mapViewModel.route?.let{
+            populateMap(it.pointList)
+        }
     }
 
-    private fun populateMap() {
-        for ((index, latlng) in mapViewModel.markerList.withIndex()) {
+    private fun populateMap(mapPoints : Map<String, MapPoint>) {
+        for ((id,mapPoint) in mapPoints) {
             val marker = googleMap.addMarker(
                 MarkerOptions()
-                    .position(latlng)
-                    .title("place $index")
+                    .position(mapPoint.position)
+                    .title(mapPoint.name)
+                    .snippet(mapPoint.id)
             )
             markerList.add(marker)
         }
@@ -149,7 +155,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
                 )
                 routeCreationManager.addMarker(
                     marker, infoWindow
-
                 )
             }
         }
@@ -182,7 +187,6 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         } else {
             routeCreationManager.clearCreationMarkers()
             googleMap.setOnMarkerDragListener(null)
-            populateMap()
             slidingUpPanelManager.toggleCreation()
             inCreationMode = false
         }
@@ -193,7 +197,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         if (inCreationMode) {
             infoWindowManager.toggle(routeCreationManager.getInfoWindow(marker.snippet!!))
         } else {
-            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            slidingUpPanelManager.openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
         }
         return true
     }
@@ -234,7 +238,7 @@ class PointMapFragment : Fragment(), OnMapReadyCallback,
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
-        seekbarManager.removeCallback()
+        //seekbarManager.removeCallback()
     }
 
     override fun onDestroy() {
