@@ -1,9 +1,8 @@
 package loch.golden.waytogo.routes.api
 
-import loch.golden.waytogo.routes.model.MapLocation
-import loch.golden.waytogo.routes.model.MapLocationListResponse
-import loch.golden.waytogo.routes.model.Route
-import loch.golden.waytogo.routes.model.RouteListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.route.Route
+import loch.golden.waytogo.routes.model.route.RouteListResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET

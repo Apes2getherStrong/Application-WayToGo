@@ -11,9 +11,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import loch.golden.waytogo.routes.model.MapLocation
-import loch.golden.waytogo.routes.model.MapLocationListResponse
-import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
-import loch.golden.waytogo.routes.model.MapLocation
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 
 class MapLocationAdapter(private val mapLocations: List<MapLocation>) :
 RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {

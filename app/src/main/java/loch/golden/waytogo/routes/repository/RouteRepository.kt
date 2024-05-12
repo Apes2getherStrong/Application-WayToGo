@@ -3,10 +3,10 @@ package loch.golden.waytogo.routes.repository
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.model.MapLocation
-import loch.golden.waytogo.routes.model.MapLocationListResponse
-import loch.golden.waytogo.routes.model.Route
-import loch.golden.waytogo.routes.model.RouteListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.route.Route
+import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import retrofit2.Response
 

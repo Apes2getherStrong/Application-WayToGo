@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
-import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.model.route.Route
 
 class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Adapter<SimpleMyRoutesAdapter.SimpleViewHolder>() {
 
