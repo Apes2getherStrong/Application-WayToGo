@@ -4,6 +4,6 @@ data class MapRoute(
     val id: String,
     val name: String,
     val description: String,
-    val pointList: MutableList<MapPoint>
+    val pointList: MutableMap<String, MapPoint>
 
 )

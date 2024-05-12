@@ -112,8 +112,8 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         }
     }
 
-    private fun populateMap(mapPoints : List<MapPoint>) {
-        for (mapPoint in mapPoints) {
+    private fun populateMap(mapPoints : Map<String, MapPoint>) {
+        for ((id,mapPoint) in mapPoints) {
             val marker = googleMap.addMarker(
                 MarkerOptions()
                     .position(mapPoint.position)
@@ -155,7 +155,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                 )
                 routeCreationManager.addMarker(
                     marker, infoWindow
-
                 )
             }
         }
@@ -198,7 +197,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         if (inCreationMode) {
             infoWindowManager.toggle(routeCreationManager.getInfoWindow(marker.snippet!!))
         } else {
-            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            slidingUpPanelManager.openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
         }
         return true
     }

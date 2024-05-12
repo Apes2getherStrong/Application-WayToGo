@@ -83,7 +83,7 @@ class RouteDetailFragment : Fragment() {
                     response.body()!!.routeUid,
                     response.body()!!.name,
                     response.body()!!.description,
-                    mutableListOf()
+                    mutableMapOf()
                 )
                 binding.routeTitle.text = response.body()?.name;
                 binding.routeDescription.text = response.body()?.description;
@@ -106,7 +106,7 @@ class RouteDetailFragment : Fragment() {
                 response.body()?.content.let {
                     Log.d("Warmbier", it.toString())
                     for (mapLocation in it!!) {
-                        route.pointList.add((MapPoint(mapLocation)))
+                        route.pointList[mapLocation.id] = (MapPoint(mapLocation))
                     }
                 }
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
