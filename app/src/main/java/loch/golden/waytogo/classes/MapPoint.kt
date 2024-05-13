@@ -1,7 +1,7 @@
 package loch.golden.waytogo.classes
 
 import com.google.android.gms.maps.model.LatLng
-import loch.golden.waytogo.routes.model.MapLocation
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 
 data class MapPoint(
     val id: String,
@@ -18,8 +18,8 @@ data class MapPoint(
                 mapLocation.name,
                 mapLocation.description,
                 LatLng(
-                    mapLocation.coordinates.coordinates[0],
-                    mapLocation.coordinates.coordinates[1]
+                    mapLocation.latitude,
+                    mapLocation.longitude
                 ),
                 null,
                 null
