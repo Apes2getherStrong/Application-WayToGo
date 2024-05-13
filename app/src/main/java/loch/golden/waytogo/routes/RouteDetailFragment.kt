@@ -28,7 +28,7 @@ import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 
-class RouteDetailFragment : Fragment() {
+class RouteDetailFragment(private val origin: String) : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
     private lateinit var routeViewModel: RouteViewModel
@@ -59,8 +59,6 @@ class RouteDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
-        // dzieki gogi za notatke
 
         //handle back press
         activity?.onBackPressedDispatcher?.addCallback(
@@ -71,53 +69,68 @@ class RouteDetailFragment : Fragment() {
                 }
             })
 
-
-        val routeId = arguments?.getString("id") ?: "" //TODO add error message
+        //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
+        // dzieki gogi za notatke
         val repository = RouteRepository(routeDao)
         val viewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, viewModelFactory)[RouteViewModel::class.java]
-        routeViewModel.getRouteById(routeId)
-        routeViewModel.myRouteResponse.observe(viewLifecycleOwner, Observer { response ->
-            if (response.isSuccessful) {
-                Log.d("Warmbier", response.body().toString())
-                route = MapRoute(
-                    response.body()!!.routeUid,
-                    response.body()!!.name,
-                    response.body()!!.description,
-                    mutableMapOf()
-                )
-                binding.routeTitle.text = response.body()?.name;
-                binding.routeDescription.text = response.body()?.description;
-                Log.d("Response id", response.body()!!.routeUid)
-                Log.d("Response title", response.body()!!.name)
-
-            } else {
-                Log.d("Response", response.errorBody().toString())
-
-            }
-
-        })
-
-        routeViewModel.getMapLocationsByRouteId(routeId)
-
-        routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner, Observer { response ->
-            if (response.isSuccessful) {
-                Log.d("Warmbier", response.body().toString())
-                val mapLocationAdapter = MapLocationAdapter(response.body()?.content ?: emptyList())
-                response.body()?.content.let {
-                    Log.d("Warmbier", it.toString())
-                    for (mapLocation in it!!) {
-                        route.pointList[mapLocation.id] = (MapPoint(mapLocation))
-                    }
+        val routeId = arguments?.getString("id") ?: "" //TODO add error message
+        if (origin == "myRoutes") {
+            routeViewModel.getRouteFromDbById(routeId)
+            routeViewModel.routeWithLocations.observe(viewLifecycleOwner) { routeWithLocations ->
+                if (routeWithLocations.isNotEmpty()) {
+                    val route = routeWithLocations[0].route
+                    binding.routeTitle.text = route.name
+                    binding.routeDescription.text = route.description
+                } else {
+                    Toast.makeText(requireContext(), "Route not found", Toast.LENGTH_SHORT).show()
                 }
-                binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
-
-                binding.recyclerViewPoints.adapter = mapLocationAdapter
-            } else {
-                Log.d("Map Locations Response", response.errorBody().toString())
             }
-        })
+        }else if (origin == "publicRoutes"){
 
+            routeViewModel.getRouteById(routeId)
+            routeViewModel.myRouteResponse.observe(viewLifecycleOwner, Observer { response ->
+                if (response.isSuccessful) {
+                    Log.d("Warmbier", response.body().toString())
+                    route = MapRoute(
+                        response.body()!!.routeUid,
+                        response.body()!!.name,
+                        response.body()!!.description,
+                        mutableMapOf()
+                    )
+                    binding.routeTitle.text = response.body()?.name;
+                    binding.routeDescription.text = response.body()?.description;
+                    Log.d("Response id", response.body()!!.routeUid)
+                    Log.d("Response title", response.body()!!.name)
+
+                } else {
+                    Log.d("Response", response.errorBody().toString())
+
+                }
+
+
+            })
+
+            routeViewModel.getMapLocationsByRouteId(routeId)
+            routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner, Observer { response ->
+                if (response.isSuccessful) {
+                    Log.d("Warmbier", response.body().toString())
+                    val mapLocationAdapter =
+                        MapLocationAdapter(response.body()?.content ?: emptyList())
+                    response.body()?.content.let {
+                        Log.d("Warmbier", it.toString())
+                        for (mapLocation in it!!) {
+                            route.pointList[mapLocation.id] = (MapPoint(mapLocation))
+                        }
+                    }
+                    binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
+
+                    binding.recyclerViewPoints.adapter = mapLocationAdapter
+                } else {
+                    Log.d("Map Locations Response", response.errorBody().toString())
+                }
+            })
+        }
         binding.backButton.setOnClickListener {
             changeBackFragment()
         }
@@ -125,17 +138,21 @@ class RouteDetailFragment : Fragment() {
         binding.chooseRoute.setOnClickListener {
             chooseRoute()
         }
-
     }
 
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
+        Log.d("Warmbier", route.toString())
         mapViewModel.route = route
         navigateToMapListener?.navigateToMap()
     }
 
     private fun changeBackFragment() {
-        (parentFragment as? RoutesFragment)?.replaceFragment(0, PublicRoutesFragment())
+        if (origin == "myRoutes")
+            (parentFragment as? RoutesFragment)?.replaceFragment(1, MyRoutesFragment())
+        else if (origin == "publicRoutes")
+            (parentFragment as? RoutesFragment)?.replaceFragment(0, PublicRoutesFragment())
+
     }
 
 

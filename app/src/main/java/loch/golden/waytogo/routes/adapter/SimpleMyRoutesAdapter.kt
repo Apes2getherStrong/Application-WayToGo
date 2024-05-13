@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
 import loch.golden.waytogo.routes.model.route.Route
 
-class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Adapter<SimpleMyRoutesAdapter.SimpleViewHolder>() {
+class SimpleMyRoutesAdapter(private var routes: List<Route>) :
+    RecyclerView.Adapter<SimpleMyRoutesAdapter.SimpleViewHolder>() {
 
     private var onClickListener: OnClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleViewHolder {
@@ -24,6 +25,11 @@ class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Ada
     override fun onBindViewHolder(holder: SimpleViewHolder, position: Int) {
         val route = routes[position]
         holder.bind(route)
+        holder.itemView.setOnClickListener {
+            if(onClickListener != null) {
+                onClickListener!!.onItemClick(position,route)
+            }
+        }
     }
 
     fun setRoutes(routes: List<Route>?) {
@@ -33,12 +39,14 @@ class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Ada
 
     inner class SimpleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.title_text_view)
-        private val descriptionTextView: TextView = itemView.findViewById(R.id.description_text_view)
+        private val descriptionTextView: TextView =
+            itemView.findViewById(R.id.description_text_view)
+
         fun bind(route: Route) {
-            itemView.apply {
+//            itemView.apply {
                 titleTextView.text = route.name
                 descriptionTextView.text = route.description
-            }
+//            }
         }
 
     }
@@ -50,7 +58,6 @@ class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Ada
     interface OnClickListener {
         fun onItemClick(position: Int, route: Route)
     }
-
 
 
 }

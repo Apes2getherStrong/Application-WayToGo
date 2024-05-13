@@ -21,7 +21,6 @@ class RoutesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRoutesBinding.inflate(inflater, container, false)
-        Log.d("Warmbier", container?.id.toString())
         return binding.root
     }
 
