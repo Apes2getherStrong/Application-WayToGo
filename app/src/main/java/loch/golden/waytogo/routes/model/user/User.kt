@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes.model
+package loch.golden.waytogo.routes.model.user
 
 data class User(
     val id: String,

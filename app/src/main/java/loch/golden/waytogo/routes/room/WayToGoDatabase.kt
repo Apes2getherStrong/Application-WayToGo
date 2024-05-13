@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes.room
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -8,11 +9,14 @@ import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.model.Converters
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.routes.model.route.Route
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
-import java.util.UUID
 
-@Database(entities = [Route::class], version = 1)
+@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 2, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class WayToGoDatabase : RoomDatabase() {
 
     abstract fun getRouteDao() : RouteDao
@@ -29,13 +33,25 @@ abstract class WayToGoDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(routeDao: RouteDao) {
-            routeDao.clearRoutes()
 
-            //sprawdzenie czy insert do bazy dziala, sprawdzic w app inspection , database inspector
-//            val route1 = Route(123,"Test trasy","test")
-//            routeDao.insertRoute(route1)
-//            val route2 = Route(32,"Drugi test trasy","dsadas")
-//            routeDao.insertRoute(route2)
+            val routeMapLocations = listOf(
+                RouteMapLocation("123eefs", "1"),
+                RouteMapLocation("123eefs", "2"),
+                RouteMapLocation("ddasa2312311", "2")
+            )
+            routeDao.insertRouteMapLocation(routeMapLocations)
+
+            val mapLocations = listOf(
+                MapLocation("1", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
+                MapLocation("2", "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
+            )
+            routeDao.insertMapLocations(mapLocations)
+
+            val route1 = Route("123eefs", "Pierwsza trasa", "Opis pierwszej trasy")
+            val route2 = Route("ddasa2312311", "Druga trasa", "Opis drugiej trasy")
+            routeDao.insertRoute(route1)
+            routeDao.insertRoute(route2)
+
         }
 
     }

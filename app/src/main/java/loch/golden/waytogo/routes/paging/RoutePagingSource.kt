@@ -2,9 +2,8 @@ package loch.golden.waytogo.routes.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
-import loch.golden.waytogo.routes.room.WayToGoDatabase
 import retrofit2.HttpException
 
 class RoutePagingSource(private val repository: RouteRepository) : PagingSource<Int, Route>() {

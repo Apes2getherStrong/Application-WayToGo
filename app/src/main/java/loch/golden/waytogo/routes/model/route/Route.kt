@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes.model
+package loch.golden.waytogo.routes.model.route
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

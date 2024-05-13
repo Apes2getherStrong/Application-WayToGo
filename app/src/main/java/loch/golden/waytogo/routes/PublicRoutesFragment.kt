@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
-import loch.golden.waytogo.routes.model.Route
+import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.room.dao.RouteDao
@@ -72,7 +72,7 @@ class PublicRoutesFragment() : Fragment() {
                     putString("id", id)
                 }
                 val fr = RouteDetailFragment()
-                fr.arguments = bundle // Set the arguments bundle to the fragment
+                fr.arguments = bundle
                 (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
             }
         })
