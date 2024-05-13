@@ -3,6 +3,7 @@ package loch.golden.waytogo.map.components
 import android.view.View
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
+import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
 
 class SlidingUpPanelManager(
@@ -31,7 +32,7 @@ class SlidingUpPanelManager(
         binding.bottomPanel.container.alpha =
             1.0f - (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
         binding.expandedPanel.container.alpha =
-            (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f)
+            (slideOffset / maxVisibilitySlideOffset).coerceIn(0.0f, 1.0f) //TODO do better function
     }
 
     override fun onPanelStateChanged(
@@ -67,8 +68,11 @@ class SlidingUpPanelManager(
         //TODO create this fun
     }
 
-    fun openNormalPanel() {
-        //TODO create this fun probably add params
+    fun openNormalPanel(mapPoint: MapPoint?) {
+        binding.expandedPanel.title.text = mapPoint?.name
+        binding.expandedPanel.description.text = mapPoint?.description
+        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+//        binding.expandedPanel.image.setImageResource(mapPoint.image)
     }
 
 

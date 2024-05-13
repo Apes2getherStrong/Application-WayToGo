@@ -14,12 +14,13 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
+import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
-    ActivityCompat.OnRequestPermissionsResultCallback {
+    ActivityCompat.OnRequestPermissionsResultCallback, OnNavigateToMapListener {
 
     private lateinit var binding: ActivityMainBinding
     private var dialog: AlertDialog? = null
@@ -107,6 +108,12 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
         return true
     }
+    override fun navigateToMap() {
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container_main, PointMapFragment())
+        }
+        binding.bottomNav.menu.findItem(R.id.bottom_nav_map).isChecked = true
+    }
 
 
     private fun setUpView() {
@@ -115,4 +122,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
         binding.bottomNav.setOnItemSelectedListener(this)
     }
+
+
 }

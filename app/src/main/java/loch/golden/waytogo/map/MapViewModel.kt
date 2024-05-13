@@ -4,17 +4,11 @@ import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import loch.golden.waytogo.classes.MapRoute
 
 class MapViewModel : ViewModel() {
     var cameraPosition: CameraPosition? = null
-    var markerList: List<LatLng> = listOf(
-        LatLng(54.3520, 18.6466),
-        LatLng(34.3520, 0.6466),
-        LatLng(18.3520, 36.6466),
-        LatLng(52.373920, 9.735603)
-    )
-    
-    var mp: MediaPlayer? = null
-
+    var route: MapRoute? = null
+    var creationMode = false
 
 }
