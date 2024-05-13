@@ -15,7 +15,7 @@ import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
 
-@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 2, exportSchema = false)
+@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class WayToGoDatabase : RoomDatabase() {
 

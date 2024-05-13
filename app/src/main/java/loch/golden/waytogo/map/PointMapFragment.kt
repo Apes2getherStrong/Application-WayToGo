@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
@@ -31,6 +32,9 @@ import loch.golden.waytogo.map.components.MapMenuManager
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
+import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
+import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 
 class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
@@ -52,6 +56,9 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
+    private val routeViewModel: RouteViewModel by viewModels {
+        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -86,8 +93,11 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         infoWindowManager.setHideOnFling(true)
         infoWindowManager.onParentViewCreated(binding.mapViewContainer, savedInstanceState)
 
-        routeCreationManager = RouteCreationManager(binding, infoWindowManager, this)
+        routeCreationManager = RouteCreationManager(binding, infoWindowManager, this, routeViewModel)
 
+
+
+        routeViewModel
     }
 
 

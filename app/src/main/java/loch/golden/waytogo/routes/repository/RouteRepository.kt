@@ -8,6 +8,7 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import retrofit2.Response
 
@@ -43,6 +44,16 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     @WorkerThread
+    suspend fun insertRouteMapLocation(routeMapLocation: RouteMapLocation) {
+        routeDao.insertRouteMapLocation(routeMapLocation)
+    }
+
+    @WorkerThread
+    suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation) {
+        routeDao.deleteRouteMapLocation(routeMapLocation)
+    }
+
+    @WorkerThread
     suspend fun getRouteWithMapLocations(routeUid: String): List<RouteWithMapLocations> {
         return routeDao.getMapLocationsOfRoute(routeUid)
     }
@@ -56,6 +67,9 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun deleteMapLocation(mapLocation: MapLocation) {
         routeDao.deleteMapLocation(mapLocation)
     }
+
+
+
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {
         return RetrofitInstance.apiService.getRoutes(pageNumber, pageSize)

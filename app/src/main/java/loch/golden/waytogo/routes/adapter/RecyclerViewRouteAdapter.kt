@@ -46,9 +46,7 @@ class RecyclerViewRouteAdapter :
         }
     }
 
-    fun setOnClickListener(onClickListener: OnClickListener) {
-        this.onClickListener = onClickListener
-    }
+
 
     inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         private val titleTextView: TextView = itemView.findViewById(R.id.title_text_view)
@@ -62,7 +60,9 @@ class RecyclerViewRouteAdapter :
 
         }
     }
-
+    fun setOnClickListener(onClickListener: OnClickListener) {
+        this.onClickListener = onClickListener
+    }
     interface OnClickListener {
         fun onItemClick(position: Int, route: Route)
     }

@@ -38,8 +38,6 @@ class MyRoutesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        listFromFolder()
-        listFromPref()
         initSearchView()
         initRecyclerView()
     }
@@ -47,15 +45,17 @@ class MyRoutesFragment : Fragment() {
         recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewMyRoutes.layoutManager = LinearLayoutManager(requireContext())
+
         recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener{
+
             override fun onItemClick(position: Int, route: Route) {
                 val id = route.routeUid
                 val bundle = Bundle().apply {
                     putString("id", id)
                 }
-                val fr = RouteDetailFragment()
+                val fr = RouteDetailFragment("myRoutes")
                 fr.arguments = bundle // Set the arguments bundle to the fragment
-                (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
+                (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
             }
 
         })
@@ -89,29 +89,4 @@ class MyRoutesFragment : Fragment() {
         }
     }
 
-
-    private fun listFromPref() {
-        //TODO move this to creationRoutePref or at least a part of it
-        val sharedPreferences =
-            requireContext().getSharedPreferences("routes_pref", Context.MODE_PRIVATE)
-        val allEntries = sharedPreferences.all
-
-        for ((key, title) in allEntries) {
-            Log.d("Warmbier", title.toString())
-        }
-    }
-
-    private fun listFromFolder() {
-        val filesDir = requireContext().filesDir
-
-        val myRoutesFolder = File(filesDir, "my_routes")
-
-        if (myRoutesFolder.exists() && myRoutesFolder.isDirectory) {
-            val subFolders = myRoutesFolder.listFiles { file -> file.isDirectory }
-            subFolders?.forEach { folder ->
-                // Perform operations with each subfolder here
-                Log.d("Warmbier", "Subfolder: ${folder.name}")
-            } //TODO move all paths to an object in consts folder
-        }
-    }
 }

@@ -14,6 +14,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import loch.golden.waytogo.Permissions
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.PointMapFragment
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.routes.model.route.Route
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -23,6 +26,7 @@ class RouteCreationManager(
     private val binding: FragmentMapBinding,
     private val infoWindowManager: InfoWindowManager,
     private val fragment: PointMapFragment,
+    private val routeViewModel: RouteViewModel
 ) : OnMarkerDragListener {
     companion object {
         private const val AUDIO_DIRECTORY = "recordings"
@@ -39,8 +43,6 @@ class RouteCreationManager(
 
     private val infoWindowMap: MutableMap<String, InfoWindow> = mutableMapOf()
     private val creationMarkerMap: MutableMap<String, Marker?> = mutableMapOf()
-
-    private var routeTitle: String = "My Route"
 
     private var currentMarkerId: String? = null
 
@@ -106,23 +108,15 @@ class RouteCreationManager(
     }
 
     fun startNew(routeTitle: String) {
-        this.routeId = UUID.randomUUID().toString()
-        setRouteTitle(routeTitle)
-        CreationPrefManager
+        routeId = UUID.randomUUID().toString()
+        routeViewModel.insert(Route(routeId, routeTitle, ""))
         initFolders()
     }
 
     fun startExisting(routeId: String) {
         this.routeId = routeId
-        getExistingPoints(routeId)
         initFolders()
     }
-
-    private fun getExistingPoints(routeId: String) {
-        routeTitle = CreationPrefManager.getRouteTitle(fragment.requireContext(), routeId)!!
-
-    }
-
 
     private fun initFolders() {
         Log.d("Warmbier", routeId)
@@ -147,14 +141,18 @@ class RouteCreationManager(
 
     fun addMarker(marker: Marker?, infoWindow: InfoWindow) {
         val markerId = marker?.snippet!!
+        routeViewModel.insertMapLocation(
+            MapLocation(
+                markerId,
+                marker.title!!,
+                "",
+                marker.position.latitude,
+                marker.position.longitude
+            ), routeId
+        )
+
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
-        CreationPrefManager.putMarkerInRoute(
-            fragment.requireContext(),
-            routeId,
-            markerId,
-            marker.title!!
-        )
     }
 
 
@@ -166,8 +164,16 @@ class RouteCreationManager(
                 val markerId = marker?.snippet!!
                 creationMarkerMap.remove(markerId)
                 hideInfoWindow(markerId)
+                routeViewModel.deleteMapLocation(
+                    MapLocation(
+                        markerId,
+                        marker.title!!,
+                        "",
+                        marker.position.latitude,
+                        marker.position.longitude
+                    ), routeId
+                )
                 infoWindowMap.remove(markerId)
-                CreationPrefManager.removeMarker(fragment.requireContext(), routeId, markerId)
                 deleteFiles(markerId)
                 marker.remove()
                 dialog.dismiss()
@@ -196,11 +202,6 @@ class RouteCreationManager(
             infoWindowManager.toggle(infoWindowMap[id]!!)
     }
 
-
-    private fun setRouteTitle(title: String) {
-        this.routeTitle = title
-        CreationPrefManager.putTitle(fragment.requireContext(), routeId, title)
-    }
 
     private fun startRecording() {
         Log.d("Warmbier", "Start recording: $isRecording")

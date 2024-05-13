@@ -63,6 +63,9 @@ interface RouteDao {
     @Query("SELECT * FROM route_table WHERE route_uid = :routeUid ")
     suspend fun getMapLocationsOfRoute(routeUid: String): List<RouteWithMapLocations>
 
+    @Delete
+    suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation)
+
     @Transaction
     suspend fun insertRouteMapLocation(routeMapLocations: List<RouteMapLocation>) {
         routeMapLocations.forEach { routeMapLocation ->
