@@ -9,7 +9,8 @@ data class MapLocation(
     val id: String,
     val name: String,
     val description: String,
-    val coordinatesId: Long,
+    val latitude: Double,
+    val longitude: Double
 //    val createdDate: Any?,
 //    val updateDate: Any?
 )

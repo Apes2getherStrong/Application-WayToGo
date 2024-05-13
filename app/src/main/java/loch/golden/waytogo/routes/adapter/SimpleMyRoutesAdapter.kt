@@ -10,6 +10,7 @@ import loch.golden.waytogo.routes.model.route.Route
 
 class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Adapter<SimpleMyRoutesAdapter.SimpleViewHolder>() {
 
+    private var onClickListener: OnClickListener? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.layout_routes_item, parent, false)
@@ -41,6 +42,15 @@ class SimpleMyRoutesAdapter(private var routes: List<Route> ) : RecyclerView.Ada
         }
 
     }
+
+    fun setOnClickListener(onClickListener: OnClickListener) {
+        this.onClickListener = onClickListener
+    }
+
+    interface OnClickListener {
+        fun onItemClick(position: Int, route: Route)
+    }
+
 
 
 }

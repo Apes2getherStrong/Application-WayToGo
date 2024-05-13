@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -51,7 +52,6 @@ class RouteDetailFragment : Fragment() {
             }
         })
 
-
         val routeId = arguments?.getString("id") ?: ""
         val repository = RouteRepository(routeDao)
         val viewModelFactory = RouteViewModelFactory(repository)
@@ -92,11 +92,9 @@ class RouteDetailFragment : Fragment() {
 
     }
 
-
     private fun changeBackFragment(){
         (parentFragment as? RoutesFragment)?.replaceFragment(0,PublicRoutesFragment())
     }
-
 
 
 }

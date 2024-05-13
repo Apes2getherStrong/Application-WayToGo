@@ -10,14 +10,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.routes.model.Converters
-import loch.golden.waytogo.routes.model.maplocation.Coordinates
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
-import loch.golden.waytogo.routes.model.maplocation.MapLocationAndCoordinates
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
 
-@Database(entities = [Route::class, MapLocation::class,Coordinates::class, RouteMapLocation::class], version = 2, exportSchema = false)
+@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class WayToGoDatabase : RoomDatabase() {
 
@@ -35,21 +33,7 @@ abstract class WayToGoDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(routeDao: RouteDao) {
-            Log.d("GOgo","dzicz")
 
-            val mapLocationsAndCoordinates = listOf(
-                MapLocationAndCoordinates(
-                    MapLocation("1", "Lokalizacja 1", "Opis lokalizacji 1", 1),
-                    Coordinates(1, listOf(12.345, 67.890))
-                ),
-                MapLocationAndCoordinates(
-                    MapLocation("2", "Lokalizacja 2", "Opis lokalizacji 2", 2),
-                    Coordinates(2, listOf(34.567, 89.012))
-                )
-            )
-            routeDao.insertMapLocationAndCoordinates(mapLocationsAndCoordinates)
-
-            // Wstawiamy połączenia między trasami a lokalizacjami na mapie
             val routeMapLocations = listOf(
                 RouteMapLocation("123eefs", "1"),
                 RouteMapLocation("123eefs", "2"),
@@ -57,13 +41,16 @@ abstract class WayToGoDatabase : RoomDatabase() {
             )
             routeDao.insertRouteMapLocation(routeMapLocations)
 
-            // Wstawiamy trasy
+            val mapLocations = listOf(
+                MapLocation("1", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
+                MapLocation("2", "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
+            )
+            routeDao.insertMapLocations(mapLocations)
+
             val route1 = Route("123eefs", "Pierwsza trasa", "Opis pierwszej trasy")
             val route2 = Route("ddasa2312311", "Druga trasa", "Opis drugiej trasy")
             routeDao.insertRoute(route1)
             routeDao.insertRoute(route2)
-
-
 
         }
 

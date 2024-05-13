@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.room.dao.RouteDao
@@ -14,6 +15,11 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     val allRoutes: Flow<List<Route>> = routeDao.getAllRoutes()
 
+    @WorkerThread
+    suspend fun getRouteFromDbById(routeUid: String) : Route {
+        return routeDao.getRouteFromDbById(routeUid)
+    }
+
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insert(route: Route) {
@@ -22,7 +28,33 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     @WorkerThread
     suspend fun updateRoute(route: Route) {
-        routeDao.insertRoute(route)
+        routeDao.updateRoute(route)
+    }
+
+    @WorkerThread
+    suspend fun deleteRoute(route: Route) {
+        routeDao.deleteRoute(route)
+    }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun insertMapLocation(mapLocation: MapLocation) {
+        routeDao.insertMapLocation(mapLocation)
+    }
+
+    @WorkerThread
+    suspend fun getRouteWithMapLocations(routeUid: String): List<RouteWithMapLocations> {
+        return routeDao.getMapLocationsOfRoute(routeUid)
+    }
+
+    @WorkerThread
+    suspend fun updateMapLocation(mapLocation: MapLocation) {
+        routeDao.updateMapLocation(mapLocation)
+    }
+
+    @WorkerThread
+    suspend fun deleteMapLocation(mapLocation: MapLocation) {
+        routeDao.deleteMapLocation(mapLocation)
     }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {

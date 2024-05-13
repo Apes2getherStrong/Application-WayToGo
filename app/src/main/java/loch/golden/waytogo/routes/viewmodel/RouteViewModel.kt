@@ -11,7 +11,9 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
@@ -24,12 +26,44 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
 
+    private val _routeWithLocations = MutableLiveData<List<RouteWithMapLocations>>()
+    val routeWithLocations: LiveData<List<RouteWithMapLocations>> = _routeWithLocations
+
+    val routeFromDb: MutableLiveData<Route> = MutableLiveData()
+
+    fun getRouteFromDbById(routeUid: String) {
+        viewModelScope.launch {
+            routeFromDb.value = routeRepository.getRouteFromDbById(routeUid)
+        }
+    }
     fun insert(route: Route) = viewModelScope.launch {
         routeRepository.insert(route)
     }
 
     fun updateRoute(route: Route) = viewModelScope.launch {
         routeRepository.updateRoute(route)
+    }
+
+    fun deleteRoute(route: Route) = viewModelScope.launch {
+        routeRepository.deleteRoute(route)
+    }
+
+    fun insertMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
+        routeRepository.insertMapLocation(mapLocation)
+    }
+
+    fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
+        routeRepository.updateMapLocation(mapLocation)
+    }
+
+    fun deleteMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
+        routeRepository.deleteMapLocation(mapLocation)
+    }
+
+    fun getRouteWithLocations(routeUid: String) {
+        viewModelScope.launch {
+            _routeWithLocations.value = routeRepository.getRouteWithMapLocations(routeUid)
+        }
     }
 
     fun getRoutes(pageNumber: Int, pageSize: Int): Flow<PagingData<Route>> {

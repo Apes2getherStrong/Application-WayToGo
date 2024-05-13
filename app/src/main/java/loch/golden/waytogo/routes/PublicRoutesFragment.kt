@@ -72,7 +72,7 @@ class PublicRoutesFragment() : Fragment() {
                     putString("id", id)
                 }
                 val fr = RouteDetailFragment()
-                fr.arguments = bundle // Set the arguments bundle to the fragment
+                fr.arguments = bundle
                 (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
             }
         })

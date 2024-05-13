@@ -10,12 +10,10 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
+import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.adapter.SimpleMyRoutesAdapter
 import loch.golden.waytogo.routes.model.route.Route
-import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.io.File
@@ -49,24 +47,23 @@ class MyRoutesFragment : Fragment() {
         recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewMyRoutes.layoutManager = LinearLayoutManager(requireContext())
+        recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener{
+            override fun onItemClick(position: Int, route: Route) {
+                val id = route.routeUid
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
+                val fr = RouteDetailFragment()
+                fr.arguments = bundle // Set the arguments bundle to the fragment
+                (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
+            }
 
+        })
 
         routeViewModel.allRoutes.observe(viewLifecycleOwner) { routes ->
             allRoutes = routes
             recyclerViewRouteAdapter.setRoutes(routes)
         }
-
-//        recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
-//            override fun onItemClick(position: Int, route: Route) {
-//                val id = route.routeUid
-//                val bundle = Bundle().apply {
-//                    putString("id", id)
-//                }
-//                val fr = RouteDetailFragment()
-//                fr.arguments = bundle // Set the arguments bundle to the fragment
-//                (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
-//            }
-//        })
 
     }
 
