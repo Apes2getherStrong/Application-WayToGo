@@ -17,6 +17,16 @@ class RouteRepository(private val routeDao: RouteDao) {
     val allRoutes: Flow<List<Route>> = routeDao.getAllRoutes()
 
     @WorkerThread
+    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        routeDao.insertRouteWithMapLocations(routeWithMapLocations)
+    }
+
+    @WorkerThread
+    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        routeDao.deleteRouteWithMapLocations(routeWithMapLocations)
+    }
+
+    @WorkerThread
     suspend fun getRouteFromDbById(routeUid: String) : Route {
         return routeDao.getRouteFromDbById(routeUid)
     }
@@ -54,8 +64,8 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     @WorkerThread
-    suspend fun getRouteWithMapLocations(routeUid: String): List<RouteWithMapLocations> {
-        return routeDao.getMapLocationsOfRoute(routeUid)
+    suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations {
+        return routeDao.getRouteWithMapLocations(routeUid)
     }
 
     @WorkerThread
@@ -84,7 +94,7 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     suspend fun postRoute(route: Route): Response<Route> {
-        return RetrofitInstance.apiService.postRoute(route);
+        return RetrofitInstance.apiService.postRoute(route)
     }
 }
 

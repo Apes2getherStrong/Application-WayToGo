@@ -27,7 +27,7 @@ import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
-class PublicRoutesFragment() : Fragment() {
+class PublicRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentPublicRoutesBinding
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter

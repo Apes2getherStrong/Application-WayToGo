@@ -69,7 +69,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mapViewModel = ViewModelProvider(requireActivity()).get(loch.golden.waytogo.map.MapViewModel::class.java)
+        mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
         initMapView(savedInstanceState)
         setUpListeners()
 

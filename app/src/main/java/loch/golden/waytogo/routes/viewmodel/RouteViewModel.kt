@@ -28,10 +28,16 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
 
-    private val _routeWithLocations = MutableLiveData<List<RouteWithMapLocations>>()
-    val routeWithLocations: LiveData<List<RouteWithMapLocations>> = _routeWithLocations
-
+    val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
+
+    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
+            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
+    }
+
+    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
+        routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
+    }
 
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
@@ -56,7 +62,6 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
     }
 
-
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
     }
@@ -67,9 +72,9 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     }
 
-    fun getRouteWithLocations(routeUid: String) {
+    fun getRouteWithMapLocations(routeUid: String) {
         viewModelScope.launch {
-            _routeWithLocations.value = routeRepository.getRouteWithMapLocations(routeUid)
+            routeWithLocationsFromDb.value = routeRepository.getRouteWithMapLocations(routeUid)
         }
     }
 

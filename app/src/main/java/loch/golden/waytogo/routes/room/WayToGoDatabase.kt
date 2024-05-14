@@ -39,7 +39,8 @@ abstract class WayToGoDatabase : RoomDatabase() {
                 RouteMapLocation("123eefs", "2"),
                 RouteMapLocation("ddasa2312311", "2")
             )
-            routeDao.insertRouteMapLocation(routeMapLocations)
+
+            routeDao.insertListOfRouteMapLocations(routeMapLocations)
 
             val mapLocations = listOf(
                 MapLocation("1", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),

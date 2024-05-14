@@ -26,6 +26,12 @@ interface RouteDao {
     suspend fun insertRouteMapLocation(routeMapLocation: RouteMapLocation)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertListOfRouteMapLocations(routeMapLocation: List<RouteMapLocation>)
+
+    @Delete
+    suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllRoutes(route: List<Route>)
 
     @Update
@@ -61,16 +67,30 @@ interface RouteDao {
 
     @Transaction
     @Query("SELECT * FROM route_table WHERE route_uid = :routeUid ")
-    suspend fun getMapLocationsOfRoute(routeUid: String): List<RouteWithMapLocations>
-
-    @Delete
-    suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation)
+    suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations
 
     @Transaction
-    suspend fun insertRouteMapLocation(routeMapLocations: List<RouteMapLocation>) {
-        routeMapLocations.forEach { routeMapLocation ->
+    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        insertRoute(routeWithMapLocations.route)
+        routeWithMapLocations.mapLocations.forEach{ mapLocation ->
+            insertMapLocation(mapLocation)
+            val routeMapLocation = RouteMapLocation(routeWithMapLocations.route.routeUid, mapLocation.id)
             insertRouteMapLocation(routeMapLocation)
         }
+    }
+
+    @Transaction
+    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        val route = routeWithMapLocations.route
+        val mapLocations = routeWithMapLocations.mapLocations
+
+        mapLocations.forEach{mapLocation ->
+            val routeMapLocation = RouteMapLocation(route.routeUid, mapLocation.id)
+            deleteRouteMapLocation(routeMapLocation)
+            deleteMapLocation(mapLocation)
+        }
+        deleteRoute(route)
+
     }
 
 }
