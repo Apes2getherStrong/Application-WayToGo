@@ -113,8 +113,21 @@ class RouteCreationManager(
         initFolders()
     }
 
-    fun startExisting(routeId: String) {
+    fun startExisting(routeId: String, markerList: MutableList<Marker?>) {
         this.routeId = routeId
+        for (marker in markerList){
+            marker?.isDraggable=true
+            creationMarkerMap[marker?.snippet!!] = marker
+            val infoWindow = InfoWindow(
+                marker,
+                InfoWindow.MarkerSpecification(0, 100),
+                MarkerCreationFragment(marker, this, binding)
+            )
+            infoWindowMap[marker.snippet!!]=infoWindow
+        }
+        Log.d("Warmbier", infoWindowMap.toString())
+        Log.d("Warmbier", creationMarkerMap.toString())
+
         initFolders()
     }
 

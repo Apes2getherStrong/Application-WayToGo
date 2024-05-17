@@ -13,6 +13,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
 import com.appolica.interactiveinfowindow.InfoWindowManager
@@ -22,6 +23,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -43,6 +46,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var mapViewModel: MapViewModel
     private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
+    private val googleMapSetup = CompletableDeferred<Unit>()
 
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
@@ -84,9 +88,12 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 //            binding.bottomPanel.customSeekbarProgress,
 //            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
 //        )
+
+
         if (mapViewModel.inCreationMode) {
             initCreation(savedInstanceState)
         }
+
     }
 
 
@@ -110,6 +117,8 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         mapViewModel.route?.let {
             populateMap(it.pointList)
         }
+        googleMapSetup.complete(Unit)
+
     }
 
     private fun populateMap(mapPoints: Map<String, MapPoint>) {
@@ -142,9 +151,13 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         routeCreationManager =
             RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel)
-        routeCreationManager?.startNew(mapViewModel.route!!.name)
-        googleMap.setOnMarkerDragListener(routeCreationManager)
-        //TODO fix this ^ . This can be potentially dangerous when onMapReady is assigned later than this is called
+//        routeCreationManager?.startNew(mapViewModel.route!!.name)
+
+        lifecycleScope.launch { // wait till googlemaps is initialized
+            googleMapSetup.await()
+            googleMap.setOnMarkerDragListener(routeCreationManager)
+            routeCreationManager?.startExisting(mapViewModel.route!!.id, markerList)
+        }
 
         slidingUpPanelManager.toggleCreation()
 
