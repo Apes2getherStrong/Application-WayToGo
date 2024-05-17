@@ -105,6 +105,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
+
             changeBackFragment()
         }
 
@@ -139,6 +140,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
         mapViewModel.route = route
+        mapViewModel.inCreationMode = true
         navigateToMapListener?.navigateToMap()
     }
 
