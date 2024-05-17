@@ -22,7 +22,7 @@ import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 
-class RouteDetailFragment(private val origin: String) : Fragment() {
+class RouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
     private lateinit var mapLocationRecyclerView: MapLocationAdapter
@@ -64,34 +64,7 @@ class RouteDetailFragment(private val origin: String) : Fragment() {
         //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
         // dzieki gogi za notatke
         val routeId = arguments?.getString("id") ?: "" //TODO add error message
-        if (origin == "myRoutes") {
-            routeViewModel.getRouteWithMapLocations(routeId)
-            routeViewModel.routeWithLocationsFromDb.observe(viewLifecycleOwner) { routeWithLocationsFromDb ->
-                if (routeWithLocationsFromDb !=  null) {
-                    route = MapRoute(
-                        routeWithLocationsFromDb.route.routeUid,
-                        routeWithLocationsFromDb.route.name,
-                        routeWithLocationsFromDb.route.description,
-                        mutableMapOf()
-                    )
-                    binding.routeTitle.text = routeWithLocationsFromDb.route.name
-                    binding.routeDescription.text = routeWithLocationsFromDb.route.description
-                    val mapLocationAdapter =
-                        MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
-                    routeWithLocationsFromDb.mapLocations.let {
-                        Log.d("Warmbier", it.toString())
-                        for (mapLocation in it) {
-                            route.pointList[mapLocation.id] = (MapPoint(mapLocation))
-                        }
-                    }
-                    binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
-                    binding.recyclerViewPoints.adapter = mapLocationAdapter
-                } else {
-                    Toast.makeText(requireContext(), "Route not found", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }else if (origin == "publicRoutes"){
 
             routeViewModel.getRouteById(routeId)
             routeViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
@@ -135,17 +108,16 @@ class RouteDetailFragment(private val origin: String) : Fragment() {
 
 
             }
+            binding.backButton.setOnClickListener {
+                changeBackFragment()
+            }
 
+            binding.chooseRoute.setOnClickListener {
+                chooseRoute()
+            }
 
-        }
-        binding.backButton.setOnClickListener {
-            changeBackFragment()
-        }
-
-        binding.chooseRoute.setOnClickListener {
-            chooseRoute()
-        }
     }
+
 
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
@@ -155,10 +127,9 @@ class RouteDetailFragment(private val origin: String) : Fragment() {
     }
 
     private fun changeBackFragment() {
-        if (origin == "myRoutes")
-            (parentFragment as? RoutesFragment)?.replaceFragment(1, MyRoutesFragment())
-        else if (origin == "publicRoutes")
-            (parentFragment as? RoutesFragment)?.replaceFragment(0, PublicRoutesFragment())
+
+
+        (parentFragment as? RoutesFragment)?.replaceFragment(0, PublicRoutesFragment())
 
     }
 

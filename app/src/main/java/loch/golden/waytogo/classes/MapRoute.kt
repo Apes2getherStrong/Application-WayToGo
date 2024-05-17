@@ -2,8 +2,8 @@ package loch.golden.waytogo.classes
 
 data class MapRoute(
     val id: String,
-    val name: String,
-    val description: String,
+    var name: String,
+    var description: String,
     val pointList: MutableMap<String, MapPoint>
 
 )

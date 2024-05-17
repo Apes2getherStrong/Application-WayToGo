@@ -53,7 +53,7 @@ class MyRoutesFragment : Fragment() {
                 val bundle = Bundle().apply {
                     putString("id", id)
                 }
-                val fr = RouteDetailFragment("myRoutes")
+                val fr = DatabaseMyRouteDetailFragment()
                 fr.arguments = bundle // Set the arguments bundle to the fragment
                 (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
             }
