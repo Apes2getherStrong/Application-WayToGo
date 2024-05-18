@@ -1,10 +1,13 @@
 package loch.golden.waytogo.map.creation
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.graphics.Color
 import android.media.MediaRecorder
 import android.net.Uri
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import androidx.activity.result.contract.ActivityResultContracts
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindowManager
@@ -24,6 +27,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
+import android.view.inputmethod.InputMethodManager
+import android.os.Bundle
+import android.view.View
+import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getSystemService
 
 class RouteCreationManager(
     private val binding: FragmentMapBinding,
@@ -106,6 +115,23 @@ class RouteCreationManager(
                     Permissions.RECORD_AUDIO_REQUEST_CODE
                 )
         }
+        binding.expandedPanel.creationTitle.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
+                mapPoint.name = binding.expandedPanel.creationTitle.text.toString()
+                routeViewModel.updateMapLocation(MapLocation(mapPoint))
+                binding.expandedPanel.creationTitle.clearFocus()
+                fragment.requireContext().hideKeyboard(binding.expandedPanel.creationTitle)
+                true
+            } else false
+        }
+
+
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     fun startNew(routeTitle: String) {
