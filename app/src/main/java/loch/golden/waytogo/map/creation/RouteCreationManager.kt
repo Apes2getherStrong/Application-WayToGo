@@ -12,7 +12,9 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import loch.golden.waytogo.Permissions
+import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
+import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.route.Route
@@ -26,7 +28,8 @@ class RouteCreationManager(
     private val binding: FragmentMapBinding,
     private val infoWindowManager: InfoWindowManager,
     private val fragment: PointMapFragment,
-    private val routeViewModel: RouteViewModel
+    private val routeViewModel: RouteViewModel,
+    private val mapViewModel: MapViewModel
 ) : OnMarkerDragListener {
     companion object {
         private const val AUDIO_DIRECTORY = "recordings"
@@ -115,15 +118,15 @@ class RouteCreationManager(
 
     fun startExisting(routeId: String, markerList: MutableList<Marker?>) {
         this.routeId = routeId
-        for (marker in markerList){
-            marker?.isDraggable=true
+        for (marker in markerList) {
+            marker?.isDraggable = true
             creationMarkerMap[marker?.snippet!!] = marker
             val infoWindow = InfoWindow(
                 marker,
                 InfoWindow.MarkerSpecification(0, 100),
                 MarkerCreationFragment(marker, this, binding)
             )
-            infoWindowMap[marker.snippet!!]=infoWindow
+            infoWindowMap[marker.snippet!!] = infoWindow
         }
         Log.d("Warmbier", infoWindowMap.toString())
         Log.d("Warmbier", creationMarkerMap.toString())
@@ -154,16 +157,15 @@ class RouteCreationManager(
 
     fun addMarker(marker: Marker?, infoWindow: InfoWindow) {
         val markerId = marker?.snippet!!
-        routeViewModel.insertMapLocation(
-            MapLocation(
-                markerId,
-                marker.title!!,
-                "",
-                marker.position.latitude,
-                marker.position.longitude
-            ), routeId
+        val mapLocation = MapLocation(
+            markerId,
+            marker.title!!,
+            "",
+            marker.position.latitude,
+            marker.position.longitude
         )
-
+        routeViewModel.insertMapLocation(mapLocation, routeId)
+        mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation)
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
     }
@@ -186,6 +188,7 @@ class RouteCreationManager(
                         marker.position.longitude
                     ), routeId
                 )
+                mapViewModel.route?.pointList?.remove(markerId)
                 infoWindowMap.remove(markerId)
                 deleteFiles(markerId)
                 marker.remove()

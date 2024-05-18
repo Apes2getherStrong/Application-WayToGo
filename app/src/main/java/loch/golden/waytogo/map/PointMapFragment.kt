@@ -150,7 +150,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         infoWindowManager?.onParentViewCreated(binding.mapViewContainer, savedInstanceState)
 
         routeCreationManager =
-            RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel)
+            RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel, mapViewModel)
 //        routeCreationManager?.startNew(mapViewModel.route!!.name)
 
         lifecycleScope.launch { // wait till googlemaps is initialized
