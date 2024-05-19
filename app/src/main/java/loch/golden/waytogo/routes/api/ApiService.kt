@@ -1,6 +1,8 @@
 package loch.golden.waytogo.routes.api
 
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import retrofit2.Response
@@ -31,4 +33,9 @@ interface ApiService {
     suspend fun postRoute(
         @Body route: Route
     ): Response<Route>
+
+    @POST("mapLocations")
+    suspend fun postMapLocations(
+        @Body mapLocations: List<MapLocationRequest>
+    ) : Response<List<MapLocationRequest>>
 }

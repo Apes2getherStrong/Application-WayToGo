@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,6 +17,8 @@ import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
+import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
+import loch.golden.waytogo.routes.model.Converters
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
@@ -29,7 +30,7 @@ class RouteDetailFragment() : Fragment() {
     private val routeViewModel: RouteViewModel by viewModels {
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
-    private var navigateToMapListener : OnNavigateToMapListener? = null
+    private var navigateToMapListener: OnNavigateToMapListener? = null
     private lateinit var route: MapRoute
 
     override fun onCreateView(
@@ -66,55 +67,57 @@ class RouteDetailFragment() : Fragment() {
         val routeId = arguments?.getString("id") ?: "" //TODO add error message
 
 
-            routeViewModel.getRouteById(routeId)
-            routeViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
+        routeViewModel.getRouteById(routeId)
+        routeViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
+            if (response.isSuccessful) {
+                Log.d("Warmbier", response.body().toString())
+                route = MapRoute(
+                    response.body()!!.routeUid,
+                    response.body()!!.name,
+                    response.body()!!.description,
+                    mutableMapOf()
+                )
+                binding.routeTitle.text = response.body()?.name
+                binding.routeDescription.text = response.body()?.description
+                Log.d("Response id", response.body()!!.routeUid)
+                Log.d("Response title", response.body()!!.name)
+
+
+            } else {
+                Log.d("Response", response.errorBody().toString())
+
+            }
+
+            routeViewModel.getMapLocationsByRouteId(routeId)
+            routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
                 if (response.isSuccessful) {
                     Log.d("Warmbier", response.body().toString())
-                    route = MapRoute(
-                        response.body()!!.routeUid,
-                        response.body()!!.name,
-                        response.body()!!.description,
-                        mutableMapOf()
-                    )
-                    binding.routeTitle.text = response.body()?.name
-                    binding.routeDescription.text = response.body()?.description
-                    Log.d("Response id", response.body()!!.routeUid)
-                    Log.d("Response title", response.body()!!.name)
-
-                } else {
-                    Log.d("Response", response.errorBody().toString())
-
-                }
-
-                routeViewModel.getMapLocationsByRouteId(routeId)
-                routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
-                    if (response.isSuccessful) {
-                        Log.d("Warmbier", response.body().toString())
-                        val mapLocationAdapter =
-                            MapLocationAdapter(response.body()?.content ?: emptyList())
-                        response.body()?.content.let {
-                            Log.d("Warmbier", it.toString())
-                            for (mapLocation in it!!) {
-                                route.pointList[mapLocation.id] = (MapPoint(mapLocation))
-                            }
+                    val mapLocationAdapter =
+                        PublicMapLocationAdapter(response.body()?.content ?: emptyList())
+                    response.body()?.content.let {
+                        Log.d("Warmbier", it.toString())
+                        for (mapLocation in it!!) {
+                            route.pointList[mapLocation.id] = (MapPoint(mapLocation))
                         }
-                        binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
-
-                        binding.recyclerViewPoints.adapter = mapLocationAdapter
-                    } else {
-                        Log.d("Map Locations Response", response.errorBody().toString())
                     }
+                    binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
+
+                    binding.recyclerViewPoints.adapter = mapLocationAdapter
+                    Log.d("Response mapLocation latitude", response.body()?.content.toString())
+                } else {
+                    Log.d("Map Locations Response", response.errorBody().toString())
                 }
-
-
-            }
-            binding.backButton.setOnClickListener {
-                changeBackFragment()
             }
 
-            binding.chooseRoute.setOnClickListener {
-                chooseRoute()
-            }
+
+        }
+        binding.backButton.setOnClickListener {
+            changeBackFragment()
+        }
+
+        binding.chooseRoute.setOnClickListener {
+            chooseRoute()
+        }
 
     }
 

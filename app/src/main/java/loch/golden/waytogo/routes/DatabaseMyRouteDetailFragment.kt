@@ -20,6 +20,7 @@ import loch.golden.waytogo.databinding.FragmentDatabaseMyRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
