@@ -5,14 +5,13 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:alpha="0"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:showIn="@layout/fragment_map">
+    app:layout_constraintTop_toTopOf="parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/normal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:visibility="invisible">
 
         <TextView
             android:id="@+id/title"
@@ -74,7 +73,8 @@
         android:id="@+id/creation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <EditText
             android:id="@+id/creation_title"
@@ -104,15 +104,27 @@
             app:layout_constraintWidth_percent="0.6"
             app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
 
+
+        <Button
+            android:id="@+id/creation_play_pause"
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="48dp"
+            app:icon="@drawable/play_pause_selector"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/creation_add_image" />
+
         <SeekBar
             android:id="@+id/creation_seekbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/creation_add_image"
-            app:layout_constraintWidth_percent="0.8"
+            android:layout_marginRight="48dp"
+            app:layout_constraintStart_toEndOf="@id/creation_play_pause"
+            app:layout_constraintTop_toTopOf="@id/creation_play_pause"
+            app:layout_constraintBottom_toBottomOf="@id/creation_play_pause"
             app:layout_goneMarginTop="20dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

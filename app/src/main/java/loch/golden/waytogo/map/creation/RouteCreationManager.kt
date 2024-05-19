@@ -243,9 +243,7 @@ class RouteCreationManager(
         try {
             mediaRecorder.prepare()
             mediaRecorder.start()
-            Log.d("Warmbier", "SHOULD BE RECORDING")
             isRecording = true
-            binding.expandedPanel.recordButton.setBackgroundColor(Color.RED)
         } catch (e: IOException) {
             Log.d("Warmbier", e.toString())
             e.printStackTrace()
@@ -256,7 +254,7 @@ class RouteCreationManager(
         Log.d("Warmbier", "Stop recording: $isRecording")
         if (isRecording) {
             mediaRecorder.stop()
-            binding.expandedPanel.recordButton.setBackgroundColor(Color.WHITE)
+            mapViewModel.route!!.pointList[currentMarkerId]?.audioPath= getOutputFile(currentMarkerId!!, MediaType.AUDIO).absolutePath
             isRecording = false
         }
     }
@@ -266,6 +264,7 @@ class RouteCreationManager(
         val directory = if (mediaType == MediaType.IMAGE) Constants.IMAGE_DIR else Constants.AUDIO_DIR
         return File(fragment.requireContext().filesDir, "$directory/$fileName$extension")
     }
+
 
 
     fun setCurrentMarkerId(id: String) {
