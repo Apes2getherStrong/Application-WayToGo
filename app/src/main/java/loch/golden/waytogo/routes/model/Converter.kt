@@ -1,6 +1,8 @@
 package loch.golden.waytogo.routes.model
 
 import androidx.room.TypeConverter
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 
 class Converters {
     @TypeConverter
@@ -12,4 +14,6 @@ class Converters {
     fun toCoordinatesList(coordinatesString: String): List<Double> {
         return coordinatesString.split(",").map { it.toDouble() }
     }
+
+
 }

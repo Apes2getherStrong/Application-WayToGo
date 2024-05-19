@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,6 +17,8 @@ import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
+import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
+import loch.golden.waytogo.routes.model.Converters
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
@@ -81,6 +82,7 @@ class RouteDetailFragment() : Fragment() {
                 Log.d("Response id", response.body()!!.routeUid)
                 Log.d("Response title", response.body()!!.name)
 
+
             } else {
                 Log.d("Response", response.errorBody().toString())
 
@@ -91,17 +93,17 @@ class RouteDetailFragment() : Fragment() {
                 if (response.isSuccessful) {
                     Log.d("Warmbier", response.body().toString())
                     val mapLocationAdapter =
-                        MapLocationAdapter(response.body()?.content ?: emptyList())
+                        PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                     response.body()?.content.let {
                         Log.d("Warmbier", it.toString())
                         for (mapLocation in it!!) {
-                            Log.d("Warmbier", "MAPLOCATION: $mapLocation")
                             route.pointList[mapLocation.id] = (MapPoint(mapLocation))
                         }
                     }
                     binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
                     binding.recyclerViewPoints.adapter = mapLocationAdapter
+                    Log.d("Response mapLocation latitude", response.body()?.content.toString())
                 } else {
                     Log.d("Map Locations Response", response.errorBody().toString())
                 }

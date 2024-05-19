@@ -47,4 +47,17 @@ data class MapPoint(
         if (audioFile.exists())
             audioPath = audioFile.absolutePath
     }
+
+     constructor(mapLocationRequest: MapLocationRequest) :
+            this(
+                mapLocationRequest.id,
+                mapLocationRequest.name,
+                mapLocationRequest.description,
+                LatLng(
+                    mapLocationRequest.coordinates.coordinates[0],
+                    mapLocationRequest.coordinates.coordinates[1]
+                ),
+                null,
+                null
+            )
 }

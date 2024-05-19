@@ -19,13 +19,14 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
+import loch.golden.waytogo.routes.model.Converters
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
-    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> =
-        MutableLiveData()
+    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
 
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
@@ -110,6 +111,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             routeRepository.postRoute(route)
 
         }
+    }
+
+    fun postMapLocations(mapLocations : List<MapLocationRequest>) = viewModelScope.launch {
+        routeRepository.postMapLocations(mapLocations)
     }
 
 }
