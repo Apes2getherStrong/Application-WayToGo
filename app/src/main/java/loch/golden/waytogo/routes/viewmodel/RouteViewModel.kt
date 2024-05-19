@@ -19,19 +19,26 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
+import loch.golden.waytogo.routes.model.Converters
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
-    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> =
-        MutableLiveData()
+    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
 
-    private val _routeWithLocations = MutableLiveData<List<RouteWithMapLocations>>()
-    val routeWithLocations: LiveData<List<RouteWithMapLocations>> = _routeWithLocations
-
+    val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
+
+    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
+            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
+    }
+
+    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
+        routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
+    }
 
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
@@ -56,7 +63,6 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
     }
 
-
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
     }
@@ -67,9 +73,9 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     }
 
-    fun getRouteWithLocations(routeUid: String) {
+    fun getRouteWithMapLocations(routeUid: String) {
         viewModelScope.launch {
-            _routeWithLocations.value = routeRepository.getRouteWithMapLocations(routeUid)
+            routeWithLocationsFromDb.value = routeRepository.getRouteWithMapLocations(routeUid)
         }
     }
 
@@ -105,6 +111,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             routeRepository.postRoute(route)
 
         }
+    }
+
+    fun postMapLocations(mapLocations : List<MapLocationRequest>) = viewModelScope.launch {
+        routeRepository.postMapLocations(mapLocations)
     }
 
 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
@@ -15,6 +16,16 @@ import retrofit2.Response
 class RouteRepository(private val routeDao: RouteDao) {
 
     val allRoutes: Flow<List<Route>> = routeDao.getAllRoutes()
+
+    @WorkerThread
+    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        routeDao.insertRouteWithMapLocations(routeWithMapLocations)
+    }
+
+    @WorkerThread
+    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+        routeDao.deleteRouteWithMapLocations(routeWithMapLocations)
+    }
 
     @WorkerThread
     suspend fun getRouteFromDbById(routeUid: String) : Route {
@@ -54,8 +65,8 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     @WorkerThread
-    suspend fun getRouteWithMapLocations(routeUid: String): List<RouteWithMapLocations> {
-        return routeDao.getMapLocationsOfRoute(routeUid)
+    suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations {
+        return routeDao.getRouteWithMapLocations(routeUid)
     }
 
     @WorkerThread
@@ -84,7 +95,11 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     suspend fun postRoute(route: Route): Response<Route> {
-        return RetrofitInstance.apiService.postRoute(route);
+        return RetrofitInstance.apiService.postRoute(route)
+    }
+
+    suspend fun postMapLocations(mapLocations: List<MapLocationRequest>): Response<List<MapLocationRequest>> {
+        return RetrofitInstance.apiService.postMapLocations(mapLocations)
     }
 }
 

@@ -13,10 +13,10 @@ data class Route(
     @ColumnInfo(name = "route_uid")
     @SerializedName("id")
     val routeUid: String,
-    val name: String,
-    val description: String,
+    var name: String,
+    var description: String,
 
-)
+    )
 
 //TODO narazie routUUid jest  wpostaci stringa, nwm czy tak napewno powinno byc i nie trzeba bedzie zrobic jakiegos mappera
 //tymczasowe rozwiazanie

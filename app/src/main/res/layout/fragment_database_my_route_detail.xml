@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".routes.DatabaseMyRouteDetailFragment"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fragment_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".routes.RouteDetailFragment">
-
+        >
 
         <Button
             android:id="@+id/back_button"
@@ -23,7 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <EditText
             android:id="@+id/route_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -33,7 +34,11 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/back_button"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@android:color/transparent"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:imeOptions="actionDone"/>
 
 
         <ImageView
@@ -43,7 +48,7 @@
             android:src="@drawable/ic_route_24"
             app:layout_constraintTop_toBottomOf="@id/route_title" />
 
-        <TextView
+        <EditText
             android:id="@+id/route_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +57,11 @@
             android:paddingBottom="8dp"
             android:text="Opis trasy"
             android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/route_image" />
+            app:layout_constraintTop_toBottomOf="@id/route_image"
+            android:background="@android:color/transparent"
+            android:inputType="textMultiLine"
+            android:imeOptions="actionDone"
+            />
 
 
         <androidx.recyclerview.widget.RecyclerView
@@ -72,8 +81,25 @@
             android:layout_margin="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.40" />
+            app:layout_constraintEnd_toStartOf="@id/publish_route_button"
+            app:layout_constraintWidth_percent="0.40"
+            />
+
+        <Button
+            android:id="@+id/publish_route_button"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Publish route"
+            android:layout_margin="12dp"
+            app:layout_constraintStart_toEndOf="@id/choose_route"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.40"
+            />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </ScrollView>
