@@ -5,13 +5,15 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:alpha="0"
+    tools:alpha="1"
     app:layout_constraintTop_toTopOf="parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/normal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:visibility="invisible">
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/title"
@@ -110,8 +112,8 @@
             style="?attr/materialIconButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp"
             app:icon="@drawable/play_pause_selector"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/creation_add_image" />
@@ -120,19 +122,22 @@
             android:id="@+id/creation_seekbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="48dp"
+            app:layout_constraintBottom_toBottomOf="@id/creation_play_pause"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/creation_play_pause"
             app:layout_constraintTop_toTopOf="@id/creation_play_pause"
-            app:layout_constraintBottom_toBottomOf="@id/creation_play_pause"
             app:layout_goneMarginTop="20dp" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/record_button"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:src="@drawable/ic_mic_24"
+            app:icon="@drawable/ic_mic_24"
+            app:iconSize="36dp"
+            app:iconTint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/creation_seekbar" />

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.utils.Constants
 import java.io.File
 
