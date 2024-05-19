@@ -82,12 +82,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 )
                 binding.routeTitle.setText(routeWithLocationsFromDb.route.name)
                 binding.routeDescription.setText(routeWithLocationsFromDb.route.description)
-                val mapLocationAdapter =
-                    MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
+                val mapLocationAdapter = MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
                 routeWithLocationsFromDb.mapLocations.let {
                     Log.d("Warmbier", it.toString())
                     for (mapLocation in it) {
-                        route.pointList[mapLocation.id] = (MapPoint(mapLocation))
+                        route.pointList[mapLocation.id] = (MapPoint(mapLocation, requireContext()))
                     }
                 }
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
@@ -99,13 +98,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.routeTitle.setOnFocusChangeListener { _, hasFocus ->
-            if(!hasFocus) updateRoute()
+            if (!hasFocus) updateRoute()
         }
         binding.routeDescription.setOnFocusChangeListener { _, hasFocus ->
-            if(!hasFocus) updateRoute()
+            if (!hasFocus) updateRoute()
         }
 
         binding.backButton.setOnClickListener {
+
             changeBackFragment()
         }
 
@@ -113,7 +113,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             chooseRoute()
         }
 
-        binding.publishRouteButton.setOnClickListener{
+        binding.publishRouteButton.setOnClickListener {
             publishRoute()
         }
     }
@@ -140,6 +140,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
         mapViewModel.route = route
+        mapViewModel.inCreationMode = true
         navigateToMapListener?.navigateToMap()
     }
 
