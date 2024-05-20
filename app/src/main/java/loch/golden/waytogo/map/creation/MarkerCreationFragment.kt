@@ -59,18 +59,10 @@ class MarkerCreationFragment(
             mapBinding.expandedPanel.creationTitle.setText(marker?.title)
             Log.d("Warmbier", mapViewModel.route!!.pointList[id].toString())
 
-            if (mapViewModel.route!!.pointList[id]?.photoPath != null) {
-                Log.d("Warmbier", "Image path not null")
-                val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[id]?.photoPath)
-                mapBinding.expandedPanel.creationAddImage.setImageBitmap(bitmap)
-            } else {
-                Log.d("Warmbier", "Image path null")
-                mapBinding.expandedPanel.creationAddImage.setImageResource(R.drawable.ic_add_photo_24)
-            }
-            routeCreationManager.setCurrentMarkerId(marker?.snippet!!)
+
+            routeCreationManager.onEditMarker(marker?.snippet!!)
             routeCreationManager.hideInfoWindow(marker.snippet!!)
         }
-        mapBinding.expandedPanel.creationSeekbar.isEnabled = false
     }
 
 

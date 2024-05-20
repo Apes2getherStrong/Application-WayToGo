@@ -3,6 +3,7 @@ package loch.golden.waytogo.map.creation
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
@@ -65,9 +66,8 @@ class RouteCreationManager(
         object : Runnable {
             override fun run() {
                 try {
-                    Log.d("AudioWarmbier", mapViewModel.mp!!.currentPosition.toString())
                     binding.expandedPanel.creationSeekbar.progress = mapViewModel.mp!!.currentPosition
-                    handler.postDelayed(this, 200)
+                    handler.postDelayed(this, 100)
                 } catch (e: Exception) {
                     Log.d("Warmbier", e.toString())
                 }
@@ -143,17 +143,12 @@ class RouteCreationManager(
 
         binding.expandedPanel.creationPlayPause.setOnClickListener {
             if (mapViewModel.route!!.pointList[currentMarkerId]?.audioPath != null) {
-
-                if (mapViewModel.mp == null) {
-                    mapViewModel.mp = MediaPlayer()
-                    startAudio()
-                } else {
-                    if (mapViewModel.mp!!.isPlaying)
-                        pauseAudio()
-                    else
-                        resumeAudio()
-                }
+                if (mapViewModel.mp!!.isPlaying)
+                    pauseAudio()
+                else
+                    resumeAudio()
             }
+
         }
 
 
@@ -284,31 +279,46 @@ class RouteCreationManager(
             isRecording = false
             val outputFilePath = getOutputFile(currentMarkerId!!, MediaType.AUDIO).absolutePath
             mapViewModel.route!!.pointList[currentMarkerId]?.audioPath = outputFilePath
+            prepareAudio()
         }
     }
 
-    private fun startAudio() {
+
+    fun onEditMarker(id: String) {
+        this.currentMarkerId = id
+        if (mapViewModel.route!!.pointList[id]?.photoPath != null) {
+            Log.d("Warmbier", "Image path not null")
+            val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[id]?.photoPath)
+            binding.expandedPanel.creationAddImage.setImageBitmap(bitmap)
+        } else {
+            Log.d("Warmbier", "Image path null")
+            binding.expandedPanel.creationAddImage.setImageResource(R.drawable.ic_add_photo_24)
+        }
+        if (mapViewModel.route!!.pointList[id]?.audioPath != null) {
+            Log.d("AudioWarmbier", "Audio not path null")
+            prepareAudio()
+        } else {
+            Log.d("AudioWarmbier", "Audio path null")
+            binding.expandedPanel.creationSeekbar.isEnabled = false
+        }
+    }
+
+    private fun prepareAudio() {
+        mapViewModel.mp = MediaPlayer()
         mapViewModel.mp!!.apply {
-            try {
-                Log.d("AudioWarmbier", "Starting playing")
-                setDataSource(mapViewModel.route!!.pointList[currentMarkerId]?.audioPath)
-                prepare()
-                setOnPreparedListener {
-                    start()
-                    binding.expandedPanel.creationPlayPause.isActivated = true
-                    initSeekbar() // Initialize SeekBar here
-                }
+            setDataSource(mapViewModel.route!!.pointList[currentMarkerId]?.audioPath)
+            prepare()
+            setOnPreparedListener {
+                binding.expandedPanel.creationPlayPause.isActivated = false
+                initSeekbar() // Initialize SeekBar here
+                binding.expandedPanel.creationSeekbar.isEnabled = true
+            }
+            setOnCompletionListener {
+                Log.d("AudioWarmbier", "stop/release playing")
+                seekTo(0)
+                stop()
+                binding.expandedPanel.creationPlayPause.isActivated = false
 
-                setOnCompletionListener {
-                    Log.d("AudioWarmbier", "stop/release playing")
-                    stop()
-                    release()
-                    mapViewModel.mp = null
-                    binding.expandedPanel.creationPlayPause.isActivated = false
-
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
             }
         }
     }
@@ -352,10 +362,6 @@ class RouteCreationManager(
         return File(fragment.requireContext().filesDir, "$directory/$fileName$extension")
     }
 
-
-    fun setCurrentMarkerId(id: String) {
-        this.currentMarkerId = id
-    }
 
     override fun onMarkerDrag(marker: Marker) {
         val id = marker.snippet!!
