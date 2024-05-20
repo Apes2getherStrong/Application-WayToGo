@@ -122,7 +122,7 @@
             android:id="@+id/creation_seekbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="48dp"
+            android:layout_marginEnd="48dp"
             app:layout_constraintBottom_toBottomOf="@id/creation_play_pause"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/creation_play_pause"
@@ -137,7 +137,6 @@
             android:layout_marginTop="12dp"
             app:icon="@drawable/ic_mic_24"
             app:iconSize="36dp"
-            app:iconTint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/creation_seekbar" />
