@@ -10,7 +10,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.route.Route
-import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
+import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 
 @Dao

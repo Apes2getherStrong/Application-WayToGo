@@ -14,8 +14,9 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
+import java.util.UUID
 
-@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 3, exportSchema = false)
+@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class WayToGoDatabase : RoomDatabase() {
 
@@ -34,20 +35,6 @@ abstract class WayToGoDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(routeDao: RouteDao) {
 
-            val routeMapLocations = listOf(
-                RouteMapLocation("123eefs", "1"),
-                RouteMapLocation("123eefs", "2"),
-                RouteMapLocation("ddasa2312311", "2")
-            )
-
-            routeDao.insertListOfRouteMapLocations(routeMapLocations)
-
-            val mapLocations = listOf(
-                MapLocation("1", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
-                MapLocation("2", "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
-            )
-            routeDao.insertMapLocations(mapLocations)
-
             val route1 = Route("123eefs", "Pierwsza trasa", "Opis pierwszej trasy")
             val route2 = Route("ddasa2312311", "Druga trasa", "Opis drugiej trasy")
             val route3NOwa = Route("c0fe79c1-895c-468f-b815-111b00b1c2eb", "Dzika trasa na posta", "Opis dzikiej trasy")
@@ -55,6 +42,41 @@ abstract class WayToGoDatabase : RoomDatabase() {
             routeDao.insertRoute(route2)
             routeDao.insertRoute(route3NOwa)
 
+
+            val mapLocations = listOf(
+                MapLocation("324esczxc", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
+                MapLocation("123eas", "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
+
+            )
+            routeDao.insertMapLocations(mapLocations)
+
+            val routeMapLocations = listOf(
+                RouteMapLocation("123eefs", "324esczxc"),
+                RouteMapLocation("123eefs", "123eas"),
+                RouteMapLocation("ddasa2312311", "123eas"),
+
+            )
+
+            routeDao.insertListOfRouteMapLocations(routeMapLocations)
+
+            val route4 = Route(
+                UUID.randomUUID().toString(),
+                "Nowa trasa do posta",
+                "Opis nowej trasy"
+            )
+            routeDao.insertRoute(route4)
+
+            val mapLocationsForRoute4 = listOf(
+                MapLocation(UUID.randomUUID().toString(), "Punkt 1", "Opis punktu 1", 45.678, 23.456),
+                MapLocation(UUID.randomUUID().toString(), "Punkt 2", "Opis punktu 2", 56.789, 34.567)
+            )
+            routeDao.insertMapLocations(mapLocationsForRoute4)
+
+            val routeMapLocationsForRoute4 = listOf(
+                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[0].id),
+                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[1].id)
+            )
+            routeDao.insertListOfRouteMapLocations(routeMapLocationsForRoute4)
         }
 
     }

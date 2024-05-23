@@ -6,11 +6,12 @@ import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
-import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
+import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
+import okhttp3.ResponseBody
 import retrofit2.Response
 
 class RouteRepository(private val routeDao: RouteDao) {
@@ -94,12 +95,30 @@ class RouteRepository(private val routeDao: RouteDao) {
         return RetrofitInstance.apiService.getMapLocationsByRouteId(routeId)
     }
 
+    suspend fun getRouteImage(routeId: String): ByteArray? {
+        val response = RetrofitInstance.apiService.getRouteImage(routeId)
+        return response.body()?.bytes()
+    }
+
+    suspend fun getMapLocationImage(mapLocationId: String): ByteArray? {
+        val response = RetrofitInstance.apiService.getMapLocationImage(mapLocationId)
+        return response.body()?.bytes()
+    }
+
+    suspend fun getMapLocationAudios(mapLocationId: String): Response<List<String>> {
+        return RetrofitInstance.apiService.getMapLocationAudios(mapLocationId)
+    }
+
     suspend fun postRoute(route: Route): Response<Route> {
         return RetrofitInstance.apiService.postRoute(route)
     }
 
-    suspend fun postMapLocations(mapLocations: List<MapLocationRequest>): Response<List<MapLocationRequest>> {
-        return RetrofitInstance.apiService.postMapLocations(mapLocations)
+    suspend fun postMapLocation(mapLocation: MapLocationRequest): Response<MapLocationRequest> {
+        return RetrofitInstance.apiService.postMapLocation(mapLocation)
+    }
+
+    suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocation): Response<RouteMapLocation> {
+        return RetrofitInstance.apiService.postRouteMapLocation(routeMapLocation)
     }
 }
 

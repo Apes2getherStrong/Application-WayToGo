@@ -22,4 +22,12 @@ data class MapLocation(
         mapPoint.position.latitude,
         mapPoint.position.longitude,
     )
+
+    constructor(mapLocationRequest: MapLocationRequest) :this(
+        mapLocationRequest.id,
+        mapLocationRequest.name,
+        mapLocationRequest.description,
+        mapLocationRequest.coordinates.coordinates[0],
+        mapLocationRequest.coordinates.coordinates[1]
+    )
 }

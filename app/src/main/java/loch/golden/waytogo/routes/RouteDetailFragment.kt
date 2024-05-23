@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -111,6 +112,18 @@ class RouteDetailFragment() : Fragment() {
 
 
         }
+        // Pobierania image routa, nwm czy napewno dziala bo nie ma imagow na backendzie
+//        routeViewModel.getRouteImage(routeId)
+//        routeViewModel.currentRouteImage.observe(viewLifecycleOwner) { imageBytes ->
+//            if (imageBytes != null) {
+//                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+//                binding.routeImage.setImageBitmap(bitmap)
+//                Log.d("Image Response", "$routeId")
+//            } else {
+//                Log.d("Image Response", "Failed $routeId")
+//            }
+//        }
+
         binding.backButton.setOnClickListener {
             changeBackFragment()
         }
