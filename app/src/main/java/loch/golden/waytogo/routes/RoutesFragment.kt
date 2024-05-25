@@ -34,11 +34,16 @@ class RoutesFragment : Fragment() {
                 1 -> tab.text = "My Routes"
             }
         }.attach()
+        binding.addRouteFab.setOnClickListener() {
+            binding.viewPager.setCurrentItem(1, true)
+            replaceFragment(1, DatabaseMyRouteDetailFragment())
+        }
     }
 
     fun replaceFragment(position: Int, fragment: Fragment) {
         pagerAdapter.replaceFragment(position, fragment)
     }
+
     private inner class RoutesViewPagerAdapter(fragment: Fragment) :
         FragmentStateAdapter(fragment) {
         val fragments: Array<Fragment> = arrayOf(PublicRoutesFragment(), MyRoutesFragment())
@@ -63,14 +68,14 @@ class RoutesFragment : Fragment() {
         }
 
         override fun containsItem(itemId: Long): Boolean {
-            for (fragment in fragments){
+            for (fragment in fragments) {
                 if (getIDForFragment(fragment) == itemId)
                     return true
             }
             return false
         }
 
-        fun getIDForFragment(fragment: Fragment): Long{
+        fun getIDForFragment(fragment: Fragment): Long {
             return fragment.hashCode().toLong()
         }
     }
