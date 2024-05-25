@@ -20,8 +20,11 @@ import loch.golden.waytogo.databinding.FragmentDatabaseMyRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
+import loch.golden.waytogo.routes.model.maplocation.Coordinates
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
@@ -36,6 +39,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private var navigateToMapListener: OnNavigateToMapListener? = null
     private lateinit var route: MapRoute
     private lateinit var routeEntity: Route
+    private lateinit var mapLocationsOfRouteEntity: List<MapLocation>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,6 +87,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 binding.routeTitle.setText(routeWithLocationsFromDb.route.name)
                 binding.routeDescription.setText(routeWithLocationsFromDb.route.description)
                 val mapLocationAdapter = MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
+                Log.d("Map Location", routeWithLocationsFromDb.mapLocations.toString())
+                mapLocationsOfRouteEntity = routeWithLocationsFromDb.mapLocations
                 routeWithLocationsFromDb.mapLocations.let {
                     Log.d("Warmbier", it.toString())
                     for (mapLocation in it) {
@@ -132,8 +138,21 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
     }
 
+    //TODO nie dziala publishowania mapLocation jeszcze , fix
     private fun publishRoute() {
         routeViewModel.postRoute(routeEntity)
+        mapLocationsOfRouteEntity.forEach { mapLocation ->
+            val mapLocationRequest = MapLocationRequest(
+                mapLocation.id,
+                mapLocation.name,
+                mapLocation.description,
+                Coordinates(listOf(mapLocation.latitude,mapLocation.longitude))
+            )
+            routeViewModel.postMapLocation(mapLocationRequest)
+            val routeMapLocation = RouteMapLocation(routeEntity.routeUid,mapLocationRequest.id)
+            routeViewModel.postRouteMapLocation(routeMapLocation)
+        }
+
     }
 
     private fun chooseRoute() {

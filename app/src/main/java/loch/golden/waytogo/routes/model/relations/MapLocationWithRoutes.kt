@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes.model.realtions
+package loch.golden.waytogo.routes.model.relations
 
 import androidx.room.Embedded
 import androidx.room.Junction
@@ -7,12 +7,12 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 
-data class RouteWithMapLocations(
-    @Embedded val route: Route,
+data class MapLocationWithRoutes(
+    @Embedded val mapLocation: MapLocation,
     @Relation(
-        parentColumn = "route_uid",
-        entityColumn = "id",
+        parentColumn = "id",
+        entityColumn = "route_uid",
         associateBy = Junction(RouteMapLocation::class)
     )
-    val mapLocations: List<MapLocation>
+    val routes: List<Route>
 )

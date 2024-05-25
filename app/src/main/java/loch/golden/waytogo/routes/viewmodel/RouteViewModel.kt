@@ -13,13 +13,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
-import loch.golden.waytogo.routes.model.realtions.RouteWithMapLocations
+import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
-import loch.golden.waytogo.routes.model.Converters
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
@@ -31,6 +30,9 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
+    val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
+    val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
+    val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
             routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
@@ -106,17 +108,38 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun postRoute(route: Route) {
+    fun getRouteImage(routeUid: String) {
         viewModelScope.launch {
-            routeRepository.postRoute(route)
-
+            val currentImageBytes = routeRepository.getRouteImage(routeUid)
+            currentRouteImage.value = currentImageBytes
         }
     }
 
-    fun postMapLocations(mapLocations : List<MapLocationRequest>) = viewModelScope.launch {
-        routeRepository.postMapLocations(mapLocations)
+    fun getMapLocationImage(mapLocationId: String) {
+        viewModelScope.launch {
+            val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
+            currentMapImage.value = currentImageBytes
+        }
     }
 
+    fun getMapLocationAudios(mapLocationId: String) {
+        viewModelScope.launch {
+            mapLocationAudios.value = routeRepository.getMapLocationAudios(mapLocationId)
+        }
+    }
+
+    fun postRoute(route: Route) = viewModelScope.launch {
+            routeRepository.postRoute(route)
+    }
+
+
+    fun postMapLocation(mapLocation : MapLocationRequest ) = viewModelScope.launch {
+        routeRepository.postMapLocation(mapLocation)
+    }
+
+    fun postRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
+        routeRepository.postRouteMapLocation(routeMapLocation)
+    }
 }
 
 //TODO przerobic na flow a nie livadata
