@@ -315,8 +315,6 @@ class RouteCreationManager(
             }
             setOnCompletionListener {
                 Log.d("AudioWarmbier", "stop/release playing")
-                seekTo(0)
-                stop()
                 binding.expandedPanel.creationPlayPause.isActivated = false
 
             }

@@ -27,6 +27,7 @@ import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import java.util.UUID
 
 
 class DatabaseMyRouteDetailFragment() : Fragment() {
@@ -70,9 +71,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 }
             })
 
-        //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
-        // dzieki gogi za notatke
-        val routeId = arguments?.getString("id") ?: "" //TODO add error message
+        val routeId = arguments?.getString("id") ?: run {
+            val route = Route(UUID.randomUUID().toString(), "My Route", "")
+            routeViewModel.insert(route)
+            route.routeUid
+        }
 
         routeViewModel.getRouteWithMapLocations(routeId)
         routeViewModel.routeWithLocationsFromDb.observe(viewLifecycleOwner) { routeWithLocationsFromDb ->
@@ -101,6 +104,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             } else {
                 Toast.makeText(requireContext(), "Route not found", Toast.LENGTH_SHORT).show()
             }
+
         }
 
         binding.routeTitle.setOnFocusChangeListener { _, hasFocus ->
@@ -146,10 +150,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 mapLocation.id,
                 mapLocation.name,
                 mapLocation.description,
-                Coordinates(listOf(mapLocation.latitude,mapLocation.longitude))
+                Coordinates(listOf(mapLocation.latitude, mapLocation.longitude))
             )
             routeViewModel.postMapLocation(mapLocationRequest)
-            val routeMapLocation = RouteMapLocation(routeEntity.routeUid,mapLocationRequest.id)
+            val routeMapLocation = RouteMapLocation(routeEntity.routeUid, mapLocationRequest.id)
             routeViewModel.postRouteMapLocation(routeMapLocation)
         }
 
