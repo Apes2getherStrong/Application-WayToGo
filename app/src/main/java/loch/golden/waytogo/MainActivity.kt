@@ -14,12 +14,12 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
-import loch.golden.waytogo.routes.LoginFragment
+import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.tokenmanager.TokenManager
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,

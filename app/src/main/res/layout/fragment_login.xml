@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/fragment_login"
-    tools:context=".routes.LoginFragment">
+    tools:context=".user.LoginFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container"

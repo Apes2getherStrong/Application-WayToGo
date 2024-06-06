@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes.tokenmanager
+package loch.golden.waytogo.user.tokenmanager
 
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import okhttp3.Interceptor

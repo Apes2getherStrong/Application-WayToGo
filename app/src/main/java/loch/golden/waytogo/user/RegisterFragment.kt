@@ -7,17 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRegisterBinding
-import loch.golden.waytogo.routes.LoginFragment
-import loch.golden.waytogo.routes.RouteDetailFragment
 import loch.golden.waytogo.routes.RouteMainApplication
-import loch.golden.waytogo.routes.RoutesFragment
-import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.model.user.User
-import loch.golden.waytogo.routes.tokenmanager.TokenManager
+import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
@@ -61,7 +54,7 @@ class RegisterFragment : Fragment() {
 
     private fun navigateToLoginFragment() {
         parentFragmentManager.commit {
-            replace(R.id.fragment_container_main,LoginFragment())
+            replace(R.id.fragment_container_main, LoginFragment())
         }
     }
 

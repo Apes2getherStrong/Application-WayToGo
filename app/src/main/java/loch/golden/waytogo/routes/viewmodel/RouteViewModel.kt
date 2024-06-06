@@ -11,8 +11,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import loch.golden.waytogo.routes.model.auth.AuthRequest
-import loch.golden.waytogo.routes.model.auth.AuthResponse
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
@@ -22,7 +22,7 @@ import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
-import loch.golden.waytogo.routes.model.user.User
+import loch.golden.waytogo.user.model.User
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 

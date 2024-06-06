@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.model.auth.AuthRequest
-import loch.golden.waytogo.routes.model.auth.AuthResponse
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
@@ -13,9 +13,8 @@ import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
-import loch.golden.waytogo.routes.model.user.User
+import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
-import okhttp3.ResponseBody
 import retrofit2.Response
 
 class RouteRepository(private val routeDao: RouteDao) {

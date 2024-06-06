@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes
+package loch.golden.waytogo.user
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,23 +8,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentLoginBinding
-import loch.golden.waytogo.routes.api.ApiService
-import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.model.auth.AuthRequest
-import loch.golden.waytogo.routes.model.auth.AuthResponse
-import loch.golden.waytogo.routes.model.user.User
-import loch.golden.waytogo.routes.tokenmanager.TokenManager
+import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
-import loch.golden.waytogo.user.RegisterFragment
-import retrofit2.Response
 
 
 class LoginFragment : Fragment() {

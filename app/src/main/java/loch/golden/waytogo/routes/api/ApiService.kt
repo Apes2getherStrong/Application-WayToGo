@@ -1,14 +1,13 @@
 package loch.golden.waytogo.routes.api
 
-import loch.golden.waytogo.routes.model.auth.AuthRequest
-import loch.golden.waytogo.routes.model.auth.AuthResponse
-import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
-import loch.golden.waytogo.routes.model.user.User
+import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.utils.Constants
 import okhttp3.ResponseBody
 import retrofit2.Response

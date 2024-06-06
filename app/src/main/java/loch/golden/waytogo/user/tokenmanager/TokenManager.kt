@@ -1,4 +1,4 @@
-package loch.golden.waytogo.routes.tokenmanager
+package loch.golden.waytogo.user.tokenmanager
 
 import android.content.Context
 import android.content.SharedPreferences
