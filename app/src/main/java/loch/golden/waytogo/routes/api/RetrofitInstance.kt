@@ -12,7 +12,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 object RetrofitInstance {
 
     private lateinit var tokenManager: TokenManager
-
     fun getTokenManager(tokenManager: TokenManager) {
         this.tokenManager = tokenManager
     }

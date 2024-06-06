@@ -18,17 +18,26 @@ import loch.golden.waytogo.routes.LoginFragment
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
+import loch.golden.waytogo.routes.api.RetrofitInstance
+import loch.golden.waytogo.routes.tokenmanager.TokenManager
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
     ActivityCompat.OnRequestPermissionsResultCallback, OnNavigateToMapListener {
 
+    private lateinit var tokenManager: TokenManager
     private lateinit var binding: ActivityMainBinding
     private var dialog: AlertDialog? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        tokenManager = TokenManager(this)
+        RetrofitInstance.getTokenManager(tokenManager)
+
+
+
     }
 
     override fun onStart() {

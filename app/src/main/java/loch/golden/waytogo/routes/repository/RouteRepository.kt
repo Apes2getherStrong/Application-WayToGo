@@ -5,6 +5,7 @@ import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.model.auth.AuthRequest
+import loch.golden.waytogo.routes.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
@@ -85,14 +86,16 @@ class RouteRepository(private val routeDao: RouteDao) {
 
 
 
-    suspend fun login(authRequest: AuthRequest) {
+    suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login",response.body().toString())
+        return response
     }
 
-    suspend fun register(user: User) {
+    suspend fun register(user: User) :Response<Void>{
         val response = RetrofitInstance.apiService.register(user)
-        Log.d("Login",response.body().toString())
+        Log.d("Register",response.body().toString())
+        return response
     }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {

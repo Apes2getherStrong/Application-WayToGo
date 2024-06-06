@@ -1,10 +1,11 @@
 package loch.golden.waytogo.routes.tokenmanager
 
 import android.content.Context
+import android.content.SharedPreferences
 
 class TokenManager (context: Context) {
 
-    private val prefs = context.getSharedPreferences("auth",Context.MODE_PRIVATE)
+    private val prefs : SharedPreferences= context.getSharedPreferences("auth",Context.MODE_PRIVATE)
 
     fun saveToken(token : String) {
         with(prefs.edit()) {

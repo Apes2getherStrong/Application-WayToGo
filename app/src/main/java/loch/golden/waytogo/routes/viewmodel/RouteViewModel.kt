@@ -37,11 +37,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
 
-    private val _authResponse = MutableLiveData<AuthResponse?>()
-    val authResponse: LiveData<AuthResponse?> = _authResponse
+    val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
 
-    private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> = _errorMessage
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
             routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
@@ -152,16 +149,19 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun login(authRequest: AuthRequest) {
         viewModelScope.launch {
-            routeRepository.login(authRequest)
+            val response = routeRepository.login(authRequest)
+            if(response.isSuccessful){
+                authResponse.postValue(response.body())
+            }
+
         }
 
     }
 
-    fun register(user: User){
-        viewModelScope.launch {
+    fun register(user: User)= viewModelScope.launch {
             routeRepository.register(user)
         }
-    }
+
 }
 
 //TODO przerobic na flow a nie livadata
