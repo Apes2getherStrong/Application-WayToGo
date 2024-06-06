@@ -1,4 +1,4 @@
 package loch.golden.waytogo.routes.model.maplocation
 
-data class Coordinates( val coordinates: List<Double>)
+data class Coordinates( val type: String, val coordinates: List<Double>)
 

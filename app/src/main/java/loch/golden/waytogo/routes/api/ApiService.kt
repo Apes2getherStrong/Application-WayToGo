@@ -1,11 +1,15 @@
 package loch.golden.waytogo.routes.api
 
+import loch.golden.waytogo.routes.model.auth.AuthRequest
+import loch.golden.waytogo.routes.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.user.User
+import loch.golden.waytogo.routes.utils.Constants
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -15,6 +19,15 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
+
+    @POST(Constants.LOGIN_URL)
+    suspend fun login(
+        @Body request: AuthRequest
+    ) : Response<AuthResponse>
+
+    @POST(Constants.REGISTER_URL)
+    suspend fun register(@Body user: User): Response<Void>
+
     @GET("routes")
     suspend fun getRoutes(
         @Query("pageNumber") pageNumber: Int,

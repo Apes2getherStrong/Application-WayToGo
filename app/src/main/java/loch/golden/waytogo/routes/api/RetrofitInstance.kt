@@ -1,11 +1,27 @@
 package loch.golden.waytogo.routes.api
 
+import android.content.Context
+import loch.golden.waytogo.routes.tokenmanager.AuthInterceptor
+import loch.golden.waytogo.routes.tokenmanager.TokenManager
 import loch.golden.waytogo.routes.utils.Constants.Companion.BASE_URL
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitInstance {
+
+    private lateinit var tokenManager: TokenManager
+
+    fun getTokenManager(tokenManager: TokenManager) {
+        this.tokenManager = tokenManager
+    }
+
+    private val okHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(tokenManager))
+            .build()
+    }
 
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
@@ -15,6 +31,7 @@ object RetrofitInstance {
             .baseUrl(BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
             .build()
     }
 }

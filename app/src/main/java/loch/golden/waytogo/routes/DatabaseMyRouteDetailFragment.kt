@@ -150,7 +150,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 mapLocation.id,
                 mapLocation.name,
                 mapLocation.description,
-                Coordinates(listOf(mapLocation.latitude, mapLocation.longitude))
+                Coordinates("Point",listOf(mapLocation.latitude, mapLocation.longitude))
             )
             routeViewModel.postMapLocation(mapLocationRequest)
             val routeMapLocation = RouteMapLocation(routeEntity.routeUid, mapLocationRequest.id)

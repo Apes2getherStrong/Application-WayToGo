@@ -14,6 +14,7 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
+import loch.golden.waytogo.routes.LoginFragment
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
@@ -100,7 +101,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         val fragment = when (item.itemId) {
             R.id.bottom_nav_map -> PointMapFragment()
             R.id.bottom_nav_routes -> RoutesFragment()
-//            R.id.bottom_nav_user -> UserFragment()
+            R.id.bottom_nav_user -> LoginFragment()
             else -> return false
         }
         supportFragmentManager.commit {

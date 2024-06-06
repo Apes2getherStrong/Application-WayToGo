@@ -7,6 +7,8 @@ class Constants {
         const val IMAGE_EXTENSION = ".jpg"
         const val IMAGE_DIR = "images"
         const val AUDIO_DIR = "audios"
+        const val LOGIN_URL = "auth/login"
+        const val REGISTER_URL = "auth/register"
 
         const val MAX_DESCRIPTION_LENGTH = 50
     }

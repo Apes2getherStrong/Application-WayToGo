@@ -11,6 +11,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.routes.model.auth.AuthRequest
+import loch.golden.waytogo.routes.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
@@ -20,6 +22,7 @@ import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
+import loch.golden.waytogo.routes.model.user.User
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
@@ -33,6 +36,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
+
+    private val _authResponse = MutableLiveData<AuthResponse?>()
+    val authResponse: LiveData<AuthResponse?> = _authResponse
+
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> = _errorMessage
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
             routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
@@ -139,6 +148,19 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun postRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
         routeRepository.postRouteMapLocation(routeMapLocation)
+    }
+
+    fun login(authRequest: AuthRequest) {
+        viewModelScope.launch {
+            routeRepository.login(authRequest)
+        }
+
+    }
+
+    fun register(user: User){
+        viewModelScope.launch {
+            routeRepository.register(user)
+        }
     }
 }
 
