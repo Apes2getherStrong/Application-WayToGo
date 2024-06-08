@@ -55,7 +55,7 @@ class RouteCreationManager(
 
 
     private val mediaRecorderDelegate = lazy {
-        MediaRecorder(fragment.requireContext())
+        MediaRecorder()
     }
     private val mediaRecorder by mediaRecorderDelegate
     private var isRecording = false
