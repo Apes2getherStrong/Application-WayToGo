@@ -3,6 +3,7 @@ package loch.golden.waytogo.routes.repository
 import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
+import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
@@ -16,6 +17,7 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
+import okhttp3.MultipartBody
 import retrofit2.Response
 
 class RouteRepository(private val routeDao: RouteDao) {
@@ -96,6 +98,18 @@ class RouteRepository(private val routeDao: RouteDao) {
         val response = RetrofitInstance.apiService.register(user)
         Log.d("Register",response.body().toString())
         return response
+    }
+
+    suspend fun postAudio(audio: Audio): Response<Audio> {
+        return RetrofitInstance.apiService.postAudio(audio)
+    }
+
+    suspend fun postAudioFile(audioId: String, audioFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.postAudioFile(audioId,audioFile)
+    }
+
+    suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId,imageFile)
     }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {

@@ -1,5 +1,6 @@
 package loch.golden.waytogo.routes.viewmodel
 
+import android.media.Image
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,44 +13,47 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import loch.golden.waytogo.user.model.auth.AuthRequest
-import loch.golden.waytogo.user.model.auth.AuthResponse
+import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
-import retrofit2.Response
-import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
-import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
-import retrofit2.Callback
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.model.auth.AuthResponse
+import okhttp3.MultipartBody
+import retrofit2.Response
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
-    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> = MutableLiveData()
+    val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> =
+        MutableLiveData()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
-
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
     val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
-
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
+    val audioResponse: MutableLiveData<Audio> = MutableLiveData()
 
 
-    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
+    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
+        viewModelScope.launch {
             routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
-    }
+        }
 
-    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) = viewModelScope.launch {
-        routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
-    }
+    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
+        viewModelScope.launch {
+            routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
+        }
 
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
@@ -69,20 +73,22 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.deleteRoute(route)
     }
 
-    fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) = viewModelScope.launch {
-        routeRepository.insertMapLocation(mapLocation)
-        routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
-    }
+    fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
+        viewModelScope.launch {
+            routeRepository.insertMapLocation(mapLocation)
+            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
+        }
 
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
     }
 
-    fun deleteMapLocation(mapLocation: MapLocation, routeId: String,sequenceNr: Int) = viewModelScope.launch {
-        routeRepository.deleteMapLocation(mapLocation)
-        routeRepository.deleteRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
+    fun deleteMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
+        viewModelScope.launch {
+            routeRepository.deleteMapLocation(mapLocation)
+            routeRepository.deleteRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
 
-    }
+        }
 
     fun getRouteWithMapLocations(routeUid: String) {
         viewModelScope.launch {
@@ -137,25 +143,50 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun postRoute(route: Route,callback: (Route) -> Unit) = viewModelScope.launch {
+    fun postAudio(audio: Audio) {
         viewModelScope.launch {
-            try {
-                val response = routeRepository.postRoute(route)
-                if (response.isSuccessful) {
-                    response.body()?.let { newRoute ->
-                        callback(newRoute)
-                    }
-                } else {
-                    Log.e("postRoute", "Error: ${response.errorBody()?.string()}")
+            val response = routeRepository.postAudio(audio)
+            if(response.isSuccessful) {
+                response.body()?.let { newAudio ->
+                    audioResponse.postValue(newAudio)
+
                 }
-            } catch (e: Exception) {
-                Log.e("postRoute", "Exception: ${e.message}")
+            }else{
+                Log.e("postAudio", "Error: ${response.errorBody()?.string()}")
             }
         }
     }
 
+    fun postAudioFile(audioId: String, audioFile: MultipartBody.Part){
+        viewModelScope.launch {
+            routeRepository.postAudioFile(audioId,audioFile)
+        }
+    }
 
-    fun postMapLocation(mapLocation : MapLocationRequest, callback: (MapLocationRequest) -> Unit ) = viewModelScope.launch {
+    fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part){
+        viewModelScope.launch {
+            routeRepository.putImageToMapLocation(mapLocationId,imageFile)
+        }
+    }
+
+    fun postRoute(route: Route, callback: (Route) -> Unit) = viewModelScope.launch {
+        try {
+            val response = routeRepository.postRoute(route)
+            if (response.isSuccessful) {
+                response.body()?.let { newRoute ->
+                    callback(newRoute)
+                }
+            } else {
+                Log.e("postRoute", "Error: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("postRoute", "Exception: ${e.message}")
+        }
+
+    }
+
+
+    fun postMapLocation(mapLocation: MapLocationRequest, callback: (MapLocationRequest) -> Unit) =
         viewModelScope.launch {
             try {
                 val response = routeRepository.postMapLocation(mapLocation)
@@ -169,8 +200,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             } catch (e: Exception) {
                 Log.e("postMapLocation", "Exception: ${e.message}")
             }
+
         }
-    }
 
     fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest) = viewModelScope.launch {
         routeRepository.postRouteMapLocation(routeMapLocation)
@@ -179,7 +210,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun login(authRequest: AuthRequest) {
         viewModelScope.launch {
             val response = routeRepository.login(authRequest)
-            if(response.isSuccessful){
+            if (response.isSuccessful) {
                 authResponse.postValue(response.body())
             }
 
@@ -187,8 +218,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     }
 
-    fun register(user: User)= viewModelScope.launch {
-            routeRepository.register(user)
+    fun register(user: User) = viewModelScope.launch {
+        routeRepository.register(user)
     }
 
 }
