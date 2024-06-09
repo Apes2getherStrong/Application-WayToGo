@@ -71,11 +71,13 @@ interface RouteDao {
 
     @Transaction
     suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+
         insertRoute(routeWithMapLocations.route)
         routeWithMapLocations.mapLocations.forEach{ mapLocation ->
             insertMapLocation(mapLocation)
             val routeMapLocation = RouteMapLocation(routeWithMapLocations.route.routeUid, mapLocation.id)
             insertRouteMapLocation(routeMapLocation)
+
         }
     }
 
@@ -88,6 +90,7 @@ interface RouteDao {
             val routeMapLocation = RouteMapLocation(route.routeUid, mapLocation.id)
             deleteRouteMapLocation(routeMapLocation)
             deleteMapLocation(mapLocation)
+
         }
         deleteRoute(route)
 

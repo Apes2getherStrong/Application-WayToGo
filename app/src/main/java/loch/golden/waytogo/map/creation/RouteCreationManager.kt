@@ -197,7 +197,7 @@ class RouteCreationManager(
             marker.position.latitude,
             marker.position.longitude
         )
-        routeViewModel.insertMapLocation(mapLocation, routeId)
+        routeViewModel.insertMapLocation(mapLocation, routeId, mapViewModel.sequenceNr)
         mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation)
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
@@ -219,7 +219,8 @@ class RouteCreationManager(
                         "",
                         marker.position.latitude,
                         marker.position.longitude
-                    ), routeId
+                    ), routeId,
+                    mapViewModel.sequenceNr
                 )
                 mapViewModel.route?.pointList?.remove(markerId)
                 infoWindowMap.remove(markerId)

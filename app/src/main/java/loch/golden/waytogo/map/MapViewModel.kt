@@ -10,5 +10,6 @@ class MapViewModel : ViewModel() {
     var route: MapRoute? = null
     var inCreationMode = false
     var mp: MediaPlayer? = null
+    var sequenceNr: Int = 0
 
 }

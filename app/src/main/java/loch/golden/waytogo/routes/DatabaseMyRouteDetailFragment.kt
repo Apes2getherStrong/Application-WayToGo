@@ -24,7 +24,7 @@ import loch.golden.waytogo.routes.model.maplocation.Coordinates
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
-import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.util.UUID
@@ -138,25 +138,34 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             lifecycleScope.launch {
                 routeViewModel.updateRoute(routeEntity)
             }
-            Toast.makeText(requireContext(), "Udalo sie zupdatowac routa", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Udalo sie zupdatowac routa", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
     //TODO nie dziala publishowania mapLocation jeszcze , fix
     private fun publishRoute() {
-        routeViewModel.postRoute(routeEntity)
-        mapLocationsOfRouteEntity.forEach { mapLocation ->
-            val mapLocationRequest = MapLocationRequest(
-                mapLocation.id,
-                mapLocation.name,
-                mapLocation.description,
-                Coordinates("Point",listOf(mapLocation.latitude, mapLocation.longitude))
-            )
-            routeViewModel.postMapLocation(mapLocationRequest)
-            val routeMapLocation = RouteMapLocation(routeEntity.routeUid, mapLocationRequest.id)
-            routeViewModel.postRouteMapLocation(routeMapLocation)
-        }
+        var sequenceNumber = 1;
+        routeViewModel.postRoute(routeEntity) { newRoute ->
 
+            mapLocationsOfRouteEntity.forEach { mapLocation ->
+                val mapLocationRequest = MapLocationRequest(
+                    mapLocation.id,
+                    mapLocation.name,
+                    mapLocation.description,
+                    Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
+                )
+
+                routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
+
+                    val routeMapLocation =
+                        RouteMapLocationRequest(newMapLocation, newRoute, sequenceNumber)
+                    routeViewModel.postRouteMapLocation(routeMapLocation)
+
+                    sequenceNumber++
+                }
+            }
+        }
     }
 
     private fun chooseRoute() {

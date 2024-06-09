@@ -7,6 +7,7 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.utils.Constants
 import okhttp3.ResponseBody
@@ -71,6 +72,6 @@ interface ApiService {
 
     @POST("routeMapLocations")
     suspend fun postRouteMapLocation(
-        @Body routeMapLocation: RouteMapLocation
-    ): Response<RouteMapLocation>
+        @Body routeMapLocation: RouteMapLocationRequest
+    ): Response<RouteMapLocationRequest>
 }

@@ -13,6 +13,7 @@ import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import retrofit2.Response
@@ -131,7 +132,7 @@ class RouteRepository(private val routeDao: RouteDao) {
         return RetrofitInstance.apiService.postMapLocation(mapLocation)
     }
 
-    suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocation): Response<RouteMapLocation> {
+    suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest): Response<RouteMapLocationRequest> {
         return RetrofitInstance.apiService.postRouteMapLocation(routeMapLocation)
     }
 }

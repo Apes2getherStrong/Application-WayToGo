@@ -1,5 +1,6 @@
 package loch.golden.waytogo.routes.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,7 +23,9 @@ import loch.golden.waytogo.routes.paging.RoutePagingSource
 import loch.golden.waytogo.routes.repository.RouteRepository
 import retrofit2.Response
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
+import retrofit2.Callback
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
@@ -66,7 +69,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.deleteRoute(route)
     }
 
-    fun insertMapLocation(mapLocation: MapLocation, routeId: String) = viewModelScope.launch {
+    fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) = viewModelScope.launch {
         routeRepository.insertMapLocation(mapLocation)
         routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
     }
@@ -75,7 +78,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.updateMapLocation(mapLocation)
     }
 
-    fun deleteMapLocation(mapLocation: MapLocation, routeId: String) = viewModelScope.launch {
+    fun deleteMapLocation(mapLocation: MapLocation, routeId: String,sequenceNr: Int) = viewModelScope.launch {
         routeRepository.deleteMapLocation(mapLocation)
         routeRepository.deleteRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
 
@@ -134,16 +137,42 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun postRoute(route: Route) = viewModelScope.launch {
-            routeRepository.postRoute(route)
+    fun postRoute(route: Route,callback: (Route) -> Unit) = viewModelScope.launch {
+        viewModelScope.launch {
+            try {
+                val response = routeRepository.postRoute(route)
+                if (response.isSuccessful) {
+                    response.body()?.let { newRoute ->
+                        callback(newRoute)
+                    }
+                } else {
+                    Log.e("postRoute", "Error: ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e("postRoute", "Exception: ${e.message}")
+            }
+        }
     }
 
 
-    fun postMapLocation(mapLocation : MapLocationRequest ) = viewModelScope.launch {
-        routeRepository.postMapLocation(mapLocation)
+    fun postMapLocation(mapLocation : MapLocationRequest, callback: (MapLocationRequest) -> Unit ) = viewModelScope.launch {
+        viewModelScope.launch {
+            try {
+                val response = routeRepository.postMapLocation(mapLocation)
+                if (response.isSuccessful) {
+                    response.body()?.let { newMapLocation ->
+                        callback(newMapLocation)
+                    }
+                } else {
+                    Log.e("postMapLocation", "Error: ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e("postMapLocation", "Exception: ${e.message}")
+            }
+        }
     }
 
-    fun postRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
+    fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest) = viewModelScope.launch {
         routeRepository.postRouteMapLocation(routeMapLocation)
     }
 
@@ -160,7 +189,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun register(user: User)= viewModelScope.launch {
             routeRepository.register(user)
-        }
+    }
 
 }
 
