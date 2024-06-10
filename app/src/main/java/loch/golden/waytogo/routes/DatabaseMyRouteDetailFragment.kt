@@ -12,8 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentDatabaseMyRouteDetailBinding
@@ -25,8 +27,17 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
+import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.UUID
 
 
@@ -158,11 +169,58 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
 
+                    Log.d("Dzicz","Siema jestem se tu");
                     val routeMapLocation =
                         RouteMapLocationRequest(newMapLocation, newRoute, sequenceNumber)
                     routeViewModel.postRouteMapLocation(routeMapLocation)
 
                     sequenceNumber++
+
+                    val audio = Audio(
+                        UUID.randomUUID().toString(),
+                        newMapLocation.name + "audio",
+                        null,
+                        null,
+                        newMapLocation
+                    )
+                    routeViewModel.postAudio(audio) { newAudio ->
+                        val audioFile = File(
+                            requireContext().filesDir,
+                            "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}")
+
+                        Log.d("Dzicz",audioFile.absolutePath);
+                        if(audioFile.exists()){
+                            Log.d("Dzicz","Exists")
+                            val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(),audioFile )
+                            val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
+                            Log.d("AUDIO ID", newAudio.id)
+                            routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
+                        }else {
+                            Log.d("Dzicz","Nie mo")
+                        }
+
+
+
+                        val imageFile = File(
+                            requireContext().filesDir,
+                            "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}")
+
+                        if(imageFile.exists()){
+                            Log.d("Image","Exists")
+                            val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(),imageFile)
+                            val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
+                            routeViewModel.putImageToMapLocation(newMapLocation.id,imageMultiPartBody)
+                        }else {
+                            Log.d("Image","Nie mo")
+                        }
+
+                        val audioByteArray = routeViewModel.getAudioFile(newAudio.id)
+                       
+
+                        routeViewModel.getAudioByMapLocationId(newMapLocation.id)
+                        routeViewModel.getMapLocationImage(newMapLocation.id)
+
+                    }
                 }
             }
         }

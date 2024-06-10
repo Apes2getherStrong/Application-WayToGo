@@ -42,7 +42,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
-    val audioResponse: MutableLiveData<Audio> = MutableLiveData()
+    val mapLocationAudio: MutableLiveData<ByteArray?> = MutableLiveData()
+    val audioResponse: MutableLiveData<Response<Audio>> = MutableLiveData()
 
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
@@ -143,13 +144,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun postAudio(audio: Audio) {
+    fun postAudio(audio: Audio, callback: (Audio) -> Unit) {
         viewModelScope.launch {
             val response = routeRepository.postAudio(audio)
             if(response.isSuccessful) {
                 response.body()?.let { newAudio ->
-                    audioResponse.postValue(newAudio)
-
+                    callback(newAudio)
                 }
             }else{
                 Log.e("postAudio", "Error: ${response.errorBody()?.string()}")
@@ -157,7 +157,18 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun postAudioFile(audioId: String, audioFile: MultipartBody.Part){
+    fun getAudioFile(audioId: String) {
+        viewModelScope.launch {
+            mapLocationAudio.value = routeRepository.getAudioFile(audioId)
+        }
+    }
+
+    fun getAudioByMapLocationId(mapLocationId: String) {
+        viewModelScope.launch{
+            audioResponse.value = routeRepository.getAudioByMapLocationId(mapLocationId)
+        }
+    }
+    fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part){
         viewModelScope.launch {
             routeRepository.postAudioFile(audioId,audioFile)
         }

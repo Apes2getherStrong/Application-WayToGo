@@ -40,8 +40,8 @@ interface ApiService {
     @Multipart
     @POST("audios/{audioId}/audio")
     suspend fun postAudioFile(
-        @Path("audioId") audioId: String,
-        @Part audioFile: MultipartBody.Part,
+        @Path("audioId") audioId: String?,
+        @Part file: MultipartBody.Part,
     )
 
     @Multipart
@@ -82,6 +82,16 @@ interface ApiService {
     suspend fun getMapLocationAudios(
         @Path("mapLocationId") maplocationId: String
     ): Response<List<String>>
+
+    @GET("audios/{audioId}/audio")
+    suspend fun getAudioFile(
+        @Path("audioId") audioId: String
+    ): Response<ByteArray>
+
+    @GET("mapLocations/{mapLocationId}/audios")
+    suspend fun getAudioByMapLocationId(
+        @Path("mapLocationId") mapLocationId: String
+    ): Response<Audio>
 
 
     @POST("routes")

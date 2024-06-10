@@ -5,9 +5,10 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.user.model.User
 
 data class Audio(
-    val name: String,
-    val description: String,
-    val user: User,
+    val id: String,
+    val name: String?,
+    val description: String?,
+    val user: User?,
     @SerializedName("mapLocation")
     val mapLocationRequest: MapLocationRequest
 )
