@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.audio.Audio
+import loch.golden.waytogo.audio.AudioListResponse
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
@@ -100,12 +101,11 @@ class RouteRepository(private val routeDao: RouteDao) {
         return response
     }
 
-    suspend fun getAudioFile(audioId: String) : ByteArray? {
-        val response = RetrofitInstance.apiService.getAudioFile(audioId)
-        return response.body()
+    suspend fun getAudioFile(audioId: String) : Response<String> {
+        return RetrofitInstance.apiService.getAudioFile(audioId)
     }
 
-    suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<Audio> {
+    suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<AudioListResponse> {
         return RetrofitInstance.apiService.getAudioByMapLocationId(mapLocationId)
     }
 

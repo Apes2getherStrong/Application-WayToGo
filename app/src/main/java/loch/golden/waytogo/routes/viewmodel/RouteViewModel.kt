@@ -14,6 +14,7 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.audio.Audio
+import loch.golden.waytogo.audio.AudioListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
@@ -43,7 +44,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
     val mapLocationAudio: MutableLiveData<ByteArray?> = MutableLiveData()
-    val audioResponse: MutableLiveData<Response<Audio>> = MutableLiveData()
+    val audioResponse: MutableLiveData<Response<AudioListResponse>> = MutableLiveData()
 
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
@@ -159,7 +160,17 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun getAudioFile(audioId: String) {
         viewModelScope.launch {
-            mapLocationAudio.value = routeRepository.getAudioFile(audioId)
+            try {
+                val response = routeRepository.getAudioFile(audioId)
+                if(response.isSuccessful) {
+                    response.body().let {audio ->
+                        val audioByteArray = audio?.toByteArray()
+                        mapLocationAudio.postValue(audioByteArray)
+                    }
+                }
+            }catch (e: Exception) {
+                Log.d("FileAudio",e.toString())
+            }
         }
     }
 

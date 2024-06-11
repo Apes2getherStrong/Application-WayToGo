@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import loch.golden.waytogo.classes.MapPoint
@@ -24,6 +25,7 @@ import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 
 
 class RouteDetailFragment() : Fragment() {
@@ -102,23 +104,29 @@ class RouteDetailFragment() : Fragment() {
                             Log.d("Warmbier", "Ojezusku $mapLocation")
                             val mapPoint = MapPoint(mapLocation)
                             routeViewModel.getAudioByMapLocationId(mapLocation.id)
-                            routeViewModel.audioResponse.observe(viewLifecycleOwner) { audio ->
-                                Log.d("Warmbier", audio.toString())
-                                Log.d("Warmbier", audio.toString())
-
-//                                    routeViewModel.getAudioFile(it1.id)
-//                                    routeViewModel.mapLocationAudio.observe(viewLifecycleOwner) { audioBytes ->
-//                                        audioBytes?.let {
-//                                            val tempAudioFile =
-//                                                File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
-//                                            tempAudioFile.deleteOnExit() // Ensure the file is deleted when the app is closed
-//                                            val fos = FileOutputStream(tempAudioFile)
-//                                            fos.write(audioBytes)
-//                                            fos.close()
-//                                            mapPoint.audioPath = tempAudioFile.absolutePath
-//                                        }
-//                                    }
-
+                            routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
+                                audioResponse?.body()?.content.let {audios ->
+                                    for (audio in audios!!) {
+                                        Log.d("Audio", audio.toString())
+                                        routeViewModel.getAudioFile(audio.id)
+                                        routeViewModel.mapLocationAudio.observe(viewLifecycleOwner) { audioBytes ->
+                                            audioBytes?.let {
+                                                try {
+                                                    val tempAudioFile =
+                                                        File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
+                                                    tempAudioFile.deleteOnExit() // Ensure the file is deleted when the app is closed
+                                                    val fos = FileOutputStream(tempAudioFile)
+                                                    fos.write(audioBytes)
+                                                    fos.close()
+                                                    mapPoint.audioPath = tempAudioFile.absolutePath
+                                                    Log.d("AudioFile", "Audio file saved: ${tempAudioFile.absolutePath}")
+                                                }catch (e: IOException) {
+                                                    Log.e("AudioFile", "Error saving audio file", e)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             route.pointList[mapLocation.id] = mapPoint
