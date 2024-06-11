@@ -22,6 +22,8 @@ import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
 import loch.golden.waytogo.routes.model.Converters
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import java.io.File
+import java.io.FileOutputStream
 
 
 class RouteDetailFragment() : Fragment() {
@@ -96,9 +98,30 @@ class RouteDetailFragment() : Fragment() {
                     val mapLocationAdapter =
                         PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                     response.body()?.content.let {
-                        Log.d("Warmbier", it.toString())
                         for (mapLocation in it!!) {
-                            route.pointList[mapLocation.id] = (MapPoint(mapLocation))
+                            Log.d("Warmbier", "Ojezusku $mapLocation")
+                            val mapPoint = MapPoint(mapLocation)
+                            routeViewModel.getAudioByMapLocationId(mapLocation.id)
+                            routeViewModel.audioResponse.observe(viewLifecycleOwner) { audio ->
+                                Log.d("Warmbier", audio.toString())
+                                Log.d("Warmbier", audio.toString())
+
+//                                    routeViewModel.getAudioFile(it1.id)
+//                                    routeViewModel.mapLocationAudio.observe(viewLifecycleOwner) { audioBytes ->
+//                                        audioBytes?.let {
+//                                            val tempAudioFile =
+//                                                File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
+//                                            tempAudioFile.deleteOnExit() // Ensure the file is deleted when the app is closed
+//                                            val fos = FileOutputStream(tempAudioFile)
+//                                            fos.write(audioBytes)
+//                                            fos.close()
+//                                            mapPoint.audioPath = tempAudioFile.absolutePath
+//                                        }
+//                                    }
+
+                            }
+
+                            route.pointList[mapLocation.id] = mapPoint
                         }
                     }
                     binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
@@ -124,11 +147,13 @@ class RouteDetailFragment() : Fragment() {
 //            }
 //        }
 
-        binding.backButton.setOnClickListener {
+        binding.backButton.setOnClickListener()
+        {
             changeBackFragment()
         }
 
-        binding.chooseRoute.setOnClickListener {
+        binding.chooseRoute.setOnClickListener()
+        {
             chooseRoute()
         }
 

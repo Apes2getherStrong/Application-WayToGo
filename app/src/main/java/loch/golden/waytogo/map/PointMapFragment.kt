@@ -34,6 +34,7 @@ import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
+import loch.golden.waytogo.map.components.SeekbarManagerV2
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
@@ -54,7 +55,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
 
-    //private lateinit var seekbarManager: SeekbarManager
+    private var seekbarManager: SeekbarManagerV2? = null
     private lateinit var slidingUpPanelManager: SlidingUpPanelManager
 
 
@@ -81,20 +82,22 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         setUpListeners()
 
-        slidingUpPanelManager = SlidingUpPanelManager(binding)
+        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
         locationManager = LocationManager(requireContext())
         locationManager.startLocationUpdates()
-//        seekbarManager = SeekbarManager(
-//            requireContext(),
-//            mapViewModel,
-//            binding.expandedPanel.seekbar,
-//            binding.bottomPanel.customSeekbarProgress,
-//            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
-//        )
+
+
 
 
         if (mapViewModel.inCreationMode) {
             initCreation(savedInstanceState)
+        }else{
+            seekbarManager = SeekbarManagerV2(
+                mapViewModel,
+                binding.expandedPanel.seekbar,
+                listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
+            )
+            seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
         }
 
     }
@@ -126,7 +129,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         mapViewModel.cameraPosition?.let {
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
-            Log.d("Warmbier","In move camera ${locationManager.getCurrentLocation()}")
+            Log.d("Warmbier", "In move camera ${locationManager.getCurrentLocation()}")
             val cameraPosition = CameraPosition.builder()
                 .target(locationManager.getCurrentLocation() ?: LatLng(0.0, 0.0))
                 .zoom(4.0f)

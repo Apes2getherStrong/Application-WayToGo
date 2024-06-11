@@ -1,43 +1,44 @@
 package loch.golden.waytogo.map.components
 
+import android.content.Context
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
 import loch.golden.waytogo.map.MapViewModel
 
 class SeekbarManagerV2(
-    private val seekbar: SeekBar,
     private val mapViewModel: MapViewModel,
+    private val seekbar: SeekBar,
     private val buttonList: List<Button>
 ) {
     private val handler = Handler(Looper.getMainLooper())
-    private val seekbarRunnable by lazy {
-        object : Runnable {
-            override fun run() {
-                try {
-                    seekbar.progress = mapViewModel.mp!!.currentPosition
-                    handler.postDelayed(this, 100)
-                } catch (e: Exception) {
-                    Log.d("Warmbier", e.toString())
-                }
+    private var seekbarRunnable: Runnable = object : Runnable {
+        override fun run() {
+            try {
+                seekbar.progress = mapViewModel.mp!!.currentPosition
+                handler.postDelayed(this, 100)
+            } catch (e: Exception) {
+                Log.d("Warmbier", e.toString())
             }
-
         }
+
     }
+
 
     init {
         for (button in buttonList) {
             button.setOnClickListener {
-                try{
+                try {
                     if (mapViewModel.mp!!.isPlaying)
                         pauseAudio()
                     else
                         resumeAudio()
-                } catch (e: Exception){
-                    Log.d("Warmbier","pause/play button: $e")
+                } catch (e: Exception) {
+                    Log.d("Warmbier", "pause/play button: $e")
                 }
             }
         }
@@ -81,6 +82,32 @@ class SeekbarManagerV2(
             })
     }
 
+    fun setCustomSeekbar(customSeekbar: View, context: Context) {
+        val screenWidth = context.resources.displayMetrics.widthPixels
+        seekbarRunnable = object : Runnable {
+            override fun run() {
+                try {
+                    val currentPosition = mapViewModel.mp!!.currentPosition
+                    val duration = mapViewModel.mp!!.duration
+
+                    seekbar.progress = currentPosition.toInt()
+
+                    // Update bottom custom seekbar
+                    val trackPercentage = (if (duration != 0) currentPosition / duration else 0.0f) as Float
+                    val pixels = (screenWidth * trackPercentage).toInt()
+                    customSeekbar.layoutParams.width = pixels
+                    customSeekbar.requestLayout()
+
+                    handler.postDelayed(this, 100)
+                } catch (e: Exception) {
+                    Log.d("Warmbier", e.toString())
+                }
+            }
+
+        }
+    }
+
+
     private fun pauseAudio() {
         Log.d("AudioWarmbier", "pausing playing")
         mapViewModel.mp!!.pause()
@@ -98,4 +125,5 @@ class SeekbarManagerV2(
             button.isActivated = setActive
         }
     }
+
 }

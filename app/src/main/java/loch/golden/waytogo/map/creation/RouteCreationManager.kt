@@ -125,8 +125,8 @@ class RouteCreationManager(
 
 
         seekbarManager = SeekbarManagerV2(
-            binding.expandedPanel.creationSeekbar,
             mapViewModel,
+            binding.expandedPanel.creationSeekbar,
             listOf(binding.expandedPanel.creationPlayPause)
         )
 
