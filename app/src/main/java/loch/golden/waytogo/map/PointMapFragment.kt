@@ -17,9 +17,12 @@ import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
 import com.appolica.interactiveinfowindow.InfoWindowManager
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -40,7 +43,7 @@ import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 
 
 class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
-    OnMarkerClickListener {
+    OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //viewmodel tied to parent activity - MainActivity
     private lateinit var mapViewModel: MapViewModel
@@ -111,12 +114,27 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
 
         googleMap.isMyLocationEnabled = true
+//        googleMap.uiSettings.isMyLocationButtonEnabled = false
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnMarkerClickListener(this)
+        googleMap.setOnCameraMoveListener(this)
 
         mapViewModel.route?.let {
             populateMap(it.pointList)
         }
+
+        mapViewModel.cameraPosition?.let {
+            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
+        } ?: run {
+            Log.d("Warmbier","In move camera ${locationManager.getCurrentLocation()}")
+            val cameraPosition = CameraPosition.builder()
+                .target(locationManager.getCurrentLocation() ?: LatLng(0.0, 0.0))
+                .zoom(4.0f)
+                .build()
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        }
+
+
         googleMapSetup.complete(Unit)
 
     }
@@ -193,6 +211,10 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             slidingUpPanelManager.openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
         }
         return true
+    }
+
+    override fun onCameraMove() {
+        mapViewModel.cameraPosition = googleMap.cameraPosition
     }
 
     private fun handleBackPress() {
