@@ -10,5 +10,5 @@ import androidx.room.Entity
 data class RouteMapLocation(
     @ColumnInfo("route_uid")
     val routeUid: String,
-    val id: String
+    val id: String,
 )

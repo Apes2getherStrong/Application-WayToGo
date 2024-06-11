@@ -1,8 +1,12 @@
 package loch.golden.waytogo.routes.repository
 
+import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
+import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.routes.api.RetrofitInstance
+import loch.golden.waytogo.user.model.auth.AuthRequest
+import loch.golden.waytogo.user.model.auth.AuthResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
@@ -10,8 +14,10 @@ import loch.golden.waytogo.routes.model.relations.RouteWithMapLocations
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
+import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
-import okhttp3.ResponseBody
+import okhttp3.MultipartBody
 import retrofit2.Response
 
 class RouteRepository(private val routeDao: RouteDao) {
@@ -82,6 +88,38 @@ class RouteRepository(private val routeDao: RouteDao) {
 
 
 
+    suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
+        val response = RetrofitInstance.apiService.login(authRequest)
+        Log.d("Login",response.body().toString())
+        return response
+    }
+
+    suspend fun register(user: User) :Response<Void>{
+        val response = RetrofitInstance.apiService.register(user)
+        Log.d("Register",response.body().toString())
+        return response
+    }
+
+    suspend fun getAudioFile(audioId: String) : ByteArray? {
+        val response = RetrofitInstance.apiService.getAudioFile(audioId)
+        return response.body()
+    }
+
+    suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<Audio> {
+        return RetrofitInstance.apiService.getAudioByMapLocationId(mapLocationId)
+    }
+
+    suspend fun postAudio(audio: Audio): Response<Audio> {
+        return RetrofitInstance.apiService.postAudio(audio)
+    }
+
+    suspend fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.postAudioFile(audioId,audioFile)
+    }
+
+    suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId,imageFile)
+    }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {
         return RetrofitInstance.apiService.getRoutes(pageNumber, pageSize)
@@ -117,7 +155,7 @@ class RouteRepository(private val routeDao: RouteDao) {
         return RetrofitInstance.apiService.postMapLocation(mapLocation)
     }
 
-    suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocation): Response<RouteMapLocation> {
+    suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest): Response<RouteMapLocationRequest> {
         return RetrofitInstance.apiService.postRouteMapLocation(routeMapLocation)
     }
 }

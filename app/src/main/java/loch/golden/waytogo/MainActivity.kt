@@ -14,20 +14,30 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
+import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
+import loch.golden.waytogo.routes.api.RetrofitInstance
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
     ActivityCompat.OnRequestPermissionsResultCallback, OnNavigateToMapListener {
 
+    private lateinit var tokenManager: TokenManager
     private lateinit var binding: ActivityMainBinding
     private var dialog: AlertDialog? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        tokenManager = TokenManager(this)
+        RetrofitInstance.getTokenManager(tokenManager)
+
+
+
     }
 
     override fun onStart() {
@@ -100,7 +110,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         val fragment = when (item.itemId) {
             R.id.bottom_nav_map -> PointMapFragment()
             R.id.bottom_nav_routes -> RoutesFragment()
-//            R.id.bottom_nav_user -> UserFragment()
+            R.id.bottom_nav_user -> LoginFragment()
             else -> return false
         }
         supportFragmentManager.commit {
