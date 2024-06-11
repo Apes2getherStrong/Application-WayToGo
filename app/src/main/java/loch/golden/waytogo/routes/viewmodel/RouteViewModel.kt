@@ -168,15 +168,25 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             audioResponse.value = routeRepository.getAudioByMapLocationId(mapLocationId)
         }
     }
+
     fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part){
         viewModelScope.launch {
-            routeRepository.postAudioFile(audioId,audioFile)
+            try {
+                routeRepository.postAudioFile(audioId,audioFile)
+            }catch (e: Exception){
+                Log.d("Nie dziala audio",e.toString())
+            }
         }
     }
 
     fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part){
         viewModelScope.launch {
-            routeRepository.putImageToMapLocation(mapLocationId,imageFile)
+            try {
+                routeRepository.putImageToMapLocation(mapLocationId,imageFile)
+            }catch (e: Exception){
+                Log.d("Nie dziala image",e.toString())
+            }
+
         }
     }
 

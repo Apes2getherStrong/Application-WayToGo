@@ -199,8 +199,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             Log.d("Dzicz","Nie mo")
                         }
 
-
-
                         val imageFile = File(
                             requireContext().filesDir,
                             "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}")
@@ -213,12 +211,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                         }else {
                             Log.d("Image","Nie mo")
                         }
-
-                        val audioByteArray = routeViewModel.getAudioFile(newAudio.id)
-                       
-
-                        routeViewModel.getAudioByMapLocationId(newMapLocation.id)
-                        routeViewModel.getMapLocationImage(newMapLocation.id)
 
                     }
                 }
