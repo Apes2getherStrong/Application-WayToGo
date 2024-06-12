@@ -116,36 +116,36 @@ class RouteDetailFragment() : Fragment() {
         routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
             audioResponse?.body()?.content?.let { audios ->
                 for (audio in audios) {
-                    routeViewModel.getAudioFile(audio.id)
+                    routeViewModel.getAudioFile(audio.id, audio.mapLocationRequest.id)
                 }
             }
         }
-
-        // Observe audio file response
+        //TODO move these componenets to seperate functions
+        //TODO create files when choosing route not before
+        
         routeViewModel.audioFile.observe(viewLifecycleOwner, Observer { response ->
-            if (response.isSuccessful) {
-                val audioBytes = response.body()
+            if (response.bytes.isSuccessful) {
+                val audioBytes = response.bytes.body()
                 if (audioBytes != null) {
                     val tempAudioFile = File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
                     val fos = FileOutputStream(tempAudioFile)
                     fos.write(audioBytes)
-//                    route.mapLocation[maplocationid].audiopath = tempAudioFile.absolutePath
+                    route.pointList[response.mapLocationId]?.audioPath = tempAudioFile.absolutePath
                     fos.close()
                 }
             }
         })
 
         routeViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
-            if (response.isSuccessful) {
-                val mapLocationId = routeViewModel.currentMapLocationId.value
-                val imageBytes = response.body()
+            if (response.bytes.isSuccessful) {
+                val imageBytes = response.bytes.body()
                 if (imageBytes != null) {
                     val tempImageFile = File.createTempFile("temp_img", ".jpg", requireContext().cacheDir)
                     tempImageFile.deleteOnExit()
                     val fos = FileOutputStream(tempImageFile)
                     fos.write(imageBytes)
                     fos.close()
-
+                    route.pointList[response.mapLocationId]?.photoPath = tempImageFile.absolutePath
                 }
             }
         }
