@@ -91,7 +91,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         if (mapViewModel.inCreationMode) {
             initCreation(savedInstanceState)
-        }else{
+        } else {
             seekbarManager = SeekbarManagerV2(
                 mapViewModel,
                 binding.expandedPanel.seekbar,
@@ -129,7 +129,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         mapViewModel.cameraPosition?.let {
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
-            Log.d("Warmbier", "In move camera ${locationManager.getCurrentLocation()}")
+            //TODO change to first point
             val cameraPosition = CameraPosition.builder()
                 .target(locationManager.getCurrentLocation() ?: LatLng(0.0, 0.0))
                 .zoom(4.0f)

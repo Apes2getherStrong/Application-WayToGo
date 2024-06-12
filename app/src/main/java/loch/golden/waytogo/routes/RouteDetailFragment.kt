@@ -67,15 +67,16 @@ class RouteDetailFragment() : Fragment() {
                 }
             })
 
-        //pobranie id kliknietego argumentu, zobacz publicRoutesFragment bundle
-        // dzieki gogi za notatke
+
         val routeId = arguments?.getString("id") ?: "" //TODO add error message
 
 
+        // Fetch route by ID
         routeViewModel.getRouteById(routeId)
+
+        // Observe route response
         routeViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
-                Log.d("Warmbier", response.body().toString())
                 route = MapRoute(
                     response.body()!!.routeUid,
                     response.body()!!.name,
@@ -84,72 +85,70 @@ class RouteDetailFragment() : Fragment() {
                 )
                 binding.routeTitle.text = response.body()?.name
                 binding.routeDescription.text = response.body()?.description
-                Log.d("Response id", response.body()!!.routeUid)
-                Log.d("Response title", response.body()!!.name)
 
-
-            } else {
-                Log.d("Response", response.errorBody().toString())
-
+                // Fetch map locations by route ID
+                routeViewModel.getMapLocationsByRouteId(routeId)
             }
+        }
 
-            routeViewModel.getMapLocationsByRouteId(routeId)
-            routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
-                if (response.isSuccessful) {
-                    Log.d("Warmbier", response.body().toString())
-                    val mapLocationAdapter =
-                        PublicMapLocationAdapter(response.body()?.content ?: emptyList())
-                    response.body()?.content.let {
-                        for (mapLocation in it!!) {
-                            Log.d("Warmbier", "Ojezusku $mapLocation")
-                            val mapPoint = MapPoint(mapLocation)
-                            routeViewModel.getAudioByMapLocationId(mapLocation.id)
-                            routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
-                                audioResponse?.body()?.content.let {audios ->
-                                    for (audio in audios!!) {
-                                        Log.d("Audio", audio.toString())
-                                        routeViewModel.getAudioFile(audio.id)
-                                        routeViewModel.audioFile.observe(viewLifecycleOwner,Observer { response ->
-                                            if(response.isSuccessful) {
-                                                val audioBytes = response.body()
-                                                if(audioBytes!=null){
-                                                    val tempAudioFile = File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
-                                                    val fos = FileOutputStream(tempAudioFile)
-                                                    fos.write(audioBytes)
-                                                    fos.close()
-                                                }
-                                            }
+        // Observe map locations response
+        routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
+            if (response.isSuccessful) {
+                val mapLocationAdapter = PublicMapLocationAdapter(response.body()?.content ?: emptyList())
+                response.body()?.content?.let { mapLocations ->
+                    for (mapLocation in mapLocations) {
+                        val mapPoint = MapPoint(mapLocation)
+                        route.pointList[mapLocation.id] = mapPoint
 
-                                        })
-                                    }
-                                }
-                            }
+                        // Fetch audio by map location ID
+                        Log.d("Warmbier", "MapLocationId: ${mapLocation.id}")
+                        routeViewModel.getAudioByMapLocationId(mapLocation.id)
+                        routeViewModel.getMapLocationImage(mapLocation.id)
 
-                            route.pointList[mapLocation.id] = mapPoint
-                        }
                     }
-                    binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
+                }
+                binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
+                binding.recyclerViewPoints.adapter = mapLocationAdapter
+            }
+        }
 
-                    binding.recyclerViewPoints.adapter = mapLocationAdapter
-                    Log.d("Response mapLocation latitude", response.body()?.content.toString())
-                } else {
-                    Log.d("Map Locations Response", response.errorBody().toString())
+        // Observe audio response
+        routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
+            audioResponse?.body()?.content?.let { audios ->
+                for (audio in audios) {
+                    routeViewModel.getAudioFile(audio.id)
                 }
             }
-
-
         }
-        // Pobierania image routa, nwm czy napewno dziala bo nie ma imagow na backendzie
-//        routeViewModel.getRouteImage(routeId)
-//        routeViewModel.currentRouteImage.observe(viewLifecycleOwner) { imageBytes ->
-//            if (imageBytes != null) {
-//                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-//                binding.routeImage.setImageBitmap(bitmap)
-//                Log.d("Image Response", "$routeId")
-//            } else {
-//                Log.d("Image Response", "Failed $routeId")
-//            }
-//        }
+
+        // Observe audio file response
+        routeViewModel.audioFile.observe(viewLifecycleOwner, Observer { response ->
+            if (response.isSuccessful) {
+                val audioBytes = response.body()
+                if (audioBytes != null) {
+                    val tempAudioFile = File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
+                    val fos = FileOutputStream(tempAudioFile)
+                    fos.write(audioBytes)
+//                    route.mapLocation[maplocationid].audiopath = tempAudioFile.absolutePath
+                    fos.close()
+                }
+            }
+        })
+
+        routeViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
+            if (response.isSuccessful) {
+                val mapLocationId = routeViewModel.currentMapLocationId.value
+                val imageBytes = response.body()
+                if (imageBytes != null) {
+                    val tempImageFile = File.createTempFile("temp_img", ".jpg", requireContext().cacheDir)
+                    tempImageFile.deleteOnExit()
+                    val fos = FileOutputStream(tempImageFile)
+                    fos.write(imageBytes)
+                    fos.close()
+
+                }
+            }
+        }
 
         binding.backButton.setOnClickListener()
         {

@@ -40,13 +40,16 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
     val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
-    val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
     private val _audioFile = MutableLiveData<Response<ByteArray>>()
     val audioFile: LiveData<Response<ByteArray>> get() = _audioFile
     val audioResponse: MutableLiveData<Response<AudioListResponse>> = MutableLiveData()
 
+    private val _currentMapImage = MutableLiveData<Response<ByteArray>>()
+    val currentMapImage:  LiveData<Response<ByteArray>> get() =_currentMapImage
+
+    
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
         viewModelScope.launch {
@@ -136,7 +139,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun getMapLocationImage(mapLocationId: String) {
         viewModelScope.launch {
             val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
-            currentMapImage.value = currentImageBytes
+            _currentMapImage.value = currentImageBytes
         }
     }
 

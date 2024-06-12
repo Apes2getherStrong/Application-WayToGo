@@ -77,14 +77,12 @@ class RouteCreationManager(
             inputStream?.use { input ->
                 outputStream.use { output ->
                     input.copyTo(output)
-                    Log.d("Warmbier", outputFilePath)
                     mapViewModel.route!!.pointList[currentMarkerId]?.photoPath = outputFilePath
                 }
             }
-            Log.d("Warmbier", "save successful")
         } catch (e: IOException) {
             e.printStackTrace()
-            Log.d("Warmbier", e.toString())
+            Log.e("Warmbier", e.toString())
         }
     }
 

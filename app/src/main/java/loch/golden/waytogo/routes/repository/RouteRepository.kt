@@ -140,9 +140,9 @@ class RouteRepository(private val routeDao: RouteDao) {
         return response.body()?.bytes()
     }
 
-    suspend fun getMapLocationImage(mapLocationId: String): ByteArray? {
+    suspend fun getMapLocationImage(mapLocationId: String): Response<ByteArray> {
         val response = RetrofitInstance.apiService.getMapLocationImage(mapLocationId)
-        return response.body()?.bytes()
+        return Response.success(response.body()?.bytes())
     }
 
     suspend fun getMapLocationAudios(mapLocationId: String): Response<List<String>> {

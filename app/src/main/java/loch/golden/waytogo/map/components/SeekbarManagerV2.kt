@@ -100,7 +100,7 @@ class SeekbarManagerV2(
 
                     handler.postDelayed(this, 100)
                 } catch (e: Exception) {
-                    Log.d("Warmbier", e.toString())
+                    Log.e("Warmbier", e.toString())
                 }
             }
 
