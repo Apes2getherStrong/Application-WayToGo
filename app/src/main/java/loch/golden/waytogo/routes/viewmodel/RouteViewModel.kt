@@ -43,7 +43,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
-    val mapLocationAudio: MutableLiveData<ByteArray?> = MutableLiveData()
+    private val _audioFile = MutableLiveData<Response<ByteArray>>()
+    val audioFile: LiveData<Response<ByteArray>> get() = _audioFile
     val audioResponse: MutableLiveData<Response<AudioListResponse>> = MutableLiveData()
 
 
@@ -160,17 +161,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     fun getAudioFile(audioId: String) {
         viewModelScope.launch {
-            try {
-                val response = routeRepository.getAudioFile(audioId)
-                if(response.isSuccessful) {
-                    response.body().let {audio ->
-                        val audioByteArray = audio?.toByteArray()
-                        mapLocationAudio.postValue(audioByteArray)
-                    }
-                }
-            }catch (e: Exception) {
-                Log.d("FileAudio",e.toString())
-            }
+
+            val response = routeRepository.getAudioFile(audioId)
+            _audioFile.value = response
+
         }
     }
 

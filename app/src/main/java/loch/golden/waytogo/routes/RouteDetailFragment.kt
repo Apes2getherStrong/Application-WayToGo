@@ -109,22 +109,18 @@ class RouteDetailFragment() : Fragment() {
                                     for (audio in audios!!) {
                                         Log.d("Audio", audio.toString())
                                         routeViewModel.getAudioFile(audio.id)
-                                        routeViewModel.mapLocationAudio.observe(viewLifecycleOwner) { audioBytes ->
-                                            audioBytes?.let {
-                                                try {
-                                                    val tempAudioFile =
-                                                        File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
-                                                    tempAudioFile.deleteOnExit() // Ensure the file is deleted when the app is closed
+                                        routeViewModel.audioFile.observe(viewLifecycleOwner,Observer { response ->
+                                            if(response.isSuccessful) {
+                                                val audioBytes = response.body()
+                                                if(audioBytes!=null){
+                                                    val tempAudioFile = File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
                                                     val fos = FileOutputStream(tempAudioFile)
                                                     fos.write(audioBytes)
                                                     fos.close()
-                                                    mapPoint.audioPath = tempAudioFile.absolutePath
-                                                    Log.d("AudioFile", "Audio file saved: ${tempAudioFile.absolutePath}")
-                                                }catch (e: IOException) {
-                                                    Log.e("AudioFile", "Error saving audio file", e)
                                                 }
                                             }
-                                        }
+
+                                        })
                                     }
                                 }
                             }

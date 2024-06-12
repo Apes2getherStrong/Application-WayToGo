@@ -101,8 +101,10 @@ class RouteRepository(private val routeDao: RouteDao) {
         return response
     }
 
-    suspend fun getAudioFile(audioId: String) : Response<String> {
-        return RetrofitInstance.apiService.getAudioFile(audioId)
+    suspend fun getAudioFile(audioId: String) : Response<ByteArray> {
+        val response = RetrofitInstance.apiService.getAudioFile(audioId)
+        return Response.success(response.body()?.bytes())
+
     }
 
     suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<AudioListResponse> {

@@ -87,7 +87,7 @@ interface ApiService {
     @GET("audios/{audioId}/audio")
     suspend fun getAudioFile(
         @Path("audioId") audioId: String
-    ): Response<String>
+    ): Response<ResponseBody>
 
     @GET("mapLocations/{mapLocationId}/audios")
     suspend fun getAudioByMapLocationId(
