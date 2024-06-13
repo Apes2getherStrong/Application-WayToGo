@@ -1,6 +1,7 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -211,9 +212,22 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         if (mapViewModel.inCreationMode) {
             infoWindowManager?.toggle(routeCreationManager!!.getInfoWindow(marker.snippet!!))
         } else {
-            slidingUpPanelManager.openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
+            openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
         }
         return true
+    }
+
+    private fun openNormalPanel(mapPoint: MapPoint?) {
+        binding.expandedPanel.title.text = mapPoint?.name
+        binding.bottomPanel.title.text = mapPoint?.name
+        binding.expandedPanel.description.text = mapPoint?.description
+        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
+        binding.expandedPanel.image.setImageBitmap(bitmap)
+        seekbarManager?.prepareAudio(mapViewModel.route!!.pointList[mapPoint?.id]?.audioPath!!)
+
+
+//        binding.expandedPanel.image.setImageResource(mapPoint.image)
     }
 
     override fun onCameraMove() {
