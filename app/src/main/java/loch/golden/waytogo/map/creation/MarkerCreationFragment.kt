@@ -57,9 +57,6 @@ class MarkerCreationFragment(
         binding.buttonEdit.setOnClickListener {
             mapBinding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
             mapBinding.expandedPanel.creationTitle.setText(marker?.title)
-            Log.d("Warmbier", mapViewModel.route!!.pointList[id].toString())
-
-
             routeCreationManager.onEditMarker(marker?.snippet!!)
             routeCreationManager.hideInfoWindow(marker.snippet!!)
         }

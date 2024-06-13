@@ -14,6 +14,7 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.audio.Audio
+import loch.golden.waytogo.audio.AudioListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
@@ -22,6 +23,7 @@ import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.paging.RoutePagingSource
+import loch.golden.waytogo.routes.repository.IdByteArray
 import loch.golden.waytogo.routes.repository.RouteRepository
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.user.model.auth.AuthRequest
@@ -39,11 +41,14 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
     val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
-    val currentMapImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
-    val mapLocationAudio: MutableLiveData<ByteArray?> = MutableLiveData()
-    val audioResponse: MutableLiveData<Response<Audio>> = MutableLiveData()
+    private val _audioFile = MutableLiveData<IdByteArray>()
+    val audioFile: LiveData<IdByteArray> get() = _audioFile
+    val audioResponse: MutableLiveData<Response<AudioListResponse>> = MutableLiveData()
+
+    private val _currentMapImage = MutableLiveData<IdByteArray>()
+    val currentMapImage: LiveData<IdByteArray> get() = _currentMapImage
 
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
@@ -134,7 +139,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun getMapLocationImage(mapLocationId: String) {
         viewModelScope.launch {
             val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
-            currentMapImage.value = currentImageBytes
+            _currentMapImage.value = IdByteArray(mapLocationId, currentImageBytes)
         }
     }
 
@@ -147,44 +152,47 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun postAudio(audio: Audio, callback: (Audio) -> Unit) {
         viewModelScope.launch {
             val response = routeRepository.postAudio(audio)
-            if(response.isSuccessful) {
+            if (response.isSuccessful) {
                 response.body()?.let { newAudio ->
                     callback(newAudio)
                 }
-            }else{
+            } else {
                 Log.e("postAudio", "Error: ${response.errorBody()?.string()}")
             }
         }
     }
 
-    fun getAudioFile(audioId: String) {
+    fun getAudioFile(audioId: String, mapLocationId: String) {
         viewModelScope.launch {
-            mapLocationAudio.value = routeRepository.getAudioFile(audioId)
+
+            val response = routeRepository.getAudioFile(audioId)
+            _audioFile.value = IdByteArray(mapLocationId, response)
+
         }
     }
 
     fun getAudioByMapLocationId(mapLocationId: String) {
-        viewModelScope.launch{
+        viewModelScope.launch {
             audioResponse.value = routeRepository.getAudioByMapLocationId(mapLocationId)
         }
     }
 
-    fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part){
+    fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
         viewModelScope.launch {
             try {
-                routeRepository.postAudioFile(audioId,audioFile)
-            }catch (e: Exception){
-                Log.d("Nie dziala audio",e.toString())
+                routeRepository.postAudioFile(audioId, audioFile)
+            } catch (e: Exception) {
+                Log.d("Nie dziala audio", e.toString())
             }
         }
     }
 
-    fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part){
+    fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
         viewModelScope.launch {
             try {
-                routeRepository.putImageToMapLocation(mapLocationId,imageFile)
-            }catch (e: Exception){
-                Log.d("Nie dziala image",e.toString())
+                routeRepository.putImageToMapLocation(mapLocationId, imageFile)
+            } catch (e: Exception) {
+                Log.d("Nie dziala image", e.toString())
             }
 
         }

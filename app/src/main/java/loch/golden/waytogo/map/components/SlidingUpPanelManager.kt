@@ -1,13 +1,16 @@
 package loch.golden.waytogo.map.components
 
+import android.graphics.BitmapFactory
 import android.view.View
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
+import loch.golden.waytogo.map.MapViewModel
 
 class SlidingUpPanelManager(
-    private val binding: FragmentMapBinding
+    private val binding: FragmentMapBinding,
+    private val mapViewModel: MapViewModel
 ) : PanelSlideListener {
     private var inCreationMode: Boolean = false
 
@@ -66,13 +69,6 @@ class SlidingUpPanelManager(
 
     fun openCreationPanel(markerId: String) {
         //TODO create this fun
-    }
-
-    fun openNormalPanel(mapPoint: MapPoint?) {
-        binding.expandedPanel.title.text = mapPoint?.name
-        binding.expandedPanel.description.text = mapPoint?.description
-        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-//        binding.expandedPanel.image.setImageResource(mapPoint.image)
     }
 
 

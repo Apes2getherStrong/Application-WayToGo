@@ -29,15 +29,13 @@
                     android:layout_height="match_parent" />
             </com.appolica.interactiveinfowindow.customview.TouchInterceptFrameLayout>
 
-            <include
-                android:id="@+id/map_menu"
-                layout="@layout/component_map_menu" />
 
             <Button
                 android:id="@+id/button_add_marker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="add_marker"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -50,10 +48,9 @@
             <!--BOTTOM PANEL-->
             <include
                 android:id="@+id/bottom_panel"
-                layout="@layout/map_component_bottom_panel"
-                />
+                layout="@layout/map_component_bottom_panel" />
             <!--EXPANDED PANEL-->
-
+            <!--TODO create seperate views for creation and for normal panel and inflate them accordingly-->
             <include
                 android:id="@+id/expanded_panel"
                 layout="@layout/map_component_expanded_panel" />

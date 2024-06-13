@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
 import loch.golden.waytogo.audio.Audio
+import loch.golden.waytogo.audio.AudioListResponse
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
@@ -100,12 +101,13 @@ class RouteRepository(private val routeDao: RouteDao) {
         return response
     }
 
-    suspend fun getAudioFile(audioId: String) : ByteArray? {
+    suspend fun getAudioFile(audioId: String) : Response<ByteArray> {
         val response = RetrofitInstance.apiService.getAudioFile(audioId)
-        return response.body()
+        return Response.success(response.body()?.bytes())
+
     }
 
-    suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<Audio> {
+    suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<AudioListResponse> {
         return RetrofitInstance.apiService.getAudioByMapLocationId(mapLocationId)
     }
 
@@ -138,9 +140,9 @@ class RouteRepository(private val routeDao: RouteDao) {
         return response.body()?.bytes()
     }
 
-    suspend fun getMapLocationImage(mapLocationId: String): ByteArray? {
+    suspend fun getMapLocationImage(mapLocationId: String): Response<ByteArray> {
         val response = RetrofitInstance.apiService.getMapLocationImage(mapLocationId)
-        return response.body()?.bytes()
+        return Response.success(response.body()?.bytes())
     }
 
     suspend fun getMapLocationAudios(mapLocationId: String): Response<List<String>> {

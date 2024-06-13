@@ -1,6 +1,7 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -34,6 +35,7 @@ import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.adapters.PointInfoWindowAdapter
 import loch.golden.waytogo.map.components.LocationManager
 import loch.golden.waytogo.map.components.MapMenuManager
+import loch.golden.waytogo.map.components.SeekbarManagerV2
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
@@ -54,7 +56,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
 
-    //private lateinit var seekbarManager: SeekbarManager
+    private var seekbarManager: SeekbarManagerV2? = null
     private lateinit var slidingUpPanelManager: SlidingUpPanelManager
 
 
@@ -74,6 +76,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         return binding.root
     }
 
+    //TODO if route is not chosen display a button that says choose route
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
@@ -81,20 +84,22 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         setUpListeners()
 
-        slidingUpPanelManager = SlidingUpPanelManager(binding)
+        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
         locationManager = LocationManager(requireContext())
         locationManager.startLocationUpdates()
-//        seekbarManager = SeekbarManager(
-//            requireContext(),
-//            mapViewModel,
-//            binding.expandedPanel.seekbar,
-//            binding.bottomPanel.customSeekbarProgress,
-//            arrayListOf(binding.bottomPanel.playButton, binding.expandedPanel.playFab)
-//        )
+
+
 
 
         if (mapViewModel.inCreationMode) {
             initCreation(savedInstanceState)
+        } else {
+            seekbarManager = SeekbarManagerV2(
+                mapViewModel,
+                binding.expandedPanel.seekbar,
+                listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
+            )
+            seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
         }
 
     }
@@ -126,7 +131,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         mapViewModel.cameraPosition?.let {
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
-            Log.d("Warmbier","In move camera ${locationManager.getCurrentLocation()}")
+            //TODO change to first point
             val cameraPosition = CameraPosition.builder()
                 .target(locationManager.getCurrentLocation() ?: LatLng(0.0, 0.0))
                 .zoom(4.0f)
@@ -157,9 +162,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     }
 
     private fun setUpListeners() {
-        binding.mapMenu.stylesFab.setOnClickListener {
-            Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
-        }
+
     }
 
     private fun initCreation(savedInstanceState: Bundle?) {
@@ -169,7 +172,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         routeCreationManager =
             RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel, mapViewModel)
-//        routeCreationManager?.startNew(mapViewModel.route!!.name)
 
         lifecycleScope.launch { // wait till googlemaps is initialized
             googleMapSetup.await()
@@ -179,7 +181,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         slidingUpPanelManager.toggleCreation()
 
-
+        binding.buttonAddMarker.visibility= View.VISIBLE
         binding.buttonAddMarker.setOnClickListener {
             if (mapViewModel.inCreationMode) {
                 val markerId = routeCreationManager?.generateMarkerId()
@@ -208,9 +210,22 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         if (mapViewModel.inCreationMode) {
             infoWindowManager?.toggle(routeCreationManager!!.getInfoWindow(marker.snippet!!))
         } else {
-            slidingUpPanelManager.openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
+            openNormalPanel(mapViewModel.route?.pointList?.get(marker.snippet))
         }
         return true
+    }
+
+    private fun openNormalPanel(mapPoint: MapPoint?) {
+        binding.expandedPanel.title.text = mapPoint?.name
+        binding.bottomPanel.title.text = mapPoint?.name
+        binding.expandedPanel.description.text = mapPoint?.description
+        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
+        binding.expandedPanel.image.setImageBitmap(bitmap)
+        seekbarManager?.prepareAudio(mapViewModel.route!!.pointList[mapPoint?.id]?.audioPath!!)
+
+
+//        binding.expandedPanel.image.setImageResource(mapPoint.image)
     }
 
     override fun onCameraMove() {

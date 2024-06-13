@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes.api
 
 import loch.golden.waytogo.audio.Audio
+import loch.golden.waytogo.audio.AudioListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
@@ -86,12 +87,12 @@ interface ApiService {
     @GET("audios/{audioId}/audio")
     suspend fun getAudioFile(
         @Path("audioId") audioId: String
-    ): Response<ByteArray>
+    ): Response<ResponseBody>
 
     @GET("mapLocations/{mapLocationId}/audios")
     suspend fun getAudioByMapLocationId(
         @Path("mapLocationId") mapLocationId: String
-    ): Response<Audio>
+    ): Response<AudioListResponse>
 
 
     @POST("routes")

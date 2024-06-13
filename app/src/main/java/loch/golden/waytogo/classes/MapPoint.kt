@@ -1,12 +1,14 @@
 package loch.golden.waytogo.classes
 
 import android.content.Context
-import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.utils.Constants
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import java.io.File
+import java.io.FileOutputStream
+
 
 data class MapPoint(
     val id: String,
@@ -49,7 +51,7 @@ data class MapPoint(
             audioPath = audioFile.absolutePath
     }
 
-     constructor(mapLocationRequest: MapLocationRequest) :
+    constructor(mapLocationRequest: MapLocationRequest) :
             this(
                 mapLocationRequest.id,
                 mapLocationRequest.name,

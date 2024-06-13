@@ -31,7 +31,6 @@ class LocationManager(context: Context) : LocationCallback() {
     override fun onLocationResult(location: LocationResult) {
         currentLocation =
             LatLng(location.lastLocation!!.latitude, location.lastLocation!!.longitude)
-        Log.d("Warmbier", "On location result: $currentLocation")
 
     }
 
@@ -45,7 +44,7 @@ class LocationManager(context: Context) : LocationCallback() {
 
     fun getCurrentLocation() = currentLocation
 
-    fun stopLocationUpdates(){
+    fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(this)
     }
 
