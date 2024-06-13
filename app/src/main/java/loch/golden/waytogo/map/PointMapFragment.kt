@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -31,7 +32,10 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.gson.JsonParser
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -151,7 +155,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                 val myLocation = awaitMyLocation()
                 val polyPoints = test(myLocation, mapViewModel.route!!.pointList.values.first().position)
                 val polylineOptions = PolylineOptions().apply {
-                    polyPoints.forEach(){polyPoint ->
+                    polyPoints.forEach() { polyPoint ->
                         add(polyPoint)
                     }
                     color(Color.GREEN)
@@ -169,12 +173,16 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         mapViewModel.cameraPosition?.let {
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
-            //TODO change to first point
-            val cameraPosition = CameraPosition.builder()
-                .target(locationManager.getCurrentLocation() ?: LatLng(0.0, 0.0))
-                .zoom(4.0f)
-                .build()
-            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            lifecycleScope.launch(Dispatchers.IO) {
+                val myLocation = awaitMyLocation()
+                withContext(Dispatchers.Main) {
+                    val cameraPosition = CameraPosition.builder()
+                        .target(myLocation)
+                        .zoom(14.0f)
+                        .build()
+                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                }
+            }
         }
 
 
@@ -182,11 +190,10 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
     }
 
-    private fun awaitMyLocation() : LatLng{
+    private fun awaitMyLocation(): LatLng {
         while (locationManager.getCurrentLocation() == null)
             Thread.sleep(100)
         return locationManager.getCurrentLocation()!!
-
     }
 
     private fun populateMap(mapPoints: Map<String, MapPoint>) {
@@ -226,7 +233,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         slidingUpPanelManager.toggleCreation()
 
-        binding.buttonAddMarker.visibility= View.VISIBLE
+        binding.buttonAddMarker.visibility = View.VISIBLE
         binding.buttonAddMarker.setOnClickListener {
             if (mapViewModel.inCreationMode) {
                 val markerId = routeCreationManager?.generateMarkerId()
