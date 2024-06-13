@@ -36,6 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import loch.golden.waytogo.BuildConfig
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -91,7 +92,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             fromStr,
             toStr,
             "walking",
-            "AIzaSyAxNbXyjaifU3TuA6lyocCVMaYYRSMVJpA",
+            BuildConfig.MAPS_API_KEY,
             null
         )
         Log.d("Warmbier", jsonResponse)
@@ -150,6 +151,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnCameraMoveListener(this)
+
         lifecycleScope.launch {
             if (mapViewModel.route != null) {
                 val myLocation = awaitMyLocation()
@@ -178,7 +180,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                 withContext(Dispatchers.Main) {
                     val cameraPosition = CameraPosition.builder()
                         .target(myLocation)
-                        .zoom(14.0f)
+                        .zoom(15.0f)
                         .build()
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
                 }
