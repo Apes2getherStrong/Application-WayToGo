@@ -76,6 +76,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         return binding.root
     }
 
+    //TODO if route is not chosen display a button that says choose route
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
@@ -161,9 +162,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     }
 
     private fun setUpListeners() {
-        binding.mapMenu.stylesFab.setOnClickListener {
-            Toast.makeText(requireContext(), "Styles", Toast.LENGTH_SHORT).show()
-        }
+
     }
 
     private fun initCreation(savedInstanceState: Bundle?) {
@@ -173,7 +172,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         routeCreationManager =
             RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel, mapViewModel)
-//        routeCreationManager?.startNew(mapViewModel.route!!.name)
 
         lifecycleScope.launch { // wait till googlemaps is initialized
             googleMapSetup.await()
@@ -183,7 +181,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         slidingUpPanelManager.toggleCreation()
 
-
+        binding.buttonAddMarker.visibility= View.VISIBLE
         binding.buttonAddMarker.setOnClickListener {
             if (mapViewModel.inCreationMode) {
                 val markerId = routeCreationManager?.generateMarkerId()
