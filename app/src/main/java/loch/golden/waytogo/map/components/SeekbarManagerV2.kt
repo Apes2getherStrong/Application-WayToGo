@@ -93,10 +93,11 @@ class SeekbarManagerV2(
                     seekbar.progress = currentPosition.toInt()
 
                     // Update bottom custom seekbar
-                    val trackPercentage = (if (duration != 0) currentPosition / duration else 0.0f) as Float
+                    val trackPercentage = if (duration != 0) (currentPosition.toFloat() / duration) else 0.0f
                     val pixels = (screenWidth * trackPercentage).toInt()
                     customSeekbar.layoutParams.width = pixels
                     customSeekbar.requestLayout()
+                    Log.e("Warmbier", pixels.toString())
 
                     handler.postDelayed(this, 100)
                 } catch (e: Exception) {
