@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+
 android {
     namespace = "loch.golden.waytogo"
     compileSdk = 34
@@ -17,10 +18,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     buildTypes {
@@ -31,6 +34,7 @@ android {
                 "proguard-rules.pro"
             )
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -57,6 +61,8 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.appolica:interactive-info-window-android:1.1.0")
+    implementation("com.google.code.gson:gson:2.9.0")
+
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

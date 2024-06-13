@@ -10,6 +10,10 @@ class Constants {
         const val LOGIN_URL = "auth/login"
         const val REGISTER_URL = "auth/register"
 
+        const val GOOGLE_API_URL = "https://maps.googleapis.com/"
+        const val GOOGLE_NAVIGATION_ENDPOINT = "maps/api/directions/json"
+
+
         const val MAX_DESCRIPTION_LENGTH = 50
     }
 }

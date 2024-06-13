@@ -2,6 +2,7 @@ package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -26,6 +27,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.gson.JsonParser
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -39,6 +42,7 @@ import loch.golden.waytogo.map.components.SeekbarManagerV2
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
+import loch.golden.waytogo.map.navigation.GoogleApiRetrofitInstance
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
@@ -76,17 +80,36 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         return binding.root
     }
 
+    private suspend fun test(from: LatLng, to: LatLng): ArrayList<LatLng> {
+        val fromStr = "${from.latitude},${from.longitude}"
+        val toStr = "${to.latitude},${to.longitude}"
+        val jsonResponse = GoogleApiRetrofitInstance.apiService.getPolyline(
+            fromStr,
+            toStr,
+            "walking",
+            "AIzaSyAxNbXyjaifU3TuA6lyocCVMaYYRSMVJpA",
+            null
+        )
+        Log.d("Warmbier", jsonResponse)
+        val encodedPoly =
+            JsonParser.parseString(jsonResponse).asJsonObject["routes"].asJsonArray[0].asJsonObject["overview_polyline"].asJsonObject["points"].asString
+        Log.d("Warmbier", encodedPoly)
+        return decodePoly(encodedPoly)
+
+    }
+
     //TODO if route is not chosen display a button that says choose route
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
+        locationManager = LocationManager(requireContext())
+        locationManager.startLocationUpdates()
+
         initMapView(savedInstanceState)
 
         setUpListeners()
 
         slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
-        locationManager = LocationManager(requireContext())
-        locationManager.startLocationUpdates()
 
 
 
@@ -123,6 +146,21 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         googleMap.setInfoWindowAdapter(PointInfoWindowAdapter(requireContext()))
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnCameraMoveListener(this)
+        lifecycleScope.launch {
+            if (mapViewModel.route != null) {
+                val myLocation = awaitMyLocation()
+                val polyPoints = test(myLocation, mapViewModel.route!!.pointList.values.first().position)
+                val polylineOptions = PolylineOptions().apply {
+                    polyPoints.forEach(){polyPoint ->
+                        add(polyPoint)
+                    }
+                    color(Color.GREEN)
+                }
+                googleMap.addPolyline(polylineOptions)
+
+            }
+        }
+
 
         mapViewModel.route?.let {
             populateMap(it.pointList)
@@ -141,6 +179,13 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
 
         googleMapSetup.complete(Unit)
+
+    }
+
+    private fun awaitMyLocation() : LatLng{
+        while (locationManager.getCurrentLocation() == null)
+            Thread.sleep(100)
+        return locationManager.getCurrentLocation()!!
 
     }
 
@@ -245,6 +290,41 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                     }
                 }
             })
+    }
+
+
+    private fun decodePoly(encoded: String): ArrayList<LatLng> {
+        Log.d("Warmbier", encoded)
+        val poly: ArrayList<LatLng> = ArrayList<LatLng>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+            val position = LatLng(lat.toDouble() / 1E5, lng.toDouble() / 1E5)
+            poly.add(position)
+        }
+        Log.d("Warmbier", poly.toString())
+        return poly
     }
 
     //Forwarding map functions
