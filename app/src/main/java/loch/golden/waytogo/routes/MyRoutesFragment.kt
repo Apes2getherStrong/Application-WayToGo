@@ -41,12 +41,14 @@ class MyRoutesFragment : Fragment() {
         initSearchView()
         initRecyclerView()
     }
+
+    //TODO add published status and publish / unpublish /delete
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewMyRoutes.layoutManager = LinearLayoutManager(requireContext())
 
-        recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener{
+        recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener {
 
             override fun onItemClick(position: Int, route: Route) {
                 val id = route.routeUid
@@ -55,7 +57,7 @@ class MyRoutesFragment : Fragment() {
                 }
                 val fr = DatabaseMyRouteDetailFragment()
                 fr.arguments = bundle // Set the arguments bundle to the fragment
-                (parentFragment as? RoutesFragment)?.replaceFragment(1,fr)
+                (parentFragment as? RoutesFragment)?.replaceFragment(1, fr)
             }
 
         })
@@ -80,10 +82,11 @@ class MyRoutesFragment : Fragment() {
             }
         })
     }
+
     private fun search(query: String?) {
         query?.let { searchedQuery ->
             val filteredRoutes = allRoutes.filter { route ->
-                route.name.contains(searchedQuery,ignoreCase = true )
+                route.name.contains(searchedQuery, ignoreCase = true)
             }
             recyclerViewRouteAdapter.setRoutes(filteredRoutes)
         }
