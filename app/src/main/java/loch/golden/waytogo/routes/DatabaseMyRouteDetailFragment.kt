@@ -140,7 +140,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
-
             changeBackFragment()
         }
 
@@ -149,9 +148,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.publishRouteButton.setOnClickListener {
-
             publishRoute()
+        }
 
+        binding.testButton.setOnClickListener{
+            Log.d("Warmbier", mapLocationsOfRouteEntity.toString())
         }
     }
 
@@ -177,6 +178,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
+
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -187,7 +189,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                     mapLocationIdMap[mapLocation.id] = newMapLocation.id
-                    Log.d("RouteMapLocation Test","Test czy wchodzi");
                     val routeMapLocation =
                         RouteMapLocationRequest(UUID.randomUUID().toString(),newMapLocation, newRoute, sequenceNumber)
                     routeViewModel.postRouteMapLocation(routeMapLocation) { newRouteMapLocation ->

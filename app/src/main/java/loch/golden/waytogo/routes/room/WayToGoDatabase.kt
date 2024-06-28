@@ -16,13 +16,13 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import java.util.UUID
 
-@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 1, exportSchema = false)
+@Database(entities = [Route::class, MapLocation::class, RouteMapLocation::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class WayToGoDatabase : RoomDatabase() {
 
-    abstract fun getRouteDao() : RouteDao
+    abstract fun getRouteDao(): RouteDao
 
-    private class WayToGoDatabaseCallback (private val scope: CoroutineScope) : Callback() {
+    private class WayToGoDatabaseCallback(private val scope: CoroutineScope) : Callback() {
 
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
@@ -51,11 +51,11 @@ abstract class WayToGoDatabase : RoomDatabase() {
             routeDao.insertMapLocations(mapLocations)
 
             val routeMapLocations = listOf(
-                RouteMapLocation("123eefs", "324esczxc"),
-                RouteMapLocation("123eefs", "123eas"),
-                RouteMapLocation("ddasa2312311", "123eas"),
+                RouteMapLocation("123eefs", "324esczxc", 1),
+                RouteMapLocation("123eefs", "123eas", 2),
+                RouteMapLocation("ddasa2312311", "123eas", 3),
 
-            )
+                )
 
             routeDao.insertListOfRouteMapLocations(routeMapLocations)
 
@@ -73,8 +73,8 @@ abstract class WayToGoDatabase : RoomDatabase() {
             routeDao.insertMapLocations(mapLocationsForRoute4)
 
             val routeMapLocationsForRoute4 = listOf(
-                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[0].id),
-                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[1].id)
+                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[0].id, 1),
+                RouteMapLocation(route4.routeUid, mapLocationsForRoute4[1].id, 2)
             )
             routeDao.insertListOfRouteMapLocations(routeMapLocationsForRoute4)
         }
@@ -85,8 +85,10 @@ abstract class WayToGoDatabase : RoomDatabase() {
 
         @Volatile
         private var DATABASE_INSTANCE: WayToGoDatabase? = null
-        fun getDatabase(context: Context,
-                        scope: CoroutineScope) : WayToGoDatabase{
+        fun getDatabase(
+            context: Context,
+            scope: CoroutineScope
+        ): WayToGoDatabase {
 
             return DATABASE_INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

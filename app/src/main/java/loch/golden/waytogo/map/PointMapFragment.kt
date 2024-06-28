@@ -152,18 +152,20 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnCameraMoveListener(this)
 
-        lifecycleScope.launch {
-            if (mapViewModel.route != null) {
-                val myLocation = awaitMyLocation()
-                val polyPoints = test(myLocation, mapViewModel.route!!.pointList.values.first().position)
-                val polylineOptions = PolylineOptions().apply {
-                    polyPoints.forEach() { polyPoint ->
-                        add(polyPoint)
+        if (!mapViewModel.inCreationMode) {
+            lifecycleScope.launch {
+                if (mapViewModel.route != null) {
+                    val myLocation = awaitMyLocation()
+                    val polyPoints = test(myLocation, mapViewModel.route!!.pointList.values.first().position)
+                    val polylineOptions = PolylineOptions().apply {
+                        polyPoints.forEach() { polyPoint ->
+                            add(polyPoint)
+                        }
+                        color(Color.GREEN)
                     }
-                    color(Color.GREEN)
-                }
-                googleMap.addPolyline(polylineOptions)
+                    googleMap.addPolyline(polylineOptions)
 
+                }
             }
         }
 

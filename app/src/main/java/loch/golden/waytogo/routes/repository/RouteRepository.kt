@@ -25,15 +25,15 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     val allRoutes: Flow<List<Route>> = routeDao.getAllRoutes()
 
-    @WorkerThread
-    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
-        routeDao.insertRouteWithMapLocations(routeWithMapLocations)
-    }
-
-    @WorkerThread
-    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
-        routeDao.deleteRouteWithMapLocations(routeWithMapLocations)
-    }
+//    @WorkerThread
+//    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+//        routeDao.insertRouteWithMapLocations(routeWithMapLocations)
+//    }
+//
+//    @WorkerThread
+//    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+//        routeDao.deleteRouteWithMapLocations(routeWithMapLocations)
+//    }
 
     @WorkerThread
     suspend fun getRouteFromDbById(routeUid: String) : Route {
@@ -71,6 +71,12 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation) {
         routeDao.deleteRouteMapLocation(routeMapLocation)
     }
+
+    @WorkerThread
+    suspend fun deleteRouteMapLocationById(mapLocationId: String) {
+        routeDao.deleteRouteMapLocationById(mapLocationId)
+    }
+
 
     @WorkerThread
     suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations {

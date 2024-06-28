@@ -62,15 +62,15 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     private val _putRouteMapLocationResponse = MutableLiveData<Response<Void>>()
     val putRouteMapLocationResponse: LiveData<Response<Void>> get() = _putRouteMapLocationResponse
 
-    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
-        viewModelScope.launch {
-            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
-        }
-
-    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
-        viewModelScope.launch {
-            routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
-        }
+//    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
+//        viewModelScope.launch {
+//            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
+//        }
+//
+//    fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
+//        viewModelScope.launch {
+//            routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
+//        }
 
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
@@ -93,17 +93,17 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
         viewModelScope.launch {
             routeRepository.insertMapLocation(mapLocation)
-            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
+            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr))
         }
 
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
     }
 
-    fun deleteMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
+    fun deleteMapLocation(mapLocation: MapLocation) =
         viewModelScope.launch {
             routeRepository.deleteMapLocation(mapLocation)
-            routeRepository.deleteRouteMapLocation(RouteMapLocation(routeId, mapLocation.id))
+            routeRepository.deleteRouteMapLocationById(mapLocation.id)
 
         }
 
