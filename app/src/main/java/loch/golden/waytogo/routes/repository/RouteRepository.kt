@@ -88,7 +88,6 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
 
-
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login",response.body().toString())
@@ -109,18 +108,6 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     suspend fun getAudioByMapLocationId(mapLocationId: String) : Response<AudioListResponse> {
         return RetrofitInstance.apiService.getAudioByMapLocationId(mapLocationId)
-    }
-
-    suspend fun postAudio(audio: Audio): Response<Audio> {
-        return RetrofitInstance.apiService.postAudio(audio)
-    }
-
-    suspend fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
-        return RetrofitInstance.apiService.postAudioFile(audioId,audioFile)
-    }
-
-    suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
-        return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId,imageFile)
     }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {
@@ -153,12 +140,40 @@ class RouteRepository(private val routeDao: RouteDao) {
         return RetrofitInstance.apiService.postRoute(route)
     }
 
+    suspend fun putRouteById(routeId: String,route: Route): Response<Void> {
+        return RetrofitInstance.apiService.putRouteById(routeId,route)
+    }
+
     suspend fun postMapLocation(mapLocation: MapLocationRequest): Response<MapLocationRequest> {
         return RetrofitInstance.apiService.postMapLocation(mapLocation)
     }
 
+    suspend fun putMapLocationById(mapLocationId: String,mapLocation: MapLocationRequest): Response<Void> {
+        return RetrofitInstance.apiService.putMapLocationById(mapLocationId,mapLocation)
+    }
+
     suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest): Response<RouteMapLocationRequest> {
         return RetrofitInstance.apiService.postRouteMapLocation(routeMapLocation)
+    }
+
+    suspend fun putRouteMapLocationById(routeMapLocationId: String,routeMapLocation: RouteMapLocationRequest): Response<Void> {
+        return RetrofitInstance.apiService.putRouteMapLocationById(routeMapLocationId,routeMapLocation)
+    }
+
+    suspend fun postAudio(audio: Audio): Response<Audio> {
+        return RetrofitInstance.apiService.postAudio(audio)
+    }
+
+    suspend fun putAudioById(audioId: String,audio: Audio) : Response<Void>{
+        return RetrofitInstance.apiService.putAudioById(audioId,audio)
+    }
+
+    suspend fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.postAudioFile(audioId,audioFile)
+    }
+
+    suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId,imageFile)
     }
 }
 

@@ -7,8 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.adapter.FragmentViewHolder
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
+import okhttp3.internal.notifyAll
 import kotlin.random.Random
 
 class RoutesFragment : Fragment() {
@@ -34,9 +38,13 @@ class RoutesFragment : Fragment() {
                 1 -> tab.text = "My Routes"
             }
         }.attach()
+
+
         binding.addRouteFab.setOnClickListener() {
             binding.viewPager.setCurrentItem(1, true)
             replaceFragment(1, DatabaseMyRouteDetailFragment())
+
+
         }
     }
 
@@ -46,7 +54,10 @@ class RoutesFragment : Fragment() {
 
     private inner class RoutesViewPagerAdapter(fragment: Fragment) :
         FragmentStateAdapter(fragment) {
-        val fragments: Array<Fragment> = arrayOf(PublicRoutesFragment(), MyRoutesFragment())
+        val fragments:MutableList<Fragment> = mutableListOf(
+            PublicRoutesFragment(),
+            MyRoutesFragment()
+        )
         override fun createFragment(position: Int): Fragment {
             return fragments[position]
         }
@@ -59,6 +70,7 @@ class RoutesFragment : Fragment() {
             fragments[position] = fragment
             notifyItemChanged(position)
             createFragment(position)
+
         }
 
         override fun getItemId(position: Int): Long {
@@ -78,6 +90,8 @@ class RoutesFragment : Fragment() {
         fun getIDForFragment(fragment: Fragment): Long {
             return fragment.hashCode().toLong()
         }
+
+
     }
 
 

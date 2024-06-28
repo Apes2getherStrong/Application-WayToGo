@@ -1,10 +1,12 @@
 package loch.golden.waytogo.routes
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.auth0.jwt.JWT
+import com.auth0.jwt.interfaces.DecodedJWT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
@@ -26,6 +30,8 @@ import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import loch.golden.waytogo.user.tokenmanager.TokenManager
+
 
 class PublicRoutesFragment : Fragment() {
 
@@ -38,6 +44,7 @@ class PublicRoutesFragment : Fragment() {
     private val routeDao: RouteDao by lazy {
         WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
     }
+    private lateinit var tokenManager: TokenManager
 
 
     override fun onCreateView(
@@ -50,6 +57,12 @@ class PublicRoutesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        tokenManager = TokenManager(requireContext())
+
+        if (!isUserAuthenticatedAndTokenValid()) {
+            Toast.makeText(requireContext(), "Please log in to view public routes", Toast.LENGTH_LONG).show()
+        }
         initSearchView()
         initRecyclerView()
         initViewModel()
@@ -58,6 +71,21 @@ class PublicRoutesFragment : Fragment() {
 
     }
 
+
+
+    private fun isUserAuthenticatedAndTokenValid(): Boolean {
+        val token = tokenManager.getToken()
+        return !token.isNullOrBlank() && !isTokenExpired(token)
+    }
+
+    private fun isTokenExpired(token: String): Boolean {
+        val decodedJWT: DecodedJWT = JWT.decode(token)
+        val expiresAtMillis = decodedJWT.expiresAt.time
+
+        val currentTimeMillis = System.currentTimeMillis()
+
+        return expiresAtMillis < currentTimeMillis
+    }
 
 
     private fun initRecyclerView() {
@@ -84,17 +112,18 @@ class PublicRoutesFragment : Fragment() {
         val routeViewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
         observeRouteResponse()
+
     }
 
     private fun observeRouteResponse() {
-
         lifecycleScope.launch {
             viewModel.getRoutes(0, 20).collectLatest { pagingData ->
-
-                recyclerViewRouteAdapter.submitData(pagingData)
+                    recyclerViewRouteAdapter.submitData(pagingData)
 
             }
         }
+
+
     }
 
     private fun initSearchView() {
@@ -103,7 +132,6 @@ class PublicRoutesFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
-
             override fun onQueryTextChange(newText: String?): Boolean {
                 search(newText)
                 return true
@@ -123,9 +151,6 @@ class PublicRoutesFragment : Fragment() {
             }
         }
     }
-
-
-
 
 }
 

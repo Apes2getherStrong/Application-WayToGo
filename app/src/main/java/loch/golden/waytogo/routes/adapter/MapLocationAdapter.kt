@@ -1,5 +1,6 @@
 package loch.golden.waytogo.routes.adapter
 
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,7 @@ RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
     }
 
 
+
     override fun getItemCount(): Int {
         return mapLocations.size
     }
@@ -37,5 +39,7 @@ RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
             mapLocationDescription.text = mapLocation.description
 
         }
+
+
     }
 }

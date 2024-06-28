@@ -13,7 +13,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.auth0.jwt.JWT
+import com.auth0.jwt.interfaces.DecodedJWT
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
@@ -30,6 +34,7 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -38,6 +43,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.Collections
 import java.util.UUID
 
 
@@ -52,6 +58,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private lateinit var route: MapRoute
     private lateinit var routeEntity: Route
     private lateinit var mapLocationsOfRouteEntity: List<MapLocation>
+    private var isPublished = false
+    private val mapLocationIdMap = mutableMapOf<String, String>()
+    private val audioIdMap = mutableMapOf<String, String>()
+    private val routeMapLocationIdMap = mutableMapOf<String, String>()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,6 +112,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 binding.routeTitle.setText(routeWithLocationsFromDb.route.name)
                 binding.routeDescription.setText(routeWithLocationsFromDb.route.description)
                 val mapLocationAdapter = MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
+
                 Log.d("Map Location", routeWithLocationsFromDb.mapLocations.toString())
                 mapLocationsOfRouteEntity = routeWithLocationsFromDb.mapLocations
                 routeWithLocationsFromDb.mapLocations.let {
@@ -112,6 +124,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
                 binding.recyclerViewPoints.adapter = mapLocationAdapter
+                val itemTouchHelper = ItemTouchHelper(simpleCallBack)
+                itemTouchHelper.attachToRecyclerView(binding.recyclerViewPoints)
             } else {
                 Toast.makeText(requireContext(), "Route not found", Toast.LENGTH_SHORT).show()
             }
@@ -135,7 +149,9 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.publishRouteButton.setOnClickListener {
+
             publishRoute()
+
         }
     }
 
@@ -146,19 +162,21 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         if (newRouteName != routeEntity.name || newRouteDescription != routeEntity.description) {
             routeEntity.name = newRouteName
             routeEntity.description = newRouteDescription
-            lifecycleScope.launch {
-                routeViewModel.updateRoute(routeEntity)
-            }
+            routeViewModel.updateRoute(routeEntity)
+
             Toast.makeText(requireContext(), "Udalo sie zupdatowac routa", Toast.LENGTH_SHORT)
                 .show()
         }
     }
 
-    //TODO nie dziala publishowania mapLocation jeszcze , fix
     private fun publishRoute() {
+        if (!isUserLoggedIn()) {
+            Toast.makeText(requireContext(), "You need to log in to publish a route", Toast.LENGTH_SHORT).show()
+        }
         var sequenceNumber = 1;
         routeViewModel.postRoute(routeEntity) { newRoute ->
-
+            isPublished = true
+            binding.publishRouteButton.text = "Update Route"
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -168,56 +186,161 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 )
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
-
-                    Log.d("Dzicz","Siema jestem se tu");
+                    mapLocationIdMap[mapLocation.id] = newMapLocation.id
+                    Log.d("RouteMapLocation Test","Test czy wchodzi");
                     val routeMapLocation =
-                        RouteMapLocationRequest(newMapLocation, newRoute, sequenceNumber)
-                    routeViewModel.postRouteMapLocation(routeMapLocation)
+                        RouteMapLocationRequest(UUID.randomUUID().toString(),newMapLocation, newRoute, sequenceNumber)
+                    routeViewModel.postRouteMapLocation(routeMapLocation) { newRouteMapLocation ->
+                        routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
+                        sequenceNumber++
 
-                    sequenceNumber++
+                        val audio = Audio(
+                            UUID.randomUUID().toString(),
+                            newMapLocation.name + "audio",
+                            null,
+                            null,
+                            newMapLocation
+                        )
+                        routeViewModel.postAudio(audio) { newAudio ->
+                            audioIdMap[newMapLocation.id] = newAudio.id
+                            val audioFile = File(
+                                requireContext().filesDir,
+                                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}")
 
-                    val audio = Audio(
-                        UUID.randomUUID().toString(),
-                        newMapLocation.name + "audio",
-                        null,
-                        null,
-                        newMapLocation
-                    )
-                    routeViewModel.postAudio(audio) { newAudio ->
-                        val audioFile = File(
-                            requireContext().filesDir,
-                            "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}")
+                            Log.d("Dzicz",audioFile.absolutePath);
+                            if(audioFile.exists()){
+                                Log.d("AudioRequest","Exists")
+                                val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(),audioFile )
+                                val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
+                                Log.d("AUDIO ID", newAudio.id)
+                                routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
+                            }else {
+                                Log.d("AudioRequest","Nie mo")
+                            }
 
-                        Log.d("Dzicz",audioFile.absolutePath);
-                        if(audioFile.exists()){
-                            Log.d("Dzicz","Exists")
-                            val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(),audioFile )
-                            val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
-                            Log.d("AUDIO ID", newAudio.id)
-                            routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
-                        }else {
-                            Log.d("Dzicz","Nie mo")
-                        }
+                            val imageFile = File(
+                                requireContext().filesDir,
+                                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}")
 
-                        val imageFile = File(
-                            requireContext().filesDir,
-                            "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}")
+                            if(imageFile.exists()){
+                                Log.d("Image","Exists")
+                                val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(),imageFile)
+                                val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
+                                routeViewModel.putImageToMapLocation(newMapLocation.id,imageMultiPartBody)
+                            }else {
+                                Log.d("Image","Nie mo")
+                            }
 
-                        if(imageFile.exists()){
-                            Log.d("Image","Exists")
-                            val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(),imageFile)
-                            val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
-                            routeViewModel.putImageToMapLocation(newMapLocation.id,imageMultiPartBody)
-                        }else {
-                            Log.d("Image","Nie mo")
                         }
 
                     }
+
+
                 }
             }
         }
     }
 
+    private var simpleCallBack = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),0){
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            var startPosition = viewHolder.bindingAdapterPosition
+            var stopPosition = target.bindingAdapterPosition
+
+            Collections.swap(mapLocationsOfRouteEntity,startPosition,stopPosition)
+            recyclerView.adapter?.notifyItemMoved(startPosition,stopPosition)
+            return true;
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            super.onSelectedChanged(viewHolder, actionState)
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                viewHolder?.itemView?.alpha = 0.5f
+            }
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            viewHolder.itemView.alpha = 1.0f
+        }
+
+    }
+    private fun isUserLoggedIn(): Boolean {
+        val tokenManager = TokenManager(requireContext())
+        val token = tokenManager.getToken()
+        return !token.isNullOrEmpty() && !isTokenExpired(token)
+
+    }
+
+    private fun isTokenExpired(token: String): Boolean {
+        val decodedJWT: DecodedJWT = JWT.decode(token)
+        val expiresAtMillis = decodedJWT.expiresAt?.time ?: return true
+        val currentTimeMillis = System.currentTimeMillis()
+        return expiresAtMillis < currentTimeMillis
+    }
+
+    //TODO zrobic update routow, jeszcze nie do konca dziala
+//    private fun updatePublishedRoute(){
+//        var sequenceNumber = 1
+//
+//        routeViewModel.putRouteById(routeEntity.routeUid, routeEntity)
+//
+//        mapLocationsOfRouteEntity.forEach { mapLocation ->
+//            val mapLocationId = mapLocationIdMap[mapLocation.id] ?: return@forEach
+//            val mapLocationRequest = MapLocationRequest(
+//                mapLocation.id,
+//                mapLocation.name,
+//                mapLocation.description,
+//                Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
+//            )
+//            routeViewModel.putMapLocationById(mapLocationId, mapLocationRequest)
+//
+//            val routeMapLocationId = routeMapLocationIdMap[mapLocationId] ?: return@forEach
+//            val routeMapLocation = RouteMapLocationRequest(UUID.randomUUID().toString(),mapLocationRequest, routeEntity, sequenceNumber)
+//            routeViewModel.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
+//            sequenceNumber++
+//
+//            val audioId = audioIdMap[mapLocationId] ?: return@forEach
+//            val audio = Audio(
+//                audioId,
+//                mapLocation.name + "audio",
+//                null,
+//                null,
+//                mapLocationRequest
+//            )
+//            routeViewModel.putAudioById(audioId, audio)
+//
+//            val audioFile = File(
+//                requireContext().filesDir,
+//                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
+//            )
+//
+//            if (audioFile.exists()) {
+//                val audioRequest = audioFile.asRequestBody("audio/3gp".toMediaTypeOrNull())
+//                val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioRequest)
+//                routeViewModel.postAudioFile(audio.id, audioMultiPartBody)
+//            }
+//
+//            val imageFile = File(
+//                requireContext().filesDir,
+//                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}"
+//            )
+//
+//            if (imageFile.exists()) {
+//                val imageRequest = imageFile.asRequestBody("image/jpg".toMediaTypeOrNull())
+//                val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
+//                routeViewModel.putImageToMapLocation(mapLocationId, imageMultiPartBody)
+//            }
+//        }
+//
+//    }
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())

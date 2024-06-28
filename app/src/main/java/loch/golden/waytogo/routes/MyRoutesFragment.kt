@@ -43,6 +43,7 @@ class MyRoutesFragment : Fragment() {
     }
 
     //TODO add published status and publish / unpublish /delete
+
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter

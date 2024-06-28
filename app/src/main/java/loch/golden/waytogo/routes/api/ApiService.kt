@@ -35,24 +35,6 @@ interface ApiService {
     @POST(Constants.REGISTER_URL)
     suspend fun register(@Body user: User): Response<Void>
 
-    @POST("audios")
-    suspend fun postAudio(@Body audio: Audio): Response<Audio>
-
-    @Multipart
-    @POST("audios/{audioId}/audio")
-    suspend fun postAudioFile(
-        @Path("audioId") audioId: String?,
-        @Part file: MultipartBody.Part,
-    )
-
-    @Multipart
-    @PUT("mapLocations/{mapLocationsId}/image")
-    suspend fun putImageToMapLocation(
-        @Path("mapLocationsId") mapLocationId: String,
-        @Part imageFile: MultipartBody.Part
-    )
-
-
     @GET("routes")
     suspend fun getRoutes(
         @Query("pageNumber") pageNumber: Int,
@@ -94,19 +76,58 @@ interface ApiService {
         @Path("mapLocationId") mapLocationId: String
     ): Response<AudioListResponse>
 
-
     @POST("routes")
     suspend fun postRoute(
         @Body route: Route
     ): Response<Route>
+
+    @PUT("routes/{routeId}")
+    suspend fun putRouteById(
+        @Path("routeId")routeId: String,
+        @Body route: Route
+    ): Response<Void>
 
     @POST("mapLocations")
     suspend fun postMapLocation(
         @Body mapLocation: MapLocationRequest
     ): Response<MapLocationRequest>
 
+    @PUT("mapLocations/{mapLocationId}")
+    suspend fun putMapLocationById(
+        @Path("mapLocationId")mapLocationId: String,
+        @Body mapLocation:MapLocationRequest
+    ):Response <Void>
+
     @POST("routeMapLocations")
     suspend fun postRouteMapLocation(
         @Body routeMapLocation: RouteMapLocationRequest
     ): Response<RouteMapLocationRequest>
+
+    @PUT("routeMapLocations/{routeMapLocationId}")
+    suspend fun putRouteMapLocationById(
+        @Path("routeMapLocationId")routeMapLocationId: String,
+        @Body routeMapLocation: RouteMapLocationRequest
+    ): Response<Void>
+
+    @POST("audios")
+    suspend fun postAudio(@Body audio: Audio): Response<Audio>
+
+    @PUT("audios/{audioId}")
+    suspend fun putAudioById(
+        @Path("audioId") audioId: String,
+        @Body audio: Audio): Response<Void>
+
+    @Multipart
+    @POST("audios/{audioId}/audio")
+    suspend fun postAudioFile(
+        @Path("audioId") audioId: String?,
+        @Part file: MultipartBody.Part,
+    )
+
+    @Multipart
+    @PUT("mapLocations/{mapLocationsId}/image")
+    suspend fun putImageToMapLocation(
+        @Path("mapLocationsId") mapLocationId: String,
+        @Part imageFile: MultipartBody.Part
+    )
 }
