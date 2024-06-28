@@ -176,7 +176,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         if (!isUserLoggedIn()) {
             Toast.makeText(requireContext(), "You need to log in to publish a route", Toast.LENGTH_SHORT).show()
         }
-        var sequenceNumber = 1;
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
@@ -188,14 +187,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     mapLocation.description,
                     Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                 )
+                val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                     mapLocationIdMap[mapLocation.id] = newMapLocation.id
                     val routeMapLocation =
-                        RouteMapLocationRequest(UUID.randomUUID().toString(), newMapLocation, newRoute, sequenceNumber)
+                        RouteMapLocationRequest(UUID.randomUUID().toString(), newMapLocation, newRoute, sequenceNr)
                     routeViewModel.postRouteMapLocation(routeMapLocation) { newRouteMapLocation ->
                         routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
-                        sequenceNumber++
 
                         val audio = Audio(
                             UUID.randomUUID().toString(),
