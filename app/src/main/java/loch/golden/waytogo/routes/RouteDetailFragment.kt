@@ -166,6 +166,7 @@ class RouteDetailFragment() : Fragment() {
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
+        mapViewModel.inCreationMode = false
         mapViewModel.route = route
         navigateToMapListener?.navigateToMap()
     }

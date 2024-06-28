@@ -1,9 +1,14 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.devtools.ksp")
 }
+
+
 
 android {
     namespace = "loch.golden.waytogo"
@@ -17,10 +22,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(FileInputStream(localPropertiesFile))
     }
 
     buildTypes {
@@ -30,7 +43,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "MAPS_API_KEY", localProperties.getProperty("MAPS_API_KEY", "NO API KEY PROVIDED"))
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -57,6 +72,8 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.appolica:interactive-info-window-android:1.1.0")
+    implementation("com.google.code.gson:gson:2.9.0")
+
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
