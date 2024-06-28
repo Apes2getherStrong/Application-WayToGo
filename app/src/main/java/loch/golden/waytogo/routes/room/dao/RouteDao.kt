@@ -47,6 +47,9 @@ interface RouteDao {
     @Query("SELECT * FROM map_location_table WHERE id = :mapLocationId")
     suspend fun getMyLocationById(mapLocationId: String): MapLocation
 
+    @Query("SELECT sequenceNr FROM route_map_location WHERE id = :mapLocationId")
+    suspend fun getSequenceNrByMapLocationId(mapLocationId: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMapLocations(mapLocations: List<MapLocation>)
 
@@ -70,8 +73,12 @@ interface RouteDao {
     fun getRoutesWithMapLocations(): List<RouteWithMapLocations>
 
     @Transaction
-    @Query("SELECT * FROM route_table WHERE route_uid = :routeUid ")
+    @Query("SELECT * FROM route_table WHERE route_uid = :routeUid")
     suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations
+
+    @Transaction
+    @Query("UPDATE route_map_location SET sequenceNr = :newSequenceNr WHERE id = :mapLocationId")
+    suspend fun updateRouteMapLocationSequenceNrById(mapLocationId: String, newSequenceNr: Int)
 
 //    @Transaction
 //    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {

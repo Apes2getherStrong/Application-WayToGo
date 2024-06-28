@@ -97,7 +97,7 @@ class RouteDetailFragment() : Fragment() {
                 val mapLocationAdapter = PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                 response.body()?.content?.let { mapLocations ->
                     for (mapLocation in mapLocations) {
-                        val mapPoint = MapPoint(mapLocation)
+                        val mapPoint = MapPoint(mapLocation,0 ) //TODO URGENT FIX THIS
                         route.pointList[mapLocation.id] = mapPoint
 
                         // Fetch audio by map location ID
@@ -124,7 +124,7 @@ class RouteDetailFragment() : Fragment() {
         //TODO move these componenets to seperate functions
         //TODO create files when choosing route not before
 
-        routeViewModel.audioFile.observe(viewLifecycleOwner, Observer { response ->
+        routeViewModel.audioFile.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
                 val audioBytes = response.bytes.body()
                 if (audioBytes != null) {
@@ -135,7 +135,7 @@ class RouteDetailFragment() : Fragment() {
                     fos.close()
                 }
             }
-        })
+        }
 
         routeViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
@@ -150,6 +150,7 @@ class RouteDetailFragment() : Fragment() {
                 }
             }
         }
+
 
         binding.backButton.setOnClickListener()
         {

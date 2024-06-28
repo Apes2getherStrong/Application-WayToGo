@@ -15,11 +15,13 @@ data class MapPoint(
     var name: String,
     var description: String?,
     var position: LatLng,
+    var sequenceNr : Int,
     var audioPath: String? = null,
     var photoPath: String? = null,
+
 ) {
 
-    constructor(mapLocation: MapLocation) :
+    constructor(mapLocation: MapLocation, sequenceNr: Int) :
             this(
                 mapLocation.id,
                 mapLocation.name,
@@ -27,10 +29,11 @@ data class MapPoint(
                 LatLng(
                     mapLocation.latitude,
                     mapLocation.longitude
-                )
+                ),
+                sequenceNr
             )
 
-    constructor(mapLocation: MapLocation, context: Context) :
+    constructor(mapLocation: MapLocation, sequenceNr: Int, context: Context) :
             this(
                 mapLocation.id,
                 mapLocation.name,
@@ -38,7 +41,8 @@ data class MapPoint(
                 LatLng(
                     mapLocation.latitude,
                     mapLocation.longitude
-                )
+                ),
+                sequenceNr
             ) {
         val imageFilePath = "${Constants.IMAGE_DIR}/$id${Constants.IMAGE_EXTENSION}"
         val imageFile = File(context.filesDir, imageFilePath)
@@ -51,7 +55,7 @@ data class MapPoint(
             audioPath = audioFile.absolutePath
     }
 
-    constructor(mapLocationRequest: MapLocationRequest) :
+    constructor(mapLocationRequest: MapLocationRequest, sequenceNr: Int) :
             this(
                 mapLocationRequest.id,
                 mapLocationRequest.name,
@@ -60,6 +64,7 @@ data class MapPoint(
                     mapLocationRequest.coordinates.coordinates[0],
                     mapLocationRequest.coordinates.coordinates[1]
                 ),
+                sequenceNr,
                 null,
                 null
             )

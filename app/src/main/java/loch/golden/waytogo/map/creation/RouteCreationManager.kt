@@ -174,8 +174,9 @@ class RouteCreationManager(
             marker.position.latitude,
             marker.position.longitude
         )
-        routeViewModel.insertMapLocation(mapLocation, routeId, mapViewModel.route!!.pointList.size + 1)
-        mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation)
+        val sequenceNr = mapViewModel.route!!.pointList.size + 1
+        routeViewModel.insertMapLocation(mapLocation, routeId, sequenceNr)
+        mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation, sequenceNr)
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
     }

@@ -7,9 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
+import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 
-class MapLocationAdapter(private val mapLocations: List<MapLocation>) :
+class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
 RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,7 +35,7 @@ RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
         private val mapLocationTextView: TextView = itemView.findViewById(R.id.name_mapLocation_text_view)
         private val mapLocationDescription: TextView = itemView.findViewById(R.id.mapLocation_description_text_view)
 
-        fun bind(mapLocation: MapLocation) {
+        fun bind(mapLocation: MapPoint) {
             mapLocationTextView.text = mapLocation.name
             mapLocationDescription.text = mapLocation.description
 
