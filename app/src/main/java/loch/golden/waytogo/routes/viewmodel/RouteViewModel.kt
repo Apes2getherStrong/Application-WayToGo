@@ -50,6 +50,17 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     private val _currentMapImage = MutableLiveData<IdByteArray>()
     val currentMapImage: LiveData<IdByteArray> get() = _currentMapImage
 
+    private val _putRouteResponse = MutableLiveData<Response<Void>>()
+    val putRouteResponse: LiveData<Response<Void>> get() = _putRouteResponse
+
+    private val _putMapLocationResponse = MutableLiveData<Response<Void>>()
+    val putMapLocationResponse: LiveData<Response<Void>> get() = _putMapLocationResponse
+
+    private val _putAudioResponse = MutableLiveData<Response<Void>>()
+    val putAudioResponse: LiveData<Response<Void>> get() = _putAudioResponse
+
+    private val _putRouteMapLocationResponse = MutableLiveData<Response<Void>>()
+    val putRouteMapLocationResponse: LiveData<Response<Void>> get() = _putRouteMapLocationResponse
 
     fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
         viewModelScope.launch {
@@ -214,6 +225,18 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
     }
 
+    fun putRouteById(routeId: String,route: Route) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putRouteById(routeId, route)
+            _putRouteResponse.postValue(response)
+            if (!response.isSuccessful) {
+                Log.e("putRouteById", "Error: ${response.errorBody()?.string()}")
+            }
+        }catch (e: Exception){
+            Log.e("putRouteById", "Exception: ${e.message}")
+        }
+    }
+
 
     fun postMapLocation(mapLocation: MapLocationRequest, callback: (MapLocationRequest) -> Unit) =
         viewModelScope.launch {
@@ -232,8 +255,32 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 
         }
 
-    fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest) = viewModelScope.launch {
-        routeRepository.postRouteMapLocation(routeMapLocation)
+    fun putMapLocationById(mapLocationId: String, mapLocation: MapLocationRequest) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putMapLocationById(mapLocationId, mapLocation)
+            _putMapLocationResponse.postValue(response)
+        } catch (e: Exception) {
+            Log.e("putMapLocationById", "Exception: ${e.message}")
+        }
+    }
+
+
+    fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest, callback: (RouteMapLocationRequest) -> Unit) = viewModelScope.launch {
+        val response = routeRepository.postRouteMapLocation(routeMapLocation)
+        if (response.isSuccessful) {
+            response.body()?.let { newRouteMapLocation ->
+                callback(newRouteMapLocation)
+            }
+        }
+    }
+
+    fun putRouteMapLocationById(routeMapLocationId: String, routeMapLocation: RouteMapLocationRequest) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
+            _putRouteMapLocationResponse.postValue(response)
+        } catch (e: Exception) {
+            Log.e("putRouteMapLocationById", "Exception: ${e.message}")
+        }
     }
 
     fun login(authRequest: AuthRequest) {

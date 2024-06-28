@@ -41,6 +41,7 @@ class MyRoutesFragment : Fragment() {
         initSearchView()
         initRecyclerView()
     }
+
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter

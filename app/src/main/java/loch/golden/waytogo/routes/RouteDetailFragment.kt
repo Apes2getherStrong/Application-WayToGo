@@ -90,7 +90,7 @@ class RouteDetailFragment() : Fragment() {
                 routeViewModel.getMapLocationsByRouteId(routeId)
             }
         }
-
+        binding.progressBar.visibility = View.VISIBLE
         // Observe map locations response
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
@@ -107,6 +107,7 @@ class RouteDetailFragment() : Fragment() {
 
                     }
                 }
+                binding.progressBar.visibility = View.GONE
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
                 binding.recyclerViewPoints.adapter = mapLocationAdapter
             }
@@ -122,7 +123,7 @@ class RouteDetailFragment() : Fragment() {
         }
         //TODO move these componenets to seperate functions
         //TODO create files when choosing route not before
-        
+
         routeViewModel.audioFile.observe(viewLifecycleOwner, Observer { response ->
             if (response.bytes.isSuccessful) {
                 val audioBytes = response.bytes.body()

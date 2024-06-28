@@ -92,5 +92,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 
+    //jwt
+    implementation("com.auth0:java-jwt:3.18.2")
 
 }
