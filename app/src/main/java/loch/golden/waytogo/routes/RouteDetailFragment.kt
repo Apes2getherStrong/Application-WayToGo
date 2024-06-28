@@ -92,12 +92,13 @@ class RouteDetailFragment() : Fragment() {
         }
         binding.progressBar.visibility = View.VISIBLE
         // Observe map locations response
+        var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
                 val mapLocationAdapter = PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                 response.body()?.content?.let { mapLocations ->
                     for (mapLocation in mapLocations) {
-                        val mapPoint = MapPoint(mapLocation,0 ) //TODO URGENT FIX THIS
+                        val mapPoint = MapPoint(mapLocation, ++sequenceNr)
                         route.pointList[mapLocation.id] = mapPoint
 
                         // Fetch audio by map location ID
