@@ -170,7 +170,10 @@ class RouteDetailFragment() : Fragment() {
         Log.d("Warmbier", route.toString())
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
+        mapViewModel.currentSequenceNr = 1
+        mapViewModel.currentPoint = mapViewModel.route!!.pointList.values.find { it.sequenceNr == 1 }
         navigateToMapListener?.navigateToMap()
+
     }
 
     private fun changeBackFragment() {

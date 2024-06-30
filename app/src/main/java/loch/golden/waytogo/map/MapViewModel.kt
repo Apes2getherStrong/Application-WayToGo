@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.CameraPosition
+import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import java.io.File
 
@@ -12,6 +13,12 @@ class MapViewModel : ViewModel() {
     var route: MapRoute? = null
     var inCreationMode = false
     var mp: MediaPlayer? = null
+
+    var currentSequenceNr = 1
+    var audioCompleted = false
+    var locationCompleted = false
+    var currentPoint : MapPoint? = null
+
 
 
 

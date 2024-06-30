@@ -16,5 +16,5 @@ interface GoogleApiService {
         @Query("key") key: String,
         @Query("waypoints") waypoints: List<LatLng>?,
 
-        ): String
+        ): String //TODO MAKE this nicer maybe add a converter
 }
