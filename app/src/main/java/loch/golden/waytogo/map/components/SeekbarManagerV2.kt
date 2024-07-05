@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
+import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.map.MapViewModel
 
 class SeekbarManagerV2(
@@ -16,6 +17,7 @@ class SeekbarManagerV2(
     private val buttonList: List<Button>
 ) {
     private val handler = Handler(Looper.getMainLooper())
+    private var onCompletionListener: (() -> Unit)? = null
     private var seekbarRunnable: Runnable = object : Runnable {
         override fun run() {
             try {
@@ -56,6 +58,8 @@ class SeekbarManagerV2(
             }
             setOnCompletionListener {
                 Log.d("AudioWarmbier", "stop/release playing")
+                onCompletionListener?.invoke()
+                onCompletionListener = null
                 toggleButtons(false)
 
             }
@@ -97,7 +101,6 @@ class SeekbarManagerV2(
                     val pixels = (screenWidth * trackPercentage).toInt()
                     customSeekbar.layoutParams.width = pixels
                     customSeekbar.requestLayout()
-                    Log.e("Warmbier", pixels.toString())
 
                     handler.postDelayed(this, 100)
                 } catch (e: Exception) {
@@ -115,7 +118,7 @@ class SeekbarManagerV2(
         toggleButtons(false)
     }
 
-    private fun resumeAudio() {
+    fun resumeAudio() {
         Log.d("AudioWarmbier", "resume playing")
         mapViewModel.mp!!.start()
         toggleButtons(true)
@@ -125,6 +128,10 @@ class SeekbarManagerV2(
         for (button in buttonList) {
             button.isActivated = setActive
         }
+    }
+
+    fun setOnCompletionListener(listener: () -> Unit) {
+        this.onCompletionListener = listener
     }
 
 }

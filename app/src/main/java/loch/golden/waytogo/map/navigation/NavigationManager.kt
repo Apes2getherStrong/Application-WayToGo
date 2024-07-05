@@ -12,15 +12,17 @@ class NavigationManager(private val mapViewModel: MapViewModel) {
     suspend fun getPolyline(from: LatLng, to: LatLng): ArrayList<LatLng> {
         val fromStr = "${from.latitude},${from.longitude}"
         val toStr = "${to.latitude},${to.longitude}"
-        val jsonResponse = GoogleApiRetrofitInstance.apiService.getPolyline(
+        val jsonResponse = GoogleApiRetrofitInstance.apiService.getPolyline( //todo add try catch
             fromStr,
             toStr,
             "walking",
             BuildConfig.MAPS_API_KEY,
             null
         )
+        Log.d("Warmbier", jsonResponse)
         val encodedPoly =
             JsonParser.parseString(jsonResponse).asJsonObject["routes"].asJsonArray[0].asJsonObject["overview_polyline"].asJsonObject["points"].asString
+        Log.d("Warmbier", encodedPoly)
         return decodePoly(encodedPoly)
     }
 

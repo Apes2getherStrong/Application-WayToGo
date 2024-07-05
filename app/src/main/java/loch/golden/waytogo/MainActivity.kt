@@ -122,6 +122,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         supportFragmentManager.commit {
             replace(R.id.fragment_container_main, PointMapFragment())
         }
+
         binding.bottomNav.menu.findItem(R.id.bottom_nav_map).isChecked = true
     }
 

@@ -3,19 +3,14 @@ package loch.golden.waytogo.map
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.location.Location
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -26,18 +21,15 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.gson.JsonParser
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import loch.golden.waytogo.BuildConfig
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -48,11 +40,15 @@ import loch.golden.waytogo.map.components.SeekbarManagerV2
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
-import loch.golden.waytogo.map.navigation.GoogleApiRetrofitInstance
 import loch.golden.waytogo.map.navigation.NavigationManager
 import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 
 class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
@@ -64,7 +60,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var googleMap: GoogleMap
     private val googleMapSetup = CompletableDeferred<Unit>()
 
-    private lateinit var locationManager: LocationManager
     private lateinit var mapMenuManager: MapMenuManager
 
     private var seekbarManager: SeekbarManagerV2? = null
@@ -75,6 +70,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private var routeCreationManager: RouteCreationManager? = null
 
     private var navigationManager: NavigationManager? = null
+    private var currentPolyline: Polyline? = null
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
@@ -93,8 +89,10 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
-        locationManager = LocationManager(requireContext())
-        locationManager.startLocationUpdates()
+        if (mapViewModel.locationManager == null) {
+            mapViewModel.locationManager = LocationManager(requireContext())
+            mapViewModel.locationManager!!.startLocationUpdates() //todo move this to activity
+        }
 
         initMapView(savedInstanceState)
 
@@ -108,6 +106,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             if (mapViewModel.inCreationMode) {
                 initCreation(savedInstanceState)
             } else {
+                Log.d("Warmbier", "i am getting here")
                 seekbarManager = SeekbarManagerV2(
                     mapViewModel,
                     binding.expandedPanel.seekbar,
@@ -116,6 +115,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
 
                 navigationManager = NavigationManager(mapViewModel)
+                observeLocation()
             }
 
 
@@ -150,7 +150,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
             lifecycleScope.launch(Dispatchers.IO) {
-                val myLocation = locationManager.awaitMyLocation()
+                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
                 withContext(Dispatchers.Main) {
                     val cameraPosition = CameraPosition.builder()
                         .target(myLocation)
@@ -162,24 +162,27 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         }
 
         if (!mapViewModel.inCreationMode) {
-            lifecycleScope.launch {
-                if (mapViewModel.route != null) {
-                    val myLocation = locationManager.awaitMyLocation()
-                    val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
-                    val polylineOptions = PolylineOptions().apply {
-                        polyPoints.forEach() { polyPoint ->
-                            add(polyPoint)
-                        }
-                        color(Color.GREEN)
-                    }
-                    val currentPolyline = googleMap.addPolyline(polylineOptions)
-
-                }
-            }
+            createPolylineToPoint()
         }
 
 
         googleMapSetup.complete(Unit)
+    }
+
+    private fun createPolylineToPoint() {
+        lifecycleScope.launch {
+            if (mapViewModel.route != null) {
+                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
+                val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
+                val polylineOptions = PolylineOptions().apply {
+                    polyPoints.forEach() { polyPoint ->
+                        add(polyPoint)
+                    }
+                    color(Color.GREEN)
+                }
+                currentPolyline = googleMap.addPolyline(polylineOptions)
+            }
+        }
     }
 
 
@@ -240,18 +243,47 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     }
 
     private fun observeLocation() {
-        locationManager.currentLocation.observe(this) { newValue ->
-            Log.d("Warmbier", "New location: $newValue")
-            val distance: FloatArray = FloatArray(0)
-            Location.distanceBetween(
+        mapViewModel.locationManager!!.currentLocation.observe(viewLifecycleOwner) { newValue ->
+//            Log.d("Warmbier", "New location: $newValue")
+            val distance = calculateDistance(
                 newValue.latitude,
                 newValue.longitude,
                 mapViewModel.currentPoint!!.position.latitude,
                 mapViewModel.currentPoint!!.position.longitude,
-                distance
             )
-            Log.d("Warmbier", "Distance: $distance")
+//            Log.d("Warmbier", distance.toString())
+            if (distance <= Constants.AUTOPLAY_DISTANCE) {
+                currentPolyline?.remove()
+                currentPolyline = null
+                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
+                seekbarManager?.setOnCompletionListener {
+                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1))
+                        createPolylineToPoint()
+                    else
+                        Log.d("Warmbier", "FINISH THE ROUTE")
+                    Log.d("Warmbier", "The completion")
+                }
+                seekbarManager?.resumeAudio()
+            }
+
+
         }
+    }
+
+    private fun calculateDistance(lat_a: Double, lng_a: Double, lat_b: Double, lng_b: Double): Float {
+        val earthRadius = 3958.75
+        val latDiff = Math.toRadians((lat_b - lat_a))
+        val lngDiff = Math.toRadians((lng_b - lng_a))
+        val a =
+            sin(latDiff / 2) * sin(latDiff / 2) + cos(Math.toRadians(lat_a)) * cos(
+                Math.toRadians(lat_b)
+            ) * sin(lngDiff / 2) * sin(lngDiff / 2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        val distance = earthRadius * c
+
+        val meterConversion = 1609
+
+        return (distance * meterConversion).toFloat()
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
