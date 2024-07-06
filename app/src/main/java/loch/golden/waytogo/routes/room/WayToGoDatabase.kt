@@ -35,17 +35,17 @@ abstract class WayToGoDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(routeDao: RouteDao) {
 
-            val route1 = Route("123eefs", "Pierwsza trasa", "Opis pierwszej trasy")
-            val route2 = Route("ddasa2312311", "Druga trasa", "Opis drugiej trasy")
-            val route3NOwa = Route("c0fe79c1-895c-468f-b815-111b00b1c2eb", "Dzika trasa na posta", "Opis dzikiej trasy")
+            val route1 = Route(UUID.randomUUID().toString(), "Pierwsza trasa", "Opis pierwszej trasy")
+            val route2 = Route(UUID.randomUUID().toString(), "Druga trasa", "Opis drugiej trasy")
+            val route3NOwa = Route(UUID.randomUUID().toString(), "Trasa na posta", "Opis dzikiej trasy")
             routeDao.insertRoute(route1)
             routeDao.insertRoute(route2)
             routeDao.insertRoute(route3NOwa)
 
 
             val mapLocations = listOf(
-                MapLocation("324esczxc", "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
-                MapLocation("123eas", "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
+                MapLocation(UUID.randomUUID().toString(), "Lokalizacja 1", "Opis lokalizacji 1", 12.345, 67.890),
+                MapLocation(UUID.randomUUID().toString(), "Lokalizacja 2", "Opis lokalizacji 2", 34.567, 89.012)
 
             )
             routeDao.insertMapLocations(mapLocations)
@@ -54,6 +54,7 @@ abstract class WayToGoDatabase : RoomDatabase() {
                 RouteMapLocation("123eefs", "324esczxc", 1),
                 RouteMapLocation("123eefs", "123eas", 2),
                 RouteMapLocation("ddasa2312311", "123eas", 3),
+
 
                 )
 
