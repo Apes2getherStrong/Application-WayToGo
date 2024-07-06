@@ -1,7 +1,6 @@
 package loch.golden.waytogo.routes
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import loch.golden.waytogo.classes.MapPoint
@@ -20,12 +18,10 @@ import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
 import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
-import loch.golden.waytogo.routes.model.Converters
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 
 
 class RouteDetailFragment() : Fragment() {
@@ -92,12 +88,13 @@ class RouteDetailFragment() : Fragment() {
         }
         binding.progressBar.visibility = View.VISIBLE
         // Observe map locations response
+        var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
                 val mapLocationAdapter = PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                 response.body()?.content?.let { mapLocations ->
                     for (mapLocation in mapLocations) {
-                        val mapPoint = MapPoint(mapLocation)
+                        val mapPoint = MapPoint(mapLocation, ++sequenceNr)
                         route.pointList[mapLocation.id] = mapPoint
 
                         // Fetch audio by map location ID
@@ -124,7 +121,7 @@ class RouteDetailFragment() : Fragment() {
         //TODO move these componenets to seperate functions
         //TODO create files when choosing route not before
 
-        routeViewModel.audioFile.observe(viewLifecycleOwner, Observer { response ->
+        routeViewModel.audioFile.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
                 val audioBytes = response.bytes.body()
                 if (audioBytes != null) {
@@ -135,7 +132,7 @@ class RouteDetailFragment() : Fragment() {
                     fos.close()
                 }
             }
-        })
+        }
 
         routeViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
@@ -150,6 +147,7 @@ class RouteDetailFragment() : Fragment() {
                 }
             }
         }
+
 
         binding.backButton.setOnClickListener()
         {
@@ -168,7 +166,9 @@ class RouteDetailFragment() : Fragment() {
         Log.d("Warmbier", route.toString())
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
+        mapViewModel.updateCurrentSequenceNr(1)
         navigateToMapListener?.navigateToMap()
+
     }
 
     private fun changeBackFragment() {

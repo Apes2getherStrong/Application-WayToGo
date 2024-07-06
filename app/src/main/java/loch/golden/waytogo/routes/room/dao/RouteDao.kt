@@ -31,6 +31,10 @@ interface RouteDao {
     @Delete
     suspend fun deleteRouteMapLocation(routeMapLocation: RouteMapLocation)
 
+    @Query("DELETE FROM route_map_location WHERE id = :mapLocationId")
+    suspend fun deleteRouteMapLocationById(mapLocationId: String)
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAllRoutes(route: List<Route>)
 
@@ -42,6 +46,9 @@ interface RouteDao {
 
     @Query("SELECT * FROM map_location_table WHERE id = :mapLocationId")
     suspend fun getMyLocationById(mapLocationId: String): MapLocation
+
+    @Query("SELECT sequenceNr FROM route_map_location WHERE id = :mapLocationId")
+    suspend fun getSequenceNrByMapLocationId(mapLocationId: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMapLocations(mapLocations: List<MapLocation>)
@@ -66,34 +73,38 @@ interface RouteDao {
     fun getRoutesWithMapLocations(): List<RouteWithMapLocations>
 
     @Transaction
-    @Query("SELECT * FROM route_table WHERE route_uid = :routeUid ")
+    @Query("SELECT * FROM route_table WHERE route_uid = :routeUid")
     suspend fun getRouteWithMapLocations(routeUid: String): RouteWithMapLocations
 
     @Transaction
-    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+    @Query("UPDATE route_map_location SET sequenceNr = :newSequenceNr WHERE id = :mapLocationId")
+    suspend fun updateRouteMapLocationSequenceNrById(mapLocationId: String, newSequenceNr: Int)
 
-        insertRoute(routeWithMapLocations.route)
-        routeWithMapLocations.mapLocations.forEach{ mapLocation ->
-            insertMapLocation(mapLocation)
-            val routeMapLocation = RouteMapLocation(routeWithMapLocations.route.routeUid, mapLocation.id)
-            insertRouteMapLocation(routeMapLocation)
+//    @Transaction
+//    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
+//
+//        insertRoute(routeWithMapLocations.route)
+//        routeWithMapLocations.mapLocations.forEach{ mapLocation ->
+//            insertMapLocation(mapLocation)
+//            val routeMapLocation = RouteMapLocation(routeWithMapLocations.route.routeUid, mapLocation.id)
+//            insertRouteMapLocation(routeMapLocation)
+//
+//        }
+//    }
 
-        }
-    }
-
-    @Transaction
-    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
-        val route = routeWithMapLocations.route
-        val mapLocations = routeWithMapLocations.mapLocations
-
-        mapLocations.forEach{mapLocation ->
-            val routeMapLocation = RouteMapLocation(route.routeUid, mapLocation.id)
-            deleteRouteMapLocation(routeMapLocation)
-            deleteMapLocation(mapLocation)
-
-        }
-        deleteRoute(route)
-
-    }
+//    @TransactiondeleteRouteWithMapLocations
+//    suspend fun (routeWithMapLocations: RouteWithMapLocations) {
+//        val route = routeWithMapLocations.route
+//        val mapLocations = routeWithMapLocations.mapLocations
+//
+//        mapLocations.forEach{mapLocation ->
+//            val routeMapLocation = RouteMapLocation(route.routeUid, mapLocation.id)
+//            deleteRouteMapLocation(routeMapLocation)
+//            deleteMapLocation(mapLocation)
+//
+//        }
+//        deleteRoute(route)
+//
+//    }
 
 }

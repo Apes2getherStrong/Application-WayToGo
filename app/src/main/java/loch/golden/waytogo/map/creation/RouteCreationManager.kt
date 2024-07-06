@@ -174,8 +174,9 @@ class RouteCreationManager(
             marker.position.latitude,
             marker.position.longitude
         )
-        routeViewModel.insertMapLocation(mapLocation, routeId, mapViewModel.sequenceNr)
-        mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation)
+        val sequenceNr = mapViewModel.route!!.pointList.size + 1
+        routeViewModel.insertMapLocation(mapLocation, routeId, sequenceNr)
+        mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation, sequenceNr)
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
     }
@@ -189,15 +190,14 @@ class RouteCreationManager(
                 val markerId = marker?.snippet!!
                 creationMarkerMap.remove(markerId)
                 hideInfoWindow(markerId)
-                routeViewModel.deleteMapLocation(
+                routeViewModel.deleteMapLocation( //TODO do it only by id
                     MapLocation(
                         markerId,
                         marker.title!!,
                         "",
                         marker.position.latitude,
                         marker.position.longitude
-                    ), routeId,
-                    mapViewModel.sequenceNr
+                    )
                 )
                 mapViewModel.route?.pointList?.remove(markerId)
                 infoWindowMap.remove(markerId)
@@ -218,6 +218,8 @@ class RouteCreationManager(
         if (imageFile.exists())
             imageFile.delete()
     }
+
+    // TODO change point name on add
 
     fun getInfoWindow(id: String) = infoWindowMap[id]!!
     fun hideInfoWindow(id: String) {

@@ -3,6 +3,8 @@ package loch.golden.waytogo.map.components
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationAvailability
@@ -17,7 +19,10 @@ import com.google.android.gms.maps.model.LatLng
 class LocationManager(context: Context) : LocationCallback() {
     private val fusedLocationClient: FusedLocationProviderClient
     private val locationRequest: LocationRequest
-    private var currentLocation: LatLng? = null
+    private val _currentLocation = MutableLiveData<LatLng>()
+
+    // Expose a LiveData variable to observe
+    val currentLocation: LiveData<LatLng> get() = _currentLocation
 
     init {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -29,7 +34,7 @@ class LocationManager(context: Context) : LocationCallback() {
     }
 
     override fun onLocationResult(location: LocationResult) {
-        currentLocation =
+        _currentLocation.value =
             LatLng(location.lastLocation!!.latitude, location.lastLocation!!.longitude)
 
     }
@@ -41,11 +46,14 @@ class LocationManager(context: Context) : LocationCallback() {
     fun startLocationUpdates() {
         fusedLocationClient.requestLocationUpdates(locationRequest, this, null)
     }
-
-    fun getCurrentLocation() = currentLocation
-
     fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(this)
+    }
+
+    fun awaitMyLocation(): LatLng {
+        while (currentLocation.value == null)
+            Thread.sleep(100)
+        return currentLocation.value!!
     }
 
 }

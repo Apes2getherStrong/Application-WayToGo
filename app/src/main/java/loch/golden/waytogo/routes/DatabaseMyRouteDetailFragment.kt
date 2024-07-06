@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
@@ -111,16 +112,17 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 )
                 binding.routeTitle.setText(routeWithLocationsFromDb.route.name)
                 binding.routeDescription.setText(routeWithLocationsFromDb.route.description)
-                val mapLocationAdapter = MapLocationAdapter(routeWithLocationsFromDb.mapLocations)
 
-                Log.d("Map Location", routeWithLocationsFromDb.mapLocations.toString())
                 mapLocationsOfRouteEntity = routeWithLocationsFromDb.mapLocations
                 routeWithLocationsFromDb.mapLocations.let {
-                    Log.d("Warmbier", it.toString())
                     for (mapLocation in it) {
-                        route.pointList[mapLocation.id] = (MapPoint(mapLocation, requireContext()))
+                        val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+                        Log.d("Warmbier", "Sequence Nr $sequenceNr name: ${mapLocation.name}")
+                        route.pointList[mapLocation.id] = (MapPoint(mapLocation, sequenceNr, requireContext()))
                     }
                 }
+                val mapLocationAdapter = MapLocationAdapter(route.pointList.values.toList().sortedBy { it.sequenceNr })
+
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
                 binding.recyclerViewPoints.adapter = mapLocationAdapter
@@ -140,7 +142,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
-
             changeBackFragment()
         }
 
@@ -149,9 +150,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
 
         binding.publishRouteButton.setOnClickListener {
-
             publishRoute()
+        }
 
+        binding.testButton.setOnClickListener {
+            Log.d("Warmbier", mapLocationsOfRouteEntity.toString())
         }
     }
 
@@ -173,10 +176,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         if (!isUserLoggedIn()) {
             Toast.makeText(requireContext(), "You need to log in to publish a route", Toast.LENGTH_SHORT).show()
         }
-        var sequenceNumber = 1;
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
+
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -184,15 +187,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     mapLocation.description,
                     Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                 )
+                val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                     mapLocationIdMap[mapLocation.id] = newMapLocation.id
-                    Log.d("RouteMapLocation Test","Test czy wchodzi");
                     val routeMapLocation =
-                        RouteMapLocationRequest(UUID.randomUUID().toString(),newMapLocation, newRoute, sequenceNumber)
+                        RouteMapLocationRequest(UUID.randomUUID().toString(), newMapLocation, newRoute, sequenceNr)
                     routeViewModel.postRouteMapLocation(routeMapLocation) { newRouteMapLocation ->
                         routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
-                        sequenceNumber++
 
                         val audio = Audio(
                             UUID.randomUUID().toString(),
@@ -205,30 +207,34 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             audioIdMap[newMapLocation.id] = newAudio.id
                             val audioFile = File(
                                 requireContext().filesDir,
-                                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}")
+                                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
+                            )
 
-                            Log.d("Dzicz",audioFile.absolutePath);
-                            if(audioFile.exists()){
-                                Log.d("AudioRequest","Exists")
-                                val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(),audioFile )
-                                val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
+                            Log.d("Dzicz", audioFile.absolutePath);
+                            if (audioFile.exists()) {
+                                Log.d("AudioRequest", "Exists")
+                                val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
+                                val audioMultiPartBody =
+                                    MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
                                 Log.d("AUDIO ID", newAudio.id)
                                 routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
-                            }else {
-                                Log.d("AudioRequest","Nie mo")
+                            } else {
+                                Log.d("AudioRequest", "Nie mo")
                             }
 
                             val imageFile = File(
                                 requireContext().filesDir,
-                                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}")
+                                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}"
+                            )
 
-                            if(imageFile.exists()){
-                                Log.d("Image","Exists")
-                                val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(),imageFile)
-                                val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
-                                routeViewModel.putImageToMapLocation(newMapLocation.id,imageMultiPartBody)
-                            }else {
-                                Log.d("Image","Nie mo")
+                            if (imageFile.exists()) {
+                                Log.d("Image", "Exists")
+                                val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(), imageFile)
+                                val imageMultiPartBody =
+                                    MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
+                                routeViewModel.putImageToMapLocation(newMapLocation.id, imageMultiPartBody)
+                            } else {
+                                Log.d("Image", "Nie mo")
                             }
 
                         }
@@ -241,37 +247,45 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         }
     }
 
-    private var simpleCallBack = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),0){
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            var startPosition = viewHolder.bindingAdapterPosition
-            var stopPosition = target.bindingAdapterPosition
+    private var simpleCallBack =
+        object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP.or(ItemTouchHelper.DOWN), 0) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val sortedPointList = route.pointList.values.toList().sortedBy { it.sequenceNr }
+                val startPosition = viewHolder.bindingAdapterPosition
+                val stopPosition = target.bindingAdapterPosition
+                sortedPointList[startPosition].sequenceNr = stopPosition + 1
+                sortedPointList[stopPosition].sequenceNr = startPosition + 1
 
-            Collections.swap(mapLocationsOfRouteEntity,startPosition,stopPosition)
-            recyclerView.adapter?.notifyItemMoved(startPosition,stopPosition)
-            return true;
-        }
+                routeViewModel.updateRouteMapLocationSequenceNrById(sortedPointList[startPosition].id, stopPosition + 1)
+                routeViewModel.updateRouteMapLocationSequenceNrById(sortedPointList[stopPosition].id, startPosition + 1)
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            super.onSelectedChanged(viewHolder, actionState)
-            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                viewHolder?.itemView?.alpha = 0.5f
+                Collections.swap(mapLocationsOfRouteEntity, startPosition, stopPosition)
+                recyclerView.adapter?.notifyItemMoved(startPosition, stopPosition)
+                return true;
             }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    viewHolder?.itemView?.alpha = 0.5f
+                }
+            }
+
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+                viewHolder.itemView.alpha = 1.0f
+            }
+
         }
 
-        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-            super.clearView(recyclerView, viewHolder)
-            viewHolder.itemView.alpha = 1.0f
-        }
-
-    }
     private fun isUserLoggedIn(): Boolean {
         val tokenManager = TokenManager(requireContext())
         val token = tokenManager.getToken()

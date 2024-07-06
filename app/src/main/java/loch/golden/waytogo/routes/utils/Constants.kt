@@ -1,12 +1,13 @@
 package loch.golden.waytogo.routes.utils
 
 class Constants {
-    companion object{
-        const val BASE_URL = "http://192.168.0.192:8090/api/v1/"
+    companion object {
+        const val BASE_URL = "http://192.168.1.109:8090/api/v1/"
         const val AUDIO_EXTENSION = ".3gp"
         const val IMAGE_EXTENSION = ".jpg"
         const val IMAGE_DIR = "images"
         const val AUDIO_DIR = "audios"
+
         const val LOGIN_URL = "auth/login"
         const val REGISTER_URL = "auth/register"
 
@@ -15,5 +16,7 @@ class Constants {
 
 
         const val MAX_DESCRIPTION_LENGTH = 50
+
+        const val AUTOPLAY_DISTANCE = 10 //in meteres
     }
 }

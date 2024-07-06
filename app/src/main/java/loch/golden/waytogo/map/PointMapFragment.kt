@@ -4,17 +4,14 @@ import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
@@ -25,18 +22,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.gson.JsonParser
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import loch.golden.waytogo.BuildConfig
+import loch.golden.waytogo.R
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -47,13 +42,19 @@ import loch.golden.waytogo.map.components.SeekbarManagerV2
 import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
-import loch.golden.waytogo.map.navigation.GoogleApiRetrofitInstance
+import loch.golden.waytogo.map.navigation.NavigationManager
 import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.routes.RoutesFragment
+import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 
-class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
+class PointMapFragment() : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //viewmodel tied to parent activity - MainActivity
@@ -62,15 +63,15 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var googleMap: GoogleMap
     private val googleMapSetup = CompletableDeferred<Unit>()
 
-    private lateinit var locationManager: LocationManager
-    private lateinit var mapMenuManager: MapMenuManager
-
     private var seekbarManager: SeekbarManagerV2? = null
     private lateinit var slidingUpPanelManager: SlidingUpPanelManager
 
 
     private var infoWindowManager: InfoWindowManager? = null
     private var routeCreationManager: RouteCreationManager? = null
+
+    private var navigationManager: NavigationManager? = null
+    private var currentPolyline: Polyline? = null
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
@@ -85,51 +86,54 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         return binding.root
     }
 
-    private suspend fun test(from: LatLng, to: LatLng): ArrayList<LatLng> {
-        val fromStr = "${from.latitude},${from.longitude}"
-        val toStr = "${to.latitude},${to.longitude}"
-        val jsonResponse = GoogleApiRetrofitInstance.apiService.getPolyline(
-            fromStr,
-            toStr,
-            "walking",
-            BuildConfig.MAPS_API_KEY,
-            null
-        )
-        Log.d("Warmbier", jsonResponse)
-        val encodedPoly =
-            JsonParser.parseString(jsonResponse).asJsonObject["routes"].asJsonArray[0].asJsonObject["overview_polyline"].asJsonObject["points"].asString
-        Log.d("Warmbier", encodedPoly)
-        return decodePoly(encodedPoly)
-
-    }
-
-    //TODO if route is not chosen display a button that says choose route
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
-        locationManager = LocationManager(requireContext())
-        locationManager.startLocationUpdates()
+        if (mapViewModel.locationManager == null) {
+            mapViewModel.locationManager = LocationManager(requireContext())
+            mapViewModel.locationManager!!.startLocationUpdates() //todo move this to activity
+        }
 
         initMapView(savedInstanceState)
 
+        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
         setUpListeners()
 
-        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
 
+        if (mapViewModel.route != null) {
+            binding.bottomPanel.title.visibility = View.VISIBLE
+            binding.bottomPanel.playButton.visibility = View.VISIBLE
+            binding.bottomPanel.buttonChooseRoute.visibility = View.GONE
+            if (mapViewModel.inCreationMode) {
+                initCreation(savedInstanceState)
+            } else {
+                Log.d("Warmbier", "i am getting here")
+                seekbarManager = SeekbarManagerV2(
+                    mapViewModel,
+                    binding.expandedPanel.seekbar,
+                    listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
+                )
+                seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
 
-
-
-        if (mapViewModel.inCreationMode) {
-            initCreation(savedInstanceState)
+                navigationManager = NavigationManager(mapViewModel)
+                observeLocation()
+            }
         } else {
-            seekbarManager = SeekbarManagerV2(
-                mapViewModel,
-                binding.expandedPanel.seekbar,
-                listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
-            )
-            seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
+            binding.bottomPanel.title.visibility = View.GONE
+            binding.bottomPanel.playButton.visibility = View.GONE
+            binding.bottomPanel.buttonChooseRoute.visibility = View.VISIBLE
+
         }
 
+
+    }
+
+    private fun setUpListeners() {
+        binding.bottomPanel.buttonChooseRoute.setOnClickListener {
+            parentFragmentManager.commit {
+                replace(R.id.fragment_container_main, RoutesFragment())
+            }
+        }
     }
 
 
@@ -152,21 +156,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         googleMap.setOnMarkerClickListener(this)
         googleMap.setOnCameraMoveListener(this)
 
-        lifecycleScope.launch {
-            if (mapViewModel.route != null) {
-                val myLocation = awaitMyLocation()
-                val polyPoints = test(myLocation, mapViewModel.route!!.pointList.values.first().position)
-                val polylineOptions = PolylineOptions().apply {
-                    polyPoints.forEach() { polyPoint ->
-                        add(polyPoint)
-                    }
-                    color(Color.GREEN)
-                }
-                googleMap.addPolyline(polylineOptions)
-
-            }
-        }
-
 
         mapViewModel.route?.let {
             populateMap(it.pointList)
@@ -176,7 +165,7 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
         } ?: run {
             lifecycleScope.launch(Dispatchers.IO) {
-                val myLocation = awaitMyLocation()
+                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
                 withContext(Dispatchers.Main) {
                     val cameraPosition = CameraPosition.builder()
                         .target(myLocation)
@@ -187,16 +176,30 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             }
         }
 
+        if (!mapViewModel.inCreationMode) {
+            createPolylineToPoint()
+        }
+
 
         googleMapSetup.complete(Unit)
-
     }
 
-    private fun awaitMyLocation(): LatLng {
-        while (locationManager.getCurrentLocation() == null)
-            Thread.sleep(100)
-        return locationManager.getCurrentLocation()!!
+    private fun createPolylineToPoint() {
+        lifecycleScope.launch {
+            if (mapViewModel.route != null) {
+                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
+                val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
+                val polylineOptions = PolylineOptions().apply {
+                    polyPoints.forEach() { polyPoint ->
+                        add(polyPoint)
+                    }
+                    color(Color.GREEN)
+                }
+                currentPolyline = googleMap.addPolyline(polylineOptions)
+            }
+        }
     }
+
 
     private fun populateMap(mapPoints: Map<String, MapPoint>) {
         for ((id, mapPoint) in mapPoints) {
@@ -208,15 +211,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             )
             markerList.add(marker)
         }
-    }
-
-    private fun clearMap() {
-        for (marker in markerList)
-            marker?.remove()
-    }
-
-    private fun setUpListeners() {
-
     }
 
     private fun initCreation(savedInstanceState: Bundle?) {
@@ -259,6 +253,49 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         }
     }
 
+    private fun observeLocation() {
+        mapViewModel.locationManager!!.currentLocation.observe(viewLifecycleOwner) { newValue ->
+//            Log.d("Warmbier", "New location: $newValue")
+            val distance = calculateDistance(
+                newValue.latitude,
+                newValue.longitude,
+                mapViewModel.currentPoint!!.position.latitude,
+                mapViewModel.currentPoint!!.position.longitude,
+            )
+//            Log.d("Warmbier", distance.toString())
+            if (distance <= Constants.AUTOPLAY_DISTANCE) {
+                currentPolyline?.remove()
+                currentPolyline = null
+                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
+                seekbarManager?.setOnCompletionListener {
+                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1))
+                        createPolylineToPoint()
+                    else
+                        Log.d("Warmbier", "FINISH THE ROUTE")
+                    Log.d("Warmbier", "The completion")
+                }
+                seekbarManager?.resumeAudio()
+            }
+
+
+        }
+    }
+
+    private fun calculateDistance(lat_a: Double, lng_a: Double, lat_b: Double, lng_b: Double): Float {
+        val earthRadius = 3958.75
+        val latDiff = Math.toRadians((lat_b - lat_a))
+        val lngDiff = Math.toRadians((lng_b - lng_a))
+        val a =
+            sin(latDiff / 2) * sin(latDiff / 2) + cos(Math.toRadians(lat_a)) * cos(
+                Math.toRadians(lat_b)
+            ) * sin(lngDiff / 2) * sin(lngDiff / 2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        val distance = earthRadius * c
+
+        val meterConversion = 1609
+
+        return (distance * meterConversion).toFloat()
+    }
 
     override fun onMarkerClick(marker: Marker): Boolean {
         if (mapViewModel.inCreationMode) {
@@ -270,71 +307,33 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     }
 
     private fun openNormalPanel(mapPoint: MapPoint?) {
-        binding.expandedPanel.title.text = mapPoint?.name
-        binding.bottomPanel.title.text = mapPoint?.name
-        binding.expandedPanel.description.text = mapPoint?.description
-        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
-        binding.expandedPanel.image.setImageBitmap(bitmap)
-        seekbarManager?.prepareAudio(mapViewModel.route!!.pointList[mapPoint?.id]?.audioPath!!)
+        if (mapPoint == mapViewModel.currentPoint) {
+            slidingUpPanelManager.openNormalPanel(mapPoint)
+            seekbarManager?.prepareAudio(mapPoint!!.audioPath!!)
+        } else {
+            slidingUpPanelManager.openDifferentPanel(mapPoint)
+            binding.expandedPanel.buttonSelectMarker.setOnClickListener {
+                mapViewModel.updateCurrentSequenceNr(mapPoint!!.sequenceNr)
+                binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
+                binding.expandedPanel.seekbar.visibility = View.VISIBLE
+                binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
+                seekbarManager?.prepareAudio(mapPoint.audioPath!!)
+                seekbarManager?.setOnCompletionListener {
+                    if (mapViewModel.updateCurrentSequenceNr(mapPoint.sequenceNr + 1))
+                        createPolylineToPoint()
+                    else
+                        Log.d("Warmbier", "FINISH THE ROUTE")
+                    Log.d("Warmbier", "The completion")
+                }
+            }
 
-
-//        binding.expandedPanel.image.setImageResource(mapPoint.image)
+        }
     }
 
     override fun onCameraMove() {
         mapViewModel.cameraPosition = googleMap.cameraPosition
     }
 
-    private fun handleBackPress() {
-        activity?.onBackPressedDispatcher?.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-                    } else {
-                        isEnabled = false
-                        activity?.onBackPressed()
-                    }
-                }
-            })
-    }
-
-
-    private fun decodePoly(encoded: String): ArrayList<LatLng> {
-        Log.d("Warmbier", encoded)
-        val poly: ArrayList<LatLng> = ArrayList<LatLng>()
-        var index = 0
-        val len = encoded.length
-        var lat = 0
-        var lng = 0
-        while (index < len) {
-            var b: Int
-            var shift = 0
-            var result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lat += dlat
-            shift = 0
-            result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lng += dlng
-            val position = LatLng(lat.toDouble() / 1E5, lng.toDouble() / 1E5)
-            poly.add(position)
-        }
-        Log.d("Warmbier", poly.toString())
-        return poly
-    }
 
     //Forwarding map functions
     override fun onStart() {
