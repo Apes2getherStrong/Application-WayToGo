@@ -19,15 +19,15 @@ class NavigationManager(private val mapViewModel: MapViewModel) {
             BuildConfig.MAPS_API_KEY,
             null
         )
-        Log.d("Warmbier", jsonResponse)
+//        Log.d("Warmbier", jsonResponse)
         val encodedPoly =
             JsonParser.parseString(jsonResponse).asJsonObject["routes"].asJsonArray[0].asJsonObject["overview_polyline"].asJsonObject["points"].asString
-        Log.d("Warmbier", encodedPoly)
+//        Log.d("Warmbier", encodedPoly)
         return decodePoly(encodedPoly)
     }
 
     private fun decodePoly(encoded: String): ArrayList<LatLng> {
-        Log.d("Warmbier", encoded)
+//        Log.d("Warmbier", encoded)
         val poly: ArrayList<LatLng> = ArrayList<LatLng>()
         var index = 0
         val len = encoded.length

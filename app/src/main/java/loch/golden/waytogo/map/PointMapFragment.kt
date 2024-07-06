@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +31,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import loch.golden.waytogo.R
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentMapBinding
@@ -42,6 +44,7 @@ import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.navigation.NavigationManager
 import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
@@ -51,7 +54,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 
-class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapReadyCallback,
+class PointMapFragment() : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //viewmodel tied to parent activity - MainActivity
@@ -59,8 +62,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
     private val googleMapSetup = CompletableDeferred<Unit>()
-
-    private lateinit var mapMenuManager: MapMenuManager
 
     private var seekbarManager: SeekbarManagerV2? = null
     private lateinit var slidingUpPanelManager: SlidingUpPanelManager
@@ -85,7 +86,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
         return binding.root
     }
 
-    //TODO if route is not chosen display a button that says choose route
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
@@ -96,13 +96,14 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
 
         initMapView(savedInstanceState)
 
+        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
         setUpListeners()
 
-        slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
 
-
-
-        if (mapViewModel.route != null)
+        if (mapViewModel.route != null) {
+            binding.bottomPanel.title.visibility = View.VISIBLE
+            binding.bottomPanel.playButton.visibility = View.VISIBLE
+            binding.bottomPanel.buttonChooseRoute.visibility = View.GONE
             if (mapViewModel.inCreationMode) {
                 initCreation(savedInstanceState)
             } else {
@@ -117,8 +118,22 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
+        } else {
+            binding.bottomPanel.title.visibility = View.GONE
+            binding.bottomPanel.playButton.visibility = View.GONE
+            binding.bottomPanel.buttonChooseRoute.visibility = View.VISIBLE
+
+        }
 
 
+    }
+
+    private fun setUpListeners() {
+        binding.bottomPanel.buttonChooseRoute.setOnClickListener {
+            parentFragmentManager.commit {
+                replace(R.id.fragment_container_main, RoutesFragment())
+            }
+        }
     }
 
 
@@ -196,10 +211,6 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
             )
             markerList.add(marker)
         }
-    }
-
-    private fun setUpListeners() {
-
     }
 
     private fun initCreation(savedInstanceState: Bundle?) {
@@ -296,35 +307,31 @@ class PointMapFragment(val currentRoute: MapRoute? = null) : Fragment(), OnMapRe
     }
 
     private fun openNormalPanel(mapPoint: MapPoint?) {
-        binding.expandedPanel.title.text = mapPoint?.name
-        binding.bottomPanel.title.text = mapPoint?.name
-        binding.expandedPanel.description.text = mapPoint?.description
-        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
-        binding.expandedPanel.image.setImageBitmap(bitmap)
-        seekbarManager?.prepareAudio(mapViewModel.route!!.pointList[mapPoint?.id]?.audioPath!!)
+        if (mapPoint == mapViewModel.currentPoint) {
+            slidingUpPanelManager.openNormalPanel(mapPoint)
+            seekbarManager?.prepareAudio(mapPoint!!.audioPath!!)
+        } else {
+            slidingUpPanelManager.openDifferentPanel(mapPoint)
+            binding.expandedPanel.buttonSelectMarker.setOnClickListener {
+                mapViewModel.updateCurrentSequenceNr(mapPoint!!.sequenceNr)
+                binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
+                binding.expandedPanel.seekbar.visibility = View.VISIBLE
+                binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
+                seekbarManager?.prepareAudio(mapPoint.audioPath!!)
+                seekbarManager?.setOnCompletionListener {
+                    if (mapViewModel.updateCurrentSequenceNr(mapPoint.sequenceNr + 1))
+                        createPolylineToPoint()
+                    else
+                        Log.d("Warmbier", "FINISH THE ROUTE")
+                    Log.d("Warmbier", "The completion")
+                }
+            }
 
-
-//        binding.expandedPanel.image.setImageResource(mapPoint.image)
+        }
     }
 
     override fun onCameraMove() {
         mapViewModel.cameraPosition = googleMap.cameraPosition
-    }
-
-    private fun handleBackPress() {
-        activity?.onBackPressedDispatcher?.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (binding.slideUpPanel.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                        binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-                    } else {
-                        isEnabled = false
-                        activity?.onBackPressed()
-                    }
-                }
-            })
     }
 
 
