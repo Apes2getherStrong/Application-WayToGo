@@ -260,6 +260,7 @@ class RouteCreationManager(
             val outputFilePath = getOutputFile(currentMarkerId!!, MediaType.AUDIO).absolutePath
             mapViewModel.route!!.pointList[currentMarkerId]?.audioPath = outputFilePath
             seekbarManager.prepareAudio(outputFilePath)
+            binding.expandedPanel.creationPlayPause.isEnabled= true
         }
     }
 
@@ -274,8 +275,12 @@ class RouteCreationManager(
         }
         if (mapViewModel.route!!.pointList[id]?.audioPath != null) {
             seekbarManager.prepareAudio(mapViewModel.route!!.pointList[id]?.audioPath!!)
+            binding.expandedPanel.creationPlayPause.isEnabled = true
+
         } else {
+            mapViewModel.mp = null
             binding.expandedPanel.creationSeekbar.isEnabled = false
+            binding.expandedPanel.creationPlayPause.isEnabled = false
         }
     }
 
