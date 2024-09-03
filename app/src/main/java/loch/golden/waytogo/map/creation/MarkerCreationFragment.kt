@@ -59,6 +59,7 @@ class MarkerCreationFragment(
             mapBinding.expandedPanel.creationTitle.setText(marker?.title)
             routeCreationManager.onEditMarker(marker?.snippet!!)
             routeCreationManager.hideInfoWindow(marker.snippet!!)
+            mapBinding.slideUpPanel.isTouchEnabled = true
         }
     }
 
