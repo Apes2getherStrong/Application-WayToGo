@@ -238,7 +238,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                         .position(googleMap.projection.visibleRegion.latLngBounds.center)
                         .draggable(true)
                         .snippet(markerId)
-                        .title("Point ${mapViewModel.currentSequenceNr}")
+                        .title("Point ${mapViewModel.route!!.pointList.size}")
                 )
                 val markerSpec = MarkerSpecification(0, 100)
                 val infoWindow = InfoWindow(
