@@ -322,11 +322,12 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             slidingUpPanelManager.openDifferentPanel(mapPoint)
             binding.expandedPanel.buttonSelectMarker.setOnClickListener {
                 mapViewModel.updateCurrentSequenceNr(mapPoint!!.sequenceNr)
+                createPolylineToPoint()
                 binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
                 binding.expandedPanel.seekbar.visibility = View.VISIBLE
                 binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
                 val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint.id]?.photoPath)
-                if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap) 
+                if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap)
                 else binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
                 seekbarManager?.prepareAudio(mapPoint.audioPath!!)
 
