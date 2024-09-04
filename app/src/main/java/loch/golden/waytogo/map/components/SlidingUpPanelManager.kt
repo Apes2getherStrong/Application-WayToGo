@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.view.View
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener
+import loch.golden.waytogo.R
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.map.MapViewModel
@@ -14,7 +15,6 @@ class SlidingUpPanelManager(
 ) : PanelSlideListener {
     private var inCreationMode: Boolean = false
 
-    //TODO make something nice with bottomSlidingPanel on creation :-)
     init {
         setUpSlidingUpPanel()
         binding.bottomPanel.container.setOnClickListener {
@@ -80,11 +80,16 @@ class SlidingUpPanelManager(
         binding.expandedPanel.seekbar.visibility = View.VISIBLE
         binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
         binding.expandedPanel.title.text = mapPoint?.name
-        binding.bottomPanel.title.text = mapPoint?.name
         binding.expandedPanel.description.text = mapPoint?.description
+        updateBottomPanel(mapPoint)
         binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
         val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
-        binding.expandedPanel.image.setImageBitmap(bitmap)
+        if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap) else
+            binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
+    }
+
+    fun updateBottomPanel(mapPoint: MapPoint?){
+        binding.bottomPanel.title.text = mapPoint?.name
     }
 
     fun openDifferentPanel(mapPoint: MapPoint?) {
@@ -106,8 +111,8 @@ class SlidingUpPanelManager(
         if (inCreationMode)
             return
         else {
-
-            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            openNormalPanel(mapViewModel.currentPoint)
+    //            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
         }
 
     }

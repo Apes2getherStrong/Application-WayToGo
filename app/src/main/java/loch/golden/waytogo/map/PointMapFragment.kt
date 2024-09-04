@@ -193,7 +193,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     polyPoints.forEach() { polyPoint ->
                         add(polyPoint)
                     }
-                    color(Color.GREEN)
+                    color(Color.BLUE)
                 }
                 val newPolyline = googleMap.addPolyline(polylineOptions)
                 Log.d("Warmbier", "current polyline: $currentPolyline")
@@ -271,8 +271,10 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 currentPolyline = null
                 seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 seekbarManager?.setOnCompletionListener {
-                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1))
+                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
                         createPolylineToPoint()
+                        slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                    }
                     else
                         Log.d("Warmbier", "FINISH THE ROUTE")
                     Log.d("Warmbier", "The completion")
@@ -323,7 +325,11 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
                 binding.expandedPanel.seekbar.visibility = View.VISIBLE
                 binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
+                val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint.id]?.photoPath)
+                if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap) 
+                else binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
                 seekbarManager?.prepareAudio(mapPoint.audioPath!!)
+
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapPoint.sequenceNr + 1))
                         createPolylineToPoint()
