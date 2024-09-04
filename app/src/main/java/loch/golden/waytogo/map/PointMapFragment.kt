@@ -195,7 +195,10 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     }
                     color(Color.GREEN)
                 }
-                currentPolyline = googleMap.addPolyline(polylineOptions)
+                val newPolyline = googleMap.addPolyline(polylineOptions)
+                Log.d("Warmbier", "current polyline: $currentPolyline")
+                currentPolyline?.remove()
+                currentPolyline = newPolyline
             }
         }
     }
@@ -255,7 +258,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     private fun observeLocation() {
         mapViewModel.locationManager!!.currentLocation.observe(viewLifecycleOwner) { newValue ->
-//            Log.d("Warmbier", "New location: $newValue")
+            Log.d("Warmbier", "New location: $newValue")
             val distance = calculateDistance(
                 newValue.latitude,
                 newValue.longitude,
@@ -275,6 +278,9 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     Log.d("Warmbier", "The completion")
                 }
                 seekbarManager?.resumeAudio()
+            }
+            else{
+                createPolylineToPoint()
             }
 
 
