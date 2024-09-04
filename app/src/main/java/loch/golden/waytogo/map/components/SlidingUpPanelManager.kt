@@ -28,6 +28,8 @@ class SlidingUpPanelManager(
         slideUpPanel.addPanelSlideListener(this)
         slideUpPanel.setFadeOnClickListener {
             slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+            if (inCreationMode) binding.slideUpPanel.isTouchEnabled = false
+
         }
     }
 
@@ -59,6 +61,8 @@ class SlidingUpPanelManager(
 
     fun toggleCreation() {
         inCreationMode = !inCreationMode
+        binding.slideUpPanel.isTouchEnabled = !inCreationMode
+        binding.expandedPanel.container.visibility = View.GONE
         binding.apply {
             expandedPanel.normal.visibility = if (inCreationMode) View.GONE else View.VISIBLE
             expandedPanel.creation.visibility = if (inCreationMode) View.VISIBLE else View.GONE

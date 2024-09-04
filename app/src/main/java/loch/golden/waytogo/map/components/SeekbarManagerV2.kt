@@ -94,7 +94,7 @@ class SeekbarManagerV2(
                     val currentPosition = mapViewModel.mp!!.currentPosition
                     val duration = mapViewModel.mp!!.duration
 
-                    seekbar.progress = currentPosition.toInt()
+                    seekbar.progress = currentPosition
 
                     // Update bottom custom seekbar
                     val trackPercentage = if (duration != 0) (currentPosition.toFloat() / duration) else 0.0f
