@@ -56,7 +56,6 @@ class NavigationManager(private val mapViewModel: MapViewModel) {
             val position = LatLng(lat.toDouble() / 1E5, lng.toDouble() / 1E5)
             poly.add(position)
         }
-        Log.d("Warmbier", poly.toString())
         return poly
     }
 }

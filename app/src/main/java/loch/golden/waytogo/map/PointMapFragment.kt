@@ -193,9 +193,12 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     polyPoints.forEach() { polyPoint ->
                         add(polyPoint)
                     }
-                    color(Color.GREEN)
+                    color(Color.BLUE)
                 }
-                currentPolyline = googleMap.addPolyline(polylineOptions)
+                val newPolyline = googleMap.addPolyline(polylineOptions)
+                Log.d("Warmbier", "current polyline: $currentPolyline")
+                currentPolyline?.remove()
+                currentPolyline = newPolyline
             }
         }
     }
@@ -255,7 +258,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     private fun observeLocation() {
         mapViewModel.locationManager!!.currentLocation.observe(viewLifecycleOwner) { newValue ->
-//            Log.d("Warmbier", "New location: $newValue")
+            Log.d("Warmbier", "New location: $newValue")
             val distance = calculateDistance(
                 newValue.latitude,
                 newValue.longitude,
@@ -268,13 +271,18 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 currentPolyline = null
                 seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 seekbarManager?.setOnCompletionListener {
-                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1))
+                    if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
                         createPolylineToPoint()
+                        slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                    }
                     else
                         Log.d("Warmbier", "FINISH THE ROUTE")
                     Log.d("Warmbier", "The completion")
                 }
                 seekbarManager?.resumeAudio()
+            }
+            else{
+                createPolylineToPoint()
             }
 
 
@@ -314,10 +322,15 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             slidingUpPanelManager.openDifferentPanel(mapPoint)
             binding.expandedPanel.buttonSelectMarker.setOnClickListener {
                 mapViewModel.updateCurrentSequenceNr(mapPoint!!.sequenceNr)
+                createPolylineToPoint()
                 binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
                 binding.expandedPanel.seekbar.visibility = View.VISIBLE
                 binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
+                val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint.id]?.photoPath)
+                if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap)
+                else binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
                 seekbarManager?.prepareAudio(mapPoint.audioPath!!)
+
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapPoint.sequenceNr + 1))
                         createPolylineToPoint()
