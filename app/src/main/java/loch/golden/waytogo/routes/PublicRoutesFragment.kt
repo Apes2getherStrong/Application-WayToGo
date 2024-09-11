@@ -1,6 +1,5 @@
 package loch.golden.waytogo.routes
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +16,7 @@ import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
@@ -51,7 +51,7 @@ class PublicRoutesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentPublicRoutesBinding.inflate(inflater, container, false)
-        Log.d("Warmbier",container?.id.toString())
+        Log.d("Warmbier", container?.id.toString())
         return binding.root
     }
 
@@ -61,6 +61,7 @@ class PublicRoutesFragment : Fragment() {
         tokenManager = TokenManager(requireContext())
 
         if (!isUserAuthenticatedAndTokenValid()) {
+            //Snackbar.make(requireActivity().findViewById(android.R.id.content), "Login Successful", Snackbar.LENGTH_SHORT).show()
             Toast.makeText(requireContext(), "Please log in to view public routes", Toast.LENGTH_LONG).show()
         }
         initSearchView()
@@ -70,7 +71,6 @@ class PublicRoutesFragment : Fragment() {
         //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
     }
-
 
 
     private fun isUserAuthenticatedAndTokenValid(): Boolean {
@@ -93,7 +93,8 @@ class PublicRoutesFragment : Fragment() {
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
 
-        recyclerViewRouteAdapter.setOnClickListener(object : RecyclerViewRouteAdapter.OnClickListener {
+        recyclerViewRouteAdapter.setOnClickListener(object :
+            RecyclerViewRouteAdapter.OnClickListener {
             override fun onItemClick(position: Int, route: Route) {
                 val id = route.routeUid
                 val bundle = Bundle().apply {
@@ -101,7 +102,7 @@ class PublicRoutesFragment : Fragment() {
                 }
                 val fr = RouteDetailFragment()
                 fr.arguments = bundle
-                (parentFragment as? RoutesFragment)?.replaceFragment(0,fr)
+                (parentFragment as? RoutesFragment)?.replaceFragment(0, fr)
             }
         })
 
@@ -118,7 +119,7 @@ class PublicRoutesFragment : Fragment() {
     private fun observeRouteResponse() {
         lifecycleScope.launch {
             viewModel.getRoutes(0, 20).collectLatest { pagingData ->
-                    recyclerViewRouteAdapter.submitData(pagingData)
+                recyclerViewRouteAdapter.submitData(pagingData)
 
             }
         }
@@ -132,6 +133,7 @@ class PublicRoutesFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
+
             override fun onQueryTextChange(newText: String?): Boolean {
                 search(newText)
                 return true

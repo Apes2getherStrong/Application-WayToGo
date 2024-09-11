@@ -116,12 +116,15 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 mapLocationsOfRouteEntity = routeWithLocationsFromDb.mapLocations
                 routeWithLocationsFromDb.mapLocations.let {
                     for (mapLocation in it) {
-                        val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+                        val sequenceNr =
+                            runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
                         Log.d("Warmbier", "Sequence Nr $sequenceNr name: ${mapLocation.name}")
-                        route.pointList[mapLocation.id] = (MapPoint(mapLocation, sequenceNr, requireContext()))
+                        route.pointList[mapLocation.id] =
+                            (MapPoint(mapLocation, sequenceNr, requireContext()))
                     }
                 }
-                val mapLocationAdapter = MapLocationAdapter(route.pointList.values.toList().sortedBy { it.sequenceNr })
+                val mapLocationAdapter =
+                    MapLocationAdapter(route.pointList.values.toList().sortedBy { it.sequenceNr })
 
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
@@ -174,7 +177,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     private fun publishRoute() {
         if (!isUserLoggedIn()) {
-            Toast.makeText(requireContext(), "You need to log in to publish a route", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "You need to log in to publish a route",
+                Toast.LENGTH_SHORT
+            ).show()
         }
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
@@ -187,12 +194,18 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     mapLocation.description,
                     Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                 )
-                val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+                val sequenceNr =
+                    runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
 
                 routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                     mapLocationIdMap[mapLocation.id] = newMapLocation.id
                     val routeMapLocation =
-                        RouteMapLocationRequest(UUID.randomUUID().toString(), newMapLocation, newRoute, sequenceNr)
+                        RouteMapLocationRequest(
+                            UUID.randomUUID().toString(),
+                            newMapLocation,
+                            newRoute,
+                            sequenceNr
+                        )
                     routeViewModel.postRouteMapLocation(routeMapLocation) { newRouteMapLocation ->
                         routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
 
@@ -213,9 +226,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             Log.d("Dzicz", audioFile.absolutePath);
                             if (audioFile.exists()) {
                                 Log.d("AudioRequest", "Exists")
-                                val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
+                                val audioRequest =
+                                    RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
                                 val audioMultiPartBody =
-                                    MultipartBody.Part.createFormData("file", audioFile.name, audioFile.asRequestBody())
+                                    MultipartBody.Part.createFormData(
+                                        "file",
+                                        audioFile.name,
+                                        audioFile.asRequestBody()
+                                    )
                                 Log.d("AUDIO ID", newAudio.id)
                                 routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
                             } else {
@@ -229,19 +247,23 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
                             if (imageFile.exists()) {
                                 Log.d("Image", "Exists")
-                                val imageRequest = RequestBody.create("image/jpg".toMediaTypeOrNull(), imageFile)
+                                val imageRequest =
+                                    RequestBody.create("image/jpg".toMediaTypeOrNull(), imageFile)
                                 val imageMultiPartBody =
-                                    MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
-                                routeViewModel.putImageToMapLocation(newMapLocation.id, imageMultiPartBody)
+                                    MultipartBody.Part.createFormData(
+                                        "file",
+                                        imageFile.name,
+                                        imageRequest
+                                    )
+                                routeViewModel.putImageToMapLocation(
+                                    newMapLocation.id,
+                                    imageMultiPartBody
+                                )
                             } else {
                                 Log.d("Image", "Nie mo")
                             }
-
                         }
-
                     }
-
-
                 }
             }
         }
@@ -260,8 +282,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 sortedPointList[startPosition].sequenceNr = stopPosition + 1
                 sortedPointList[stopPosition].sequenceNr = startPosition + 1
 
-                routeViewModel.updateRouteMapLocationSequenceNrById(sortedPointList[startPosition].id, stopPosition + 1)
-                routeViewModel.updateRouteMapLocationSequenceNrById(sortedPointList[stopPosition].id, startPosition + 1)
+                routeViewModel.updateRouteMapLocationSequenceNrById(
+                    sortedPointList[startPosition].id,
+                    stopPosition + 1
+                )
+                routeViewModel.updateRouteMapLocationSequenceNrById(
+                    sortedPointList[stopPosition].id,
+                    startPosition + 1
+                )
 
                 Collections.swap(mapLocationsOfRouteEntity, startPosition, stopPosition)
                 recyclerView.adapter?.notifyItemMoved(startPosition, stopPosition)
@@ -279,7 +307,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 }
             }
 
-            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            override fun clearView(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ) {
                 super.clearView(recyclerView, viewHolder)
                 viewHolder.itemView.alpha = 1.0f
             }
@@ -300,61 +331,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         return expiresAtMillis < currentTimeMillis
     }
 
-    //TODO zrobic update routow, jeszcze nie do konca dziala
-//    private fun updatePublishedRoute(){
-//        var sequenceNumber = 1
-//
-//        routeViewModel.putRouteById(routeEntity.routeUid, routeEntity)
-//
-//        mapLocationsOfRouteEntity.forEach { mapLocation ->
-//            val mapLocationId = mapLocationIdMap[mapLocation.id] ?: return@forEach
-//            val mapLocationRequest = MapLocationRequest(
-//                mapLocation.id,
-//                mapLocation.name,
-//                mapLocation.description,
-//                Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
-//            )
-//            routeViewModel.putMapLocationById(mapLocationId, mapLocationRequest)
-//
-//            val routeMapLocationId = routeMapLocationIdMap[mapLocationId] ?: return@forEach
-//            val routeMapLocation = RouteMapLocationRequest(UUID.randomUUID().toString(),mapLocationRequest, routeEntity, sequenceNumber)
-//            routeViewModel.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
-//            sequenceNumber++
-//
-//            val audioId = audioIdMap[mapLocationId] ?: return@forEach
-//            val audio = Audio(
-//                audioId,
-//                mapLocation.name + "audio",
-//                null,
-//                null,
-//                mapLocationRequest
-//            )
-//            routeViewModel.putAudioById(audioId, audio)
-//
-//            val audioFile = File(
-//                requireContext().filesDir,
-//                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
-//            )
-//
-//            if (audioFile.exists()) {
-//                val audioRequest = audioFile.asRequestBody("audio/3gp".toMediaTypeOrNull())
-//                val audioMultiPartBody = MultipartBody.Part.createFormData("file", audioFile.name, audioRequest)
-//                routeViewModel.postAudioFile(audio.id, audioMultiPartBody)
-//            }
-//
-//            val imageFile = File(
-//                requireContext().filesDir,
-//                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}"
-//            )
-//
-//            if (imageFile.exists()) {
-//                val imageRequest = imageFile.asRequestBody("image/jpg".toMediaTypeOrNull())
-//                val imageMultiPartBody = MultipartBody.Part.createFormData("file", imageFile.name, imageRequest)
-//                routeViewModel.putImageToMapLocation(mapLocationId, imageMultiPartBody)
-//            }
-//        }
-//
-//    }
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
@@ -364,10 +340,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     }
 
     private fun changeBackFragment() {
-
         (parentFragment as? RoutesFragment)?.replaceFragment(1, MyRoutesFragment())
-
     }
-
 
 }

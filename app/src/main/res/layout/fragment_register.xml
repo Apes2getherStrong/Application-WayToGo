@@ -2,10 +2,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_register"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".user.RegisterFragment"
-    android:id="@+id/fragment_register">
+    tools:context=".user.RegisterFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container"
@@ -20,12 +20,12 @@
             android:layout_marginTop="96dp"
             android:layout_marginEnd="24dp"
             android:hint="Login"
+            android:imeOptions="actionDone"
             android:inputType="text"
             android:selectAllOnFocus="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/username"
@@ -35,6 +35,7 @@
             android:layout_marginTop="36dp"
             android:layout_marginEnd="24dp"
             android:hint="Username"
+            android:imeOptions="actionDone"
             android:inputType="text"
             android:selectAllOnFocus="true"
             app:layout_constraintEnd_toEndOf="parent"
@@ -55,8 +56,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/username" />
 
 
         <Button
@@ -70,9 +70,9 @@
             android:layout_marginBottom="64dp"
             android:enabled="true"
             android:text="Register"
-            app:layout_constraintStart_toStartOf="@id/password"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/password"
+            app:layout_constraintStart_toStartOf="@id/password"
             app:layout_constraintTop_toBottomOf="@+id/password"
             app:layout_constraintVertical_bias="0.2" />
 
