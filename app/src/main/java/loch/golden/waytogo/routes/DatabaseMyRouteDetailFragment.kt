@@ -1,11 +1,15 @@
 package loch.golden.waytogo.routes
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -137,12 +141,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
         }
 
-        binding.routeTitle.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) updateRoute()
-        }
-        binding.routeDescription.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) updateRoute()
-        }
+
 
         binding.backButton.setOnClickListener {
             changeBackFragment()
@@ -155,7 +154,34 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         binding.publishRouteButton.setOnClickListener {
             publishRoute()
         }
-        
+
+        binding.routeTitle.setImeOptions(EditorInfo.IME_ACTION_DONE)
+        binding.routeTitle.setRawInputType(InputType.TYPE_CLASS_TEXT)
+        binding.routeTitle.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                updateRoute()
+                binding.routeTitle.clearFocus()
+                this.requireContext().hideKeyboard(binding.routeTitle)
+                true
+            } else false
+        }
+        binding.routeDescription.setImeOptions(EditorInfo.IME_ACTION_DONE)
+        binding.routeDescription.setRawInputType(InputType.TYPE_CLASS_TEXT)
+        binding.routeDescription.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                updateRoute()
+                binding.routeDescription.clearFocus()
+                this.requireContext().hideKeyboard(binding.routeDescription)
+                true
+            } else false
+        }
+
+
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun updateRoute() {

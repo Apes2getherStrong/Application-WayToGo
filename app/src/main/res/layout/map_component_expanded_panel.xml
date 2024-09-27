@@ -162,7 +162,7 @@
             android:layout_marginTop="12dp"
             android:hint="description"
             android:imeOptions="actionDone"
-            android:inputType="text"
+            android:inputType=""
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/record_button"

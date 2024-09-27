@@ -124,8 +124,8 @@ class RouteCreationManager(
                 val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
                 mapPoint.description = binding.expandedPanel.creationDescription.text.toString()
                 routeViewModel.updateMapLocation(MapLocation(mapPoint))
-                binding.expandedPanel.creationTitle.clearFocus()
-                fragment.requireContext().hideKeyboard(binding.expandedPanel.creationTitle)
+                binding.expandedPanel.creationDescription.clearFocus()
+                fragment.requireContext().hideKeyboard(binding.expandedPanel.creationDescription)
                 true
             } else false
         }
