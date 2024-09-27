@@ -119,6 +119,17 @@ class RouteCreationManager(
             } else false
         }
 
+        binding.expandedPanel.creationDescription.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
+                mapPoint.description = binding.expandedPanel.creationDescription.text.toString()
+                routeViewModel.updateMapLocation(MapLocation(mapPoint))
+                binding.expandedPanel.creationTitle.clearFocus()
+                fragment.requireContext().hideKeyboard(binding.expandedPanel.creationTitle)
+                true
+            } else false
+        }
+
 
         seekbarManager = SeekbarManagerV2(
             mapViewModel,
@@ -265,6 +276,8 @@ class RouteCreationManager(
 
     fun onEditMarker(id: String) {
         this.currentMarkerId = id
+        binding.expandedPanel.creationTitle.setText(mapViewModel.route!!.pointList[id]?.name)
+        binding.expandedPanel.creationDescription.setText(mapViewModel.route!!.pointList[id]?.description)
         if (mapViewModel.route!!.pointList[id]?.photoPath != null) {
             val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[id]?.photoPath)
             binding.expandedPanel.creationAddImage.setImageBitmap(bitmap)
