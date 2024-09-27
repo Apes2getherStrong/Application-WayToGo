@@ -155,10 +155,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         binding.publishRouteButton.setOnClickListener {
             publishRoute()
         }
-
-        binding.testButton.setOnClickListener {
-            Log.d("Warmbier", mapLocationsOfRouteEntity.toString())
-        }
+        
     }
 
     private fun updateRoute() {
