@@ -262,7 +262,7 @@ class RouteCreationManager(
 
     private fun stopRecording() {
         Log.d("Warmbier", "Stop recording: $isRecording")
-        binding.expandedPanel.recordButton.setIconTintResource(R.color.color1)
+        binding.expandedPanel.recordButton.setIconTintResource(R.color.color3)
         if (isRecording) {
             mediaRecorder.stop()
             isRecording = false
