@@ -114,7 +114,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
-
+                binding.bottomPanel.title.text =  mapViewModel.currentPoint?.name
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
