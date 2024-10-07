@@ -193,5 +193,9 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
         return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId, imageFile)
     }
+
+    suspend fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
+        return RetrofitInstance.apiService.putImageToRoute(routeId, imageFile)
+    }
 }
 

@@ -224,6 +224,17 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
+    fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
+        viewModelScope.launch {
+            try {
+                routeRepository.putImageToRoute(routeId, imageFile)
+            } catch (e: Exception) {
+                Log.d("Warmbier", " kurde bele image ruta nie dziala $e")
+            }
+
+        }
+    }
+
     fun postRoute(route: Route, callback: (Route) -> Unit) = viewModelScope.launch {
         try {
             val response = routeRepository.postRoute(route)

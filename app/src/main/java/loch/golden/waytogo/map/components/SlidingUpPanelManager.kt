@@ -72,9 +72,6 @@ class SlidingUpPanelManager(
 
     }
 
-    fun openCreationPanel(markerId: String) {
-        //TODO create this fun
-    }
 
     fun openNormalPanel(mapPoint: MapPoint?) {
         binding.expandedPanel.seekbar.visibility = View.VISIBLE

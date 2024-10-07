@@ -130,4 +130,11 @@ interface ApiService {
         @Path("mapLocationsId") mapLocationId: String,
         @Part imageFile: MultipartBody.Part
     )
+
+    @Multipart
+    @PUT("routes/{routeId}/image")
+    suspend fun putImageToRoute(
+        @Path("routeId") routeId: String,
+        @Part imageFile: MultipartBody.Part
+    )
 }

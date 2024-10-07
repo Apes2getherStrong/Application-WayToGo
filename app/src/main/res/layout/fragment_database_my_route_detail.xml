@@ -39,10 +39,10 @@
 
 
         <ImageView
-            android:id="@+id/route_image"
+            android:id="@+id/add_route_image"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:src="@drawable/ic_route_24"
+            android:src="@drawable/ic_add_photo_24"
             app:layout_constraintTop_toBottomOf="@id/route_title" />
 
         <EditText
@@ -57,7 +57,7 @@
             android:paddingBottom="8dp"
             android:text="Opis trasy"
             android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/route_image" />
+            app:layout_constraintTop_toBottomOf="@id/add_route_image" />
 
 
         <androidx.recyclerview.widget.RecyclerView

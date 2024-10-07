@@ -2,6 +2,8 @@ package loch.golden.waytogo.routes
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -12,17 +14,15 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
@@ -37,10 +37,11 @@ import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.utils.Constants
+import loch.golden.waytogo.routes.utils.Constants.Companion.IMAGE_DIR
+import loch.golden.waytogo.routes.utils.Constants.Companion.IMAGE_EXTENSION
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import loch.golden.waytogo.user.tokenmanager.TokenManager
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -68,6 +69,35 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private val audioIdMap = mutableMapOf<String, String>()
     private val routeMapLocationIdMap = mutableMapOf<String, String>()
 
+    private val getContent =
+        this.registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            //TODO add cropping mechanism from this lib https://github.com/CanHub/Android-Image-Cropper
+            uri?.let {
+                binding.addRouteImage.setImageURI(uri)
+                saveImage(uri)
+            }
+        }
+
+    private fun saveImage(imageUri: Uri) {
+        try {
+            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+            Log.d("Warmbier", "$IMAGE_DIR/${route.id}$IMAGE_EXTENSION")
+            val outputFile = File(requireContext().filesDir, "$IMAGE_DIR/${route.id}$IMAGE_EXTENSION")
+            val outputFilePath = outputFile.absolutePath
+            val outputStream = FileOutputStream(outputFile)
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                    route.photoPath = outputFilePath
+                    Log.d("Warmbier", route.toString())
+                }
+            }
+            Log.d("Warmbier", "spoko zapisalem se image")
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.e("Warmbier", e.toString())
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -89,6 +119,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.addRouteImage.setOnClickListener {
+            getContent.launch("image/*")
+        }
+
         //handle back press
         activity?.onBackPressedDispatcher?.addCallback(
             viewLifecycleOwner,
@@ -104,18 +138,35 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             route.routeUid
         }
 
+
+
         routeViewModel.getRouteWithMapLocations(routeId)
         routeViewModel.routeWithLocationsFromDb.observe(viewLifecycleOwner) { routeWithLocationsFromDb ->
             if (routeWithLocationsFromDb != null) {
                 routeEntity = routeWithLocationsFromDb.route
+
+                val outputFile = File(
+                    requireContext().filesDir,
+                    "$IMAGE_DIR/${routeWithLocationsFromDb.route.routeUid}$IMAGE_EXTENSION"
+                )
+                var photoPath: String? = null
+                if (outputFile.exists())
+                    photoPath = outputFile.absolutePath
+
                 route = MapRoute(
                     routeWithLocationsFromDb.route.routeUid,
                     routeWithLocationsFromDb.route.name,
                     routeWithLocationsFromDb.route.description,
-                    mutableMapOf()
+                    mutableMapOf(),
+                    photoPath = photoPath
                 )
+                Log.d("Warmbier", route.toString())
                 binding.routeTitle.setText(routeWithLocationsFromDb.route.name)
                 binding.routeDescription.setText(routeWithLocationsFromDb.route.description)
+                if (route.photoPath != null) {
+                    val bitmap = BitmapFactory.decodeFile(route.photoPath)
+                    binding.addRouteImage.setImageBitmap(bitmap)
+                }
 
                 mapLocationsOfRouteEntity = routeWithLocationsFromDb.mapLocations
                 routeWithLocationsFromDb.mapLocations.let {
@@ -209,7 +260,29 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
-
+            Log.d("Warmbier", newRoute.toString())
+            val routeImageFile = File(
+                requireContext().filesDir,
+                "${IMAGE_DIR}/${route.id}${IMAGE_EXTENSION}"
+            )
+            if (routeImageFile.exists()) {
+                Log.d("Warmbier", "oooo wysylam image")
+                val imageRequest =
+                    RequestBody.create("image/jpg".toMediaTypeOrNull(), routeImageFile)
+                val imageMultiPartBody =
+                    MultipartBody.Part.createFormData(
+                        "file",
+                        routeImageFile.name,
+                        imageRequest
+                    )
+                routeViewModel.putImageToRoute(
+                    newRoute.routeUid,
+                    imageMultiPartBody
+                )
+            }
+            else{
+                Log.d("Warmbier", "cos nie znalazlem imagy")
+            }
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -265,7 +338,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
                             val imageFile = File(
                                 requireContext().filesDir,
-                                "${Constants.IMAGE_DIR}/${mapLocation.id}${Constants.IMAGE_EXTENSION}"
+                                "${IMAGE_DIR}/${mapLocation.id}${IMAGE_EXTENSION}"
                             )
 
                             if (imageFile.exists()) {
