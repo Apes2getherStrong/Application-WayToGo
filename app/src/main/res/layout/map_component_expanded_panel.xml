@@ -154,6 +154,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/creation_seekbar" />
+
+        <EditText
+            android:id="@+id/creation_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="description"
+            android:imeOptions="actionDone"
+            android:inputType=""
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/record_button"
+            app:layout_constraintWidth_percent="0.7" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

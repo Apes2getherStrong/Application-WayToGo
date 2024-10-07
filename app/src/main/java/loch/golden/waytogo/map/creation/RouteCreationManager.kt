@@ -90,8 +90,6 @@ class RouteCreationManager(
 
 
     init {
-        // TODO Fix currentMarker id having !! in saveImage and start Recording
-        // TODO do something with opening the sliding up panel without edit option
         binding.expandedPanel.creationAddImage.setOnClickListener {
             getContent.launch("image/*")
         }
@@ -117,6 +115,17 @@ class RouteCreationManager(
                 routeViewModel.updateMapLocation(MapLocation(mapPoint))
                 binding.expandedPanel.creationTitle.clearFocus()
                 fragment.requireContext().hideKeyboard(binding.expandedPanel.creationTitle)
+                true
+            } else false
+        }
+
+        binding.expandedPanel.creationDescription.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
+                mapPoint.description = binding.expandedPanel.creationDescription.text.toString()
+                routeViewModel.updateMapLocation(MapLocation(mapPoint))
+                binding.expandedPanel.creationDescription.clearFocus()
+                fragment.requireContext().hideKeyboard(binding.expandedPanel.creationDescription)
                 true
             } else false
         }
@@ -253,7 +262,7 @@ class RouteCreationManager(
 
     private fun stopRecording() {
         Log.d("Warmbier", "Stop recording: $isRecording")
-        binding.expandedPanel.recordButton.setIconTintResource(R.color.color1)
+        binding.expandedPanel.recordButton.setIconTintResource(R.color.color3)
         if (isRecording) {
             mediaRecorder.stop()
             isRecording = false
@@ -267,6 +276,8 @@ class RouteCreationManager(
 
     fun onEditMarker(id: String) {
         this.currentMarkerId = id
+        binding.expandedPanel.creationTitle.setText(mapViewModel.route!!.pointList[id]?.name)
+        binding.expandedPanel.creationDescription.setText(mapViewModel.route!!.pointList[id]?.description)
         if (mapViewModel.route!!.pointList[id]?.photoPath != null) {
             val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[id]?.photoPath)
             binding.expandedPanel.creationAddImage.setImageBitmap(bitmap)

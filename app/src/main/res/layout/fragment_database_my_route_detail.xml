@@ -27,7 +27,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:imeOptions="actionDone"
             android:inputType="textMultiLine"
             android:maxLines="2"
             android:padding="16dp"
@@ -52,7 +51,6 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:hint="Description"
-            android:imeOptions="actionDone"
             android:inputType="textMultiLine"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
@@ -95,15 +93,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/choose_route"
             app:layout_constraintWidth_percent="0.40" />
-
-        <Button
-            android:id="@+id/test_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:text="test"
-            app:layout_constraintBottom_toTopOf="@id/publish_route_button"
-            app:layout_constraintStart_toStartOf="@id/publish_route_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

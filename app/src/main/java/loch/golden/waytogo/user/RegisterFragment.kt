@@ -1,10 +1,14 @@
 package loch.golden.waytogo.user
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import loch.golden.waytogo.R
@@ -44,6 +48,38 @@ class RegisterFragment : Fragment() {
 
         }
 
+
+        binding.login.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.login.clearFocus()
+                this.requireContext().hideKeyboard(binding.login)
+                true
+            } else false
+        }
+
+        binding.username.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.username.clearFocus()
+                this.requireContext().hideKeyboard(binding.username)
+                true
+            } else false
+        }
+
+        binding.password.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.password.clearFocus()
+                this.requireContext().hideKeyboard(binding.password)
+                true
+            } else false
+        }
+
+
+
+    }
+
+    private fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun register(user: User) {

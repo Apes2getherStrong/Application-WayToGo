@@ -7,9 +7,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
@@ -35,7 +38,18 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
 
         tokenManager = TokenManager(this)
         RetrofitInstance.getTokenManager(tokenManager)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
 
+            // Hide the bottom navigation bar when the keyboard is shown
+            if (isKeyboardVisible) {
+                binding.bottomNav.visibility = View.GONE
+            } else {
+                binding.bottomNav.visibility = View.VISIBLE
+            }
+
+            insets
+        }
 
 
     }
@@ -125,6 +139,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
 
         binding.bottomNav.menu.findItem(R.id.bottom_nav_map).isChecked = true
     }
+
+
 
 
     private fun setUpView() {

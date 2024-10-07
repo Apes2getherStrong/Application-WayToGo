@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.snackbar.Snackbar
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -114,7 +115,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
-
+                binding.bottomPanel.title.text =  mapViewModel.currentPoint?.name
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
@@ -232,8 +233,8 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
         slidingUpPanelManager.toggleCreation()
 
-        binding.buttonAddMarker.visibility = View.VISIBLE
-        binding.buttonAddMarker.setOnClickListener {
+        binding.bottomPanel.creation.visibility = View.VISIBLE
+        binding.bottomPanel.buttonAddMarker.setOnClickListener {
             if (mapViewModel.inCreationMode) {
                 val markerId = routeCreationManager?.generateMarkerId()
                 val marker = googleMap.addMarker(
@@ -253,6 +254,10 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     marker, infoWindow
                 )
             }
+        }
+
+        binding.bottomPanel.creationHelpButton.setOnClickListener{
+            Snackbar.make(binding.root, "To move a point hold and drag it", Snackbar.LENGTH_SHORT).show()
         }
     }
 
