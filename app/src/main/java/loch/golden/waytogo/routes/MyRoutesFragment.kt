@@ -45,7 +45,7 @@ class MyRoutesFragment : Fragment() {
     //TODO add published status and publish / unpublish /delete
 
     private fun initRecyclerView() {
-        recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList())
+        recyclerViewRouteAdapter = SimpleMyRoutesAdapter(emptyList(), requireContext())
         binding.recyclerViewMyRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewMyRoutes.layoutManager = LinearLayoutManager(requireContext())
 
