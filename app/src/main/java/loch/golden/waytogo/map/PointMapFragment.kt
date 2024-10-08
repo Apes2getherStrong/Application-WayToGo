@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -115,7 +116,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     listOf(binding.bottomPanel.playButton, binding.expandedPanel.normalPlayPause)
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
-                binding.bottomPanel.title.text =  mapViewModel.currentPoint?.name
+                binding.bottomPanel.title.text = mapViewModel.currentPoint?.name
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
@@ -189,17 +190,21 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         lifecycleScope.launch {
             if (mapViewModel.route != null) {
                 val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
-                val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
-                val polylineOptions = PolylineOptions().apply {
-                    polyPoints.forEach() { polyPoint ->
-                        add(polyPoint)
+                try {
+                    val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
+                    val polylineOptions = PolylineOptions().apply {
+                        polyPoints.forEach() { polyPoint ->
+                            add(polyPoint)
+                        }
+                        color(Color.BLUE)
                     }
-                    color(Color.BLUE)
+                    val newPolyline = googleMap.addPolyline(polylineOptions)
+                    currentPolyline?.remove()
+                    currentPolyline = newPolyline
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Can't find route", Toast.LENGTH_SHORT).show()
                 }
-                val newPolyline = googleMap.addPolyline(polylineOptions)
-                Log.d("Warmbier", "current polyline: $currentPolyline")
-                currentPolyline?.remove()
-                currentPolyline = newPolyline
+
             }
         }
     }
@@ -256,7 +261,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             }
         }
 
-        binding.bottomPanel.creationHelpButton.setOnClickListener{
+        binding.bottomPanel.creationHelpButton.setOnClickListener {
             Snackbar.make(binding.root, "To move a point hold and drag it", Snackbar.LENGTH_SHORT).show()
         }
     }
@@ -279,14 +284,12 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
                         createPolylineToPoint()
                         slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
-                    }
-                    else
+                    } else
                         Log.d("Warmbier", "FINISH THE ROUTE")
                     Log.d("Warmbier", "The completion")
                 }
                 seekbarManager?.resumeAudio()
-            }
-            else{
+            } else {
                 createPolylineToPoint()
             }
 
