@@ -79,18 +79,21 @@ class RecyclerViewRouteAdapter(
         fun bind(route: Route) {
             titleTextView.text = route.name
             descriptionTextView.text = route.description
-            lifecycleScope.launch {
-                val response = safeApiCall { viewModel.getBlockingRouteImage(route.routeUid) }
-                response?.let {
-                    val imageBytes = response.body()
-                    Log.d("Warmbier", imageBytes.toString())
-                    if (imageBytes != null) {
-                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                        updateRouteImage(route.routeUid, bitmap)
-                        imageView.setImageBitmap(bitmap)
-                        routeImagesMap[route.routeUid] = bitmap  // Store the image in the map
-                    } else {
-                        imageView.setImageResource(R.drawable.ic_route_24)  // Optional: Set a placeholder
+            val cachedImage = routeImagesMap[route.routeUid]
+            if (cachedImage != null)
+                imageView.setImageBitmap(cachedImage)  // If cached, set it directly
+            else {
+                imageView.setImageResource(R.drawable.ic_route_24)  // Optional: Set a placeholder
+                lifecycleScope.launch {
+                    val response = safeApiCall { viewModel.getBlockingRouteImage(route.routeUid) }
+                    response?.let {
+                        val imageBytes = response.body()
+                        if (imageBytes != null) {
+                            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                            updateRouteImage(route.routeUid, bitmap)
+                            imageView.setImageBitmap(bitmap)
+                            routeImagesMap[route.routeUid] = bitmap  // Store the image in the map
+                        }
                     }
                 }
             }
