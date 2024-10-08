@@ -64,9 +64,10 @@ class PublicRoutesFragment : Fragment() {
             //Snackbar.make(requireActivity().findViewById(android.R.id.content), "Login Successful", Snackbar.LENGTH_SHORT).show()
             Toast.makeText(requireContext(), "Please log in to view public routes", Toast.LENGTH_LONG).show()
         }
+        initViewModel()
         initSearchView()
         initRecyclerView()
-        initViewModel()
+        observeRouteResponse()
 
         //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
@@ -89,7 +90,7 @@ class PublicRoutesFragment : Fragment() {
 
 
     private fun initRecyclerView() {
-        recyclerViewRouteAdapter = RecyclerViewRouteAdapter()
+        recyclerViewRouteAdapter = RecyclerViewRouteAdapter(viewModel, lifecycleScope)
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
 
@@ -112,7 +113,6 @@ class PublicRoutesFragment : Fragment() {
         val repository = RouteRepository(routeDao)
         val routeViewModelFactory = RouteViewModelFactory(repository)
         routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
-        observeRouteResponse()
 
     }
 

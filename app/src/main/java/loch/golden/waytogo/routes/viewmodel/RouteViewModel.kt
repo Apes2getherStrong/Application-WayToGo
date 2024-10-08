@@ -162,6 +162,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
+    suspend fun getBlockingRouteImage(routeUid: String): Response<ByteArray> {
+        return withContext(Dispatchers.IO) {
+            routeRepository.getRouteImage(routeUid)
+        }
+    }
+
     fun getMapLocationImage(mapLocationId: String) {
         viewModelScope.launch {
             val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
