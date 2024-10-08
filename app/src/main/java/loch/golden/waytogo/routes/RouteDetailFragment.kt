@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -33,6 +34,8 @@ class RouteDetailFragment() : Fragment() {
     }
     private var navigateToMapListener: OnNavigateToMapListener? = null
     private lateinit var route: MapRoute
+    private var routeChosen = false
+    private lateinit var mapViewModel: MapViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +56,7 @@ class RouteDetailFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         //handle back press
         activity?.onBackPressedDispatcher?.addCallback(
             viewLifecycleOwner,
@@ -82,12 +85,37 @@ class RouteDetailFragment() : Fragment() {
                 binding.routeTitle.text = response.body()?.name
                 binding.routeDescription.text = response.body()?.description
 
+
                 // Fetch map locations by route ID
                 routeViewModel.getMapLocationsByRouteId(routeId)
+            }
+            routeViewModel.getRouteImage(routeId)
+            routeViewModel.currentRouteImage.observe(viewLifecycleOwner) { response ->
+                if (response.isSuccessful) {
+                    Log.d("Warmbier", "Rut: is Succesful")
+                    val imageBytes = response.body()
+                    if (imageBytes != null) {
+                        Log.d("Warmbier", "Rut: bytes not null")
+                        val tempImageFile = File.createTempFile("temp_img", ".jpg", requireContext().cacheDir)
+                        tempImageFile.deleteOnExit()
+                        val fos = FileOutputStream(tempImageFile)
+                        fos.write(imageBytes)
+                        fos.close()
+                        route.photoPath = tempImageFile.absolutePath
+                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                        // Set the Bitmap to the ImageView
+                        binding.routeImage.setImageBitmap(bitmap)
+                    } else
+                        Log.d("Warmbier", "Rut: bytes are null")
+                } else
+                    Log.d("Warmbier", "Rut:is not succesful")
+
             }
         }
         binding.progressBar.visibility = View.VISIBLE
         // Observe map locations response
+
         var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
@@ -161,8 +189,20 @@ class RouteDetailFragment() : Fragment() {
 
     }
 
+    private fun clearCache() {
+        val cacheDir = requireContext().cacheDir
+        cacheDir.deleteRecursively()  // Deletes all files and directories within cacheDir
+    }
+
+    override fun onDestroy() {
+        if (mapViewModel.route == null) {
+            clearCache()
+            Log.d("Warmbier", "Clearing cache")
+        }
+        super.onDestroy()
+    }
+
     private fun chooseRoute() {
-        val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
         mapViewModel.inCreationMode = false
         mapViewModel.route = route

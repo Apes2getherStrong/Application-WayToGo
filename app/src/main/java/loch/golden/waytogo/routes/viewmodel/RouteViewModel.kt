@@ -42,7 +42,7 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
     val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
-    val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
+    val currentRouteImage: MutableLiveData<Response<ByteArray>> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
     val sequenceNr: MutableLiveData<Int> = MutableLiveData()
@@ -162,6 +162,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
+    suspend fun getBlockingRouteImage(routeUid: String): Response<ByteArray> {
+        return withContext(Dispatchers.IO) {
+            routeRepository.getRouteImage(routeUid)
+        }
+    }
+
     fun getMapLocationImage(mapLocationId: String) {
         viewModelScope.launch {
             val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
@@ -219,6 +225,17 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
                 routeRepository.putImageToMapLocation(mapLocationId, imageFile)
             } catch (e: Exception) {
                 Log.d("Nie dziala image", e.toString())
+            }
+
+        }
+    }
+
+    fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
+        viewModelScope.launch {
+            try {
+                routeRepository.putImageToRoute(routeId, imageFile)
+            } catch (e: Exception) {
+                Log.d("Warmbier", " kurde bele image ruta nie dziala $e")
             }
 
         }

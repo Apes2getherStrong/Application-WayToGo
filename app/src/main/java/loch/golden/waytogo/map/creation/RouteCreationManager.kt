@@ -161,17 +161,6 @@ class RouteCreationManager(
         }
         Log.d("Warmbier", infoWindowMap.toString())
         Log.d("Warmbier", creationMarkerMap.toString())
-
-        initFolders()
-    }
-
-    private fun initFolders() {
-        val imageDir = File(fragment.requireContext().filesDir, Constants.IMAGE_DIR)
-        if (!imageDir.exists())
-            imageDir.mkdirs()
-        val audioDir = File(fragment.requireContext().filesDir, Constants.AUDIO_DIR)
-        if (!audioDir.exists())
-            audioDir.mkdirs()
     }
 
     fun addMarker(marker: Marker?, infoWindow: InfoWindow) {
