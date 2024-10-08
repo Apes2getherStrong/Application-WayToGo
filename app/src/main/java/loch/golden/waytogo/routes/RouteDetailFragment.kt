@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -82,12 +83,36 @@ class RouteDetailFragment() : Fragment() {
                 binding.routeTitle.text = response.body()?.name
                 binding.routeDescription.text = response.body()?.description
 
+
                 // Fetch map locations by route ID
                 routeViewModel.getMapLocationsByRouteId(routeId)
             }
         }
         binding.progressBar.visibility = View.VISIBLE
         // Observe map locations response
+        routeViewModel.getRouteImage(routeId)
+        routeViewModel.currentRouteImage.observe(viewLifecycleOwner) { response ->
+            if (response.isSuccessful) {
+                Log.d("Warmbier", "Rut: is Succesful")
+                val imageBytes = response.body()
+                if (imageBytes != null) {
+                    Log.d("Warmbier", "Rut: bytes not null")
+                    val tempImageFile = File.createTempFile("temp_img", ".jpg", requireContext().cacheDir)
+                    tempImageFile.deleteOnExit()
+                    val fos = FileOutputStream(tempImageFile)
+                    fos.write(imageBytes)
+                    fos.close()
+                    route.photoPath = tempImageFile.absolutePath
+                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                    // Set the Bitmap to the ImageView
+                    binding.routeImage.setImageBitmap(bitmap)
+                } else
+                    Log.d("Warmbier", "Rut: bytes are null")
+            } else
+                Log.d("Warmbier", "Rut:is not succesful")
+
+        }
         var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
