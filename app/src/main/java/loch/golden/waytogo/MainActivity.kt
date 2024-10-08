@@ -22,7 +22,9 @@ import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.api.RetrofitInstance
+import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.user.tokenmanager.TokenManager
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
@@ -50,6 +52,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
 
             insets
         }
+        initFolders()
 
 
     }
@@ -58,6 +61,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         super.onStart()
         handlePermissions(true)
     }
+
+
 
     private fun handlePermissions(requestPerm: Boolean) {
         dialog?.dismiss()
@@ -98,6 +103,15 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
     }
 
+
+    private fun initFolders() {
+        val imageDir = File(this.filesDir, Constants.IMAGE_DIR)
+        if (!imageDir.exists())
+            imageDir.mkdirs()
+        val audioDir = File(this.filesDir, Constants.AUDIO_DIR)
+        if (!audioDir.exists())
+            audioDir.mkdirs()
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
