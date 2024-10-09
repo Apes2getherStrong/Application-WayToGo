@@ -243,9 +243,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             routeEntity.name = newRouteName
             routeEntity.description = newRouteDescription
             routeViewModel.updateRoute(routeEntity)
-
-            Toast.makeText(requireContext(), "Udalo sie zupdatowac routa", Toast.LENGTH_SHORT)
-                .show()
         }
     }
 
@@ -279,8 +276,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     newRoute.routeUid,
                     imageMultiPartBody
                 )
-            }
-            else{
+            } else {
                 Log.d("Warmbier", "cos nie znalazlem imagy")
             }
             mapLocationsOfRouteEntity.forEach { mapLocation ->
