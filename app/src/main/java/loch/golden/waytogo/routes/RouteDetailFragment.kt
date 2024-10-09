@@ -16,7 +16,7 @@ import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
-import loch.golden.waytogo.map.OnNavigateToMapListener
+import loch.golden.waytogo.map.OnChangeFragmentListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
 import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
@@ -32,7 +32,7 @@ class RouteDetailFragment() : Fragment() {
     private val routeViewModel: RouteViewModel by viewModels {
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
-    private var navigateToMapListener: OnNavigateToMapListener? = null
+    private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
     private var routeChosen = false
     private lateinit var mapViewModel: MapViewModel
@@ -47,8 +47,8 @@ class RouteDetailFragment() : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnNavigateToMapListener) {
-            navigateToMapListener = context
+        if (context is OnChangeFragmentListener) {
+            changeFragmentListener = context
         } else {
             throw RuntimeException("$context must implement OnNavigateToMapListener")
         }
@@ -207,7 +207,7 @@ class RouteDetailFragment() : Fragment() {
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
         mapViewModel.updateCurrentSequenceNr(1)
-        navigateToMapListener?.navigateToMap()
+        changeFragmentListener?.changeFragment(1)
 
     }
 
