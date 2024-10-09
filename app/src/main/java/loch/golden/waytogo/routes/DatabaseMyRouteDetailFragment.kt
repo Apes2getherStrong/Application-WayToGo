@@ -75,6 +75,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             uri?.let {
                 binding.addRouteImage.setImageURI(uri)
                 saveImage(uri)
+                val id = route.id
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
+                changeFragmentListener?.changeFragment(2, bundle)
             }
         }
 

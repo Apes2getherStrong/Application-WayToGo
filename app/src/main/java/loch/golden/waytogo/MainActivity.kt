@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         return true
     }
 
-    override fun changeFragment(fragmentNo: Int) {
+    override fun changeFragment(fragmentNo: Int, bundle: Bundle?) {
         val fragmentId = when (fragmentNo) {
             1 -> R.id.bottom_nav_map
             2 -> R.id.bottom_nav_routes
@@ -159,6 +159,10 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             R.id.bottom_nav_routes -> RoutesFragment()
             R.id.bottom_nav_user -> LoginFragment()
             else -> return
+        }
+
+        bundle?.let {
+            fragment.arguments = it
         }
 
         supportFragmentManager.commit {
