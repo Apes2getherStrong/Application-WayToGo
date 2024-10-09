@@ -1,6 +1,7 @@
 package loch.golden.waytogo.map
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
@@ -81,6 +82,16 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
 
+    private var changeFragmentListener: OnChangeFragmentListener? = null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnChangeFragmentListener) {
+            changeFragmentListener = context
+        } else {
+            throw RuntimeException("$context must implement OnNavigateToMapListener")
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -133,7 +144,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
     private fun setUpListeners() {
         binding.bottomPanel.buttonChooseRoute.setOnClickListener {
             parentFragmentManager.commit {
-                replace(R.id.fragment_container_main, RoutesFragment())
+                changeFragmentListener?.changeFragment(2)
             }
         }
     }
@@ -202,7 +213,8 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     currentPolyline?.remove()
                     currentPolyline = newPolyline
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Can't find route", Toast.LENGTH_SHORT).show()
+                    e.printStackTrace().toString()
+                    Toast.makeText(requireContext(), "Can't navigate to point", Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -325,7 +337,8 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
     private fun openNormalPanel(mapPoint: MapPoint?) {
         if (mapPoint == mapViewModel.currentPoint) {
             slidingUpPanelManager.openNormalPanel(mapPoint)
-            seekbarManager?.prepareAudio(mapPoint!!.audioPath!!)
+            if (mapPoint!!.audioPath != null)
+                seekbarManager?.prepareAudio(mapPoint.audioPath!!)
         } else {
             slidingUpPanelManager.openDifferentPanel(mapPoint)
             binding.expandedPanel.buttonSelectMarker.setOnClickListener {
@@ -334,10 +347,12 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
                 binding.expandedPanel.seekbar.visibility = View.VISIBLE
                 binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
+                binding.bottomPanel.title.text = mapPoint.name
                 val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint.id]?.photoPath)
                 if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap)
                 else binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
-                seekbarManager?.prepareAudio(mapPoint.audioPath!!)
+                if (mapPoint.audioPath != null)
+                    seekbarManager?.prepareAudio(mapPoint.audioPath!!)
 
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapPoint.sequenceNr + 1))

@@ -29,7 +29,7 @@ import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentDatabaseMyRouteDetailBinding
 import loch.golden.waytogo.map.MapViewModel
-import loch.golden.waytogo.map.OnNavigateToMapListener
+import loch.golden.waytogo.map.OnChangeFragmentListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
 import loch.golden.waytogo.routes.model.maplocation.Coordinates
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
@@ -60,7 +60,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private val routeViewModel: RouteViewModel by viewModels {
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
-    private var navigateToMapListener: OnNavigateToMapListener? = null
+    private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
     private lateinit var routeEntity: Route
     private lateinit var mapLocationsOfRouteEntity: List<MapLocation>
@@ -75,6 +75,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             uri?.let {
                 binding.addRouteImage.setImageURI(uri)
                 saveImage(uri)
+                val id = route.id
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
+                changeFragmentListener?.changeFragment(2, bundle)
             }
         }
 
@@ -109,8 +114,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnNavigateToMapListener) {
-            navigateToMapListener = context
+        if (context is OnChangeFragmentListener) {
+            changeFragmentListener = context
         } else {
             throw RuntimeException("$context must implement OnNavigateToMapListener")
         }
@@ -243,9 +248,6 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             routeEntity.name = newRouteName
             routeEntity.description = newRouteDescription
             routeViewModel.updateRoute(routeEntity)
-
-            Toast.makeText(requireContext(), "Udalo sie zupdatowac routa", Toast.LENGTH_SHORT)
-                .show()
         }
     }
 
@@ -279,8 +281,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     newRoute.routeUid,
                     imageMultiPartBody
                 )
-            }
-            else{
+            } else {
                 Log.d("Warmbier", "cos nie znalazlem imagy")
             }
             mapLocationsOfRouteEntity.forEach { mapLocation ->
@@ -432,7 +433,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         Log.d("Warmbier", route.toString())
         mapViewModel.route = route
         mapViewModel.inCreationMode = true
-        navigateToMapListener?.navigateToMap()
+        changeFragmentListener?.changeFragment(1)
     }
 
     private fun changeBackFragment() {

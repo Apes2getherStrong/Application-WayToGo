@@ -17,8 +17,8 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import loch.golden.waytogo.databinding.ActivityMainBinding
+import loch.golden.waytogo.map.OnChangeFragmentListener
 import loch.golden.waytogo.user.LoginFragment
-import loch.golden.waytogo.map.OnNavigateToMapListener
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.api.RetrofitInstance
@@ -28,7 +28,7 @@ import java.io.File
 
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
-    ActivityCompat.OnRequestPermissionsResultCallback, OnNavigateToMapListener {
+    ActivityCompat.OnRequestPermissionsResultCallback, OnChangeFragmentListener {
 
     private lateinit var tokenManager: TokenManager
     private lateinit var binding: ActivityMainBinding
@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         super.onStart()
         handlePermissions(true)
     }
-
 
 
     private fun handlePermissions(requestPerm: Boolean) {
@@ -146,15 +145,33 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
         return true
     }
-    override fun navigateToMap() {
-        supportFragmentManager.commit {
-            replace(R.id.fragment_container_main, PointMapFragment())
+
+    override fun changeFragment(fragmentNo: Int, bundle: Bundle?) {
+        val fragmentId = when (fragmentNo) {
+            1 -> R.id.bottom_nav_map
+            2 -> R.id.bottom_nav_routes
+            3 -> R.id.bottom_nav_user
+            else -> return
         }
 
-        binding.bottomNav.menu.findItem(R.id.bottom_nav_map).isChecked = true
+        val fragment = when (fragmentId) {
+            R.id.bottom_nav_map -> PointMapFragment()
+            R.id.bottom_nav_routes -> RoutesFragment()
+            R.id.bottom_nav_user -> LoginFragment()
+            else -> return
+        }
+
+        bundle?.let {
+            fragment.arguments = it
+        }
+
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container_main, fragment)
+        }
+
+        // Update the bottom navigation selected item
+        binding.bottomNav.menu.findItem(fragmentId).isChecked = true
     }
-
-
 
 
     private fun setUpView() {

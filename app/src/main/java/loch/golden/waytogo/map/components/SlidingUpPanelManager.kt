@@ -74,6 +74,7 @@ class SlidingUpPanelManager(
 
 
     fun openNormalPanel(mapPoint: MapPoint?) {
+        binding.expandedPanel.buttonSelectMarker.visibility = View.GONE
         binding.expandedPanel.seekbar.visibility = View.VISIBLE
         binding.expandedPanel.normalPlayPause.visibility = View.VISIBLE
         binding.expandedPanel.title.text = mapPoint?.name
@@ -85,7 +86,7 @@ class SlidingUpPanelManager(
             binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
     }
 
-    fun updateBottomPanel(mapPoint: MapPoint?){
+    fun updateBottomPanel(mapPoint: MapPoint?) {
         binding.bottomPanel.title.text = mapPoint?.name
     }
 
@@ -96,8 +97,9 @@ class SlidingUpPanelManager(
         binding.expandedPanel.title.text = mapPoint?.name
         binding.expandedPanel.description.text = mapPoint?.description
         binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint?.id]?.photoPath)
-        binding.expandedPanel.image.setImageBitmap(bitmap)
+        val bitmap = BitmapFactory.decodeFile(mapViewModel.route!!.pointList[mapPoint!!.id]?.photoPath)
+        if (bitmap != null) binding.expandedPanel.image.setImageBitmap(bitmap)
+        else binding.expandedPanel.image.setImageResource(R.drawable.ic_no_photo_24)
     }
 
 
@@ -108,7 +110,7 @@ class SlidingUpPanelManager(
             return
         else {
             openNormalPanel(mapViewModel.currentPoint)
-    //            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            //            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
         }
 
     }
