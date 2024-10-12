@@ -9,6 +9,7 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_view_route"
+
         android:layout_width="120dp"
         android:layout_height="96dp"
         android:src="@drawable/ic_route_24"
@@ -28,7 +29,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_view_route"
-        app:layout_constraintTop_toTopOf="@id/card_view_image"
+        app:layout_constraintTop_toTopOf="@id/image_view_route"
         tools:text="Title" />
 
     <TextView
