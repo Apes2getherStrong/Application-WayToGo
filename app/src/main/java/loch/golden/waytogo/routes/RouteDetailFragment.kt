@@ -19,6 +19,7 @@ import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.map.OnChangeFragmentListener
 import loch.golden.waytogo.routes.adapter.MapLocationAdapter
 import loch.golden.waytogo.routes.adapter.PublicMapLocationAdapter
+import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import java.io.File
@@ -28,13 +29,11 @@ import java.io.FileOutputStream
 class RouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
-    private lateinit var mapLocationRecyclerView: MapLocationAdapter
     private val routeViewModel: RouteViewModel by viewModels {
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
     private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
-    private var routeChosen = false
     private lateinit var mapViewModel: MapViewModel
 
     override fun onCreateView(
@@ -67,7 +66,7 @@ class RouteDetailFragment() : Fragment() {
             })
 
 
-        val routeId = arguments?.getString("id") ?: "" //TODO add error message
+        val routeId = arguments?.getString("id") ?: ""
 
 
         // Fetch route by ID
@@ -119,19 +118,16 @@ class RouteDetailFragment() : Fragment() {
         var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
         routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
-                val mapLocationAdapter = PublicMapLocationAdapter(response.body()?.content ?: emptyList())
                 response.body()?.content?.let { mapLocations ->
                     for (mapLocation in mapLocations) {
                         val mapPoint = MapPoint(mapLocation, ++sequenceNr)
                         route.pointList[mapLocation.id] = mapPoint
-
-                        // Fetch audio by map location ID
-                        Log.d("Warmbier", "MapLocationId: ${mapLocation.id}")
                         routeViewModel.getAudioByMapLocationId(mapLocation.id)
                         routeViewModel.getMapLocationImage(mapLocation.id)
-
                     }
                 }
+                val mapLocationAdapter =
+                    PublicMapLocationAdapter(route.pointList.values.sortedBy { it.sequenceNr }.toMutableList())
                 binding.progressBar.visibility = View.GONE
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
                 binding.recyclerViewPoints.adapter = mapLocationAdapter
@@ -147,7 +143,6 @@ class RouteDetailFragment() : Fragment() {
             }
         }
         //TODO move these componenets to seperate functions
-        //TODO create files when choosing route not before
 
         routeViewModel.audioFile.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
@@ -172,6 +167,7 @@ class RouteDetailFragment() : Fragment() {
                     fos.write(imageBytes)
                     fos.close()
                     route.pointList[response.mapLocationId]?.photoPath = tempImageFile.absolutePath
+                    (binding.recyclerViewPoints.adapter as? PublicMapLocationAdapter)?.updateMapPoint(route.pointList[response.mapLocationId]!!)
                 }
             }
         }
@@ -191,7 +187,7 @@ class RouteDetailFragment() : Fragment() {
 
     private fun clearCache() {
         val cacheDir = requireContext().cacheDir
-        cacheDir.deleteRecursively()  // Deletes all files and directories within cacheDir
+        cacheDir.deleteRecursively()
     }
 
     override fun onDestroy() {
