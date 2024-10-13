@@ -1,27 +1,26 @@
 package loch.golden.waytogo.user
 
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import android.view.ViewGroup
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-
 import loch.golden.waytogo.R
-import loch.golden.waytogo.custom.CustomLoading
 import loch.golden.waytogo.databinding.FragmentLoginBinding
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.tokenmanager.TokenManager
+import retrofit2.HttpException
+import java.io.IOException
+import java.util.UUID
 
 
 class LoginFragment : Fragment() {
@@ -50,29 +49,34 @@ class LoginFragment : Fragment() {
 
         tokenManager = TokenManager(requireContext())
 
+        if (tokenManager.getToken() != null && !tokenManager.isTokenExpired(tokenManager.getToken()!!)) {
+            navigateToWelcomeFragment()
+            return
+        }
         binding.buttonLogin.setOnClickListener {
             val username = binding.username.text.toString()
             val password = binding.password.text.toString()
             val authRequest = AuthRequest(username, password)
 
             login(authRequest)
-
         }
 
         binding.registerText.setOnClickListener {
             navigateToRegisterFragment()
         }
 
+        val bottomNav =  requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
         routeViewModel.authResponse.observe(viewLifecycleOwner) { authResponse ->
             authResponse?.let {
                 progressDialog.dismiss()
                 tokenManager.saveToken(it.token)
-                Snackbar.make(requireView(), "Login Successful", Snackbar.LENGTH_SHORT).show()
-                //Toast.makeText(requireContext(), "Login Successful", Toast.LENGTH_SHORT).show()
+                val username = tokenManager.getUserFromJWT()
+                username?.let { it1 -> tokenManager.saveUsername(it1) }
+                Snackbar.make(requireView(), "Login Successful", Snackbar.LENGTH_SHORT).setAnchorView(bottomNav).show()
                 navigateToWelcomeFragment()
             } ?: run {
                 progressDialog.dismiss()
-                Toast.makeText(requireContext(), "Login Failed", Toast.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), "Login Failed", Snackbar.LENGTH_SHORT).setAnchorView(bottomNav).show()
             }
         }
 
@@ -94,15 +98,31 @@ class LoginFragment : Fragment() {
         progressDialog.show()
 
         try {
-
             routeViewModel.login(authRequest)
-        }catch (e: Exception) {
+        } catch (e: HttpException) {
             progressDialog.dismiss()
-            Toast.makeText(requireContext(), "Failed to connect.", Toast.LENGTH_LONG).show()
+            when (e.code()) {
+                404 -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "Connection error",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } catch (e: IOException) {
+            progressDialog.dismiss()
+            Toast.makeText(
+                requireContext(),
+                "Network error",
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            progressDialog.dismiss()
+            Toast.makeText(requireContext(), e.message ?: "Login failed. Incorrect password or login.", Toast.LENGTH_LONG)
+                .show()
         }
     }
-
-
 
 
 }
