@@ -19,7 +19,9 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
+import java.io.IOException
 
 class RouteRepository(private val routeDao: RouteDao) {
 
@@ -107,9 +109,10 @@ class RouteRepository(private val routeDao: RouteDao) {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login", response.body().toString())
         return response
+
     }
 
-    suspend fun register(user: User): Response<Void> {
+    suspend fun register(user: User): Response<User> {
         val response = RetrofitInstance.apiService.register(user)
         Log.d("Register", response.body().toString())
         return response
@@ -131,6 +134,10 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     suspend fun getRouteById(routeUid: String): Response<Route> {
         return RetrofitInstance.apiService.getRouteById(routeUid)
+    }
+
+    suspend fun getUserByUserId(userId: String): Response<User> {
+        return RetrofitInstance.apiService.getUserByUserId(userId)
     }
 
     suspend fun getMapLocationsByRouteId(routeId: String): Response<MapLocationListResponse> {

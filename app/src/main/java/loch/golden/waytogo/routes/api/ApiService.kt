@@ -33,7 +33,7 @@ interface ApiService {
     ): Response<AuthResponse>
 
     @POST(Constants.REGISTER_URL)
-    suspend fun register(@Body user: User): Response<Void>
+    suspend fun register(@Body user: User): Response<User>
 
     @GET("routes")
     suspend fun getRoutes(
@@ -55,6 +55,11 @@ interface ApiService {
     suspend fun getRouteImage(
         @Path("routeId") routeId: String
     ): Response<ResponseBody>
+
+    @GET("users/{userId}")
+    suspend fun getUserByUserId(
+        @Path("userId") userId: String
+    ): Response<User>
 
     @GET("mapLocations/{mapLocationId}/image")
     suspend fun getMapLocationImage(

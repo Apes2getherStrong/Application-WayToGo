@@ -1,6 +1,7 @@
 package loch.golden.waytogo.routes.viewmodel
 
 import android.media.Image
+import android.net.http.NetworkException
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -31,11 +32,13 @@ import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
 import okhttp3.MultipartBody
+import retrofit2.HttpException
 import retrofit2.Response
 
 class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
+    val userResponse: MutableLiveData<Response<User>> = MutableLiveData()
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
     val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> =
         MutableLiveData()
@@ -44,7 +47,8 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     val routeFromDb: MutableLiveData<Route> = MutableLiveData()
     val currentRouteImage: MutableLiveData<ByteArray?> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
-    val authResponse: MutableLiveData<AuthResponse> = MutableLiveData()
+    val authResponse: MutableLiveData<AuthResponse?> = MutableLiveData()
+    val registerResponse: MutableLiveData<User?> = MutableLiveData()
     val sequenceNr: MutableLiveData<Int> = MutableLiveData()
     private val _audioFile = MutableLiveData<IdByteArray>()
     val audioFile: LiveData<IdByteArray> get() = _audioFile
@@ -144,6 +148,14 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         viewModelScope.launch {
             val response = routeRepository.getRouteById(routeUid)
             myRouteResponse.value = response
+
+        }
+    }
+
+    fun getUserByUserId(userId: String) {
+        viewModelScope.launch {
+            val response = routeRepository.getUserByUserId(userId)
+            userResponse.value = response
 
         }
     }
@@ -306,15 +318,22 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             if (response.isSuccessful) {
                 authResponse.postValue(response.body())
             }
-
+            else {
+               authResponse.postValue(null)
+            }
         }
-
     }
 
-    fun register(user: User) = viewModelScope.launch {
-        routeRepository.register(user)
+    fun register(user: User) {
+        viewModelScope.launch {
+            val response = routeRepository.register(user)
+            if(response.isSuccessful) {
+                registerResponse.postValue(response.body())
+            }
+            else {
+                registerResponse.postValue(null)
+            }
+        }
     }
 
 }
-
-//TODO przerobic na flow a nie livadata
