@@ -3,18 +3,30 @@ package loch.golden.waytogo.user
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import loch.golden.waytogo.R
+import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentWelcomeBinding
+import loch.golden.waytogo.routes.RouteMainApplication
+import loch.golden.waytogo.routes.viewmodel.RouteViewModel
+import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 
 class WelcomeFragment : Fragment() {
 
     private lateinit var binding: FragmentWelcomeBinding
+    private lateinit var tokenManager: TokenManager
+    private val routeViewModel: RouteViewModel by viewModels {
+        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,14 +36,43 @@ class WelcomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        welcome()
+
+        tokenManager = TokenManager(requireContext())
+
+        val username = tokenManager.getUsername()
+
+        username?.let { welcome(it) }
     }
-    private fun welcome() {
-        binding.welcomeText.text = "Welcome, username"
+    private fun welcome(username: String) {
+//        routeViewModel.getUserByUserId(userId)
+//        routeViewModel.userResponse.observe(viewLifecycleOwner) { response ->
+//            if (response.isSuccessful) {
+//
+//
+//            }
+//        }
+        binding.welcomeText.text = "Welcome, ${username}"
+        binding.usernameEditText.setText(username)
 
         binding.saveProfileButton.setOnClickListener{
-            Toast.makeText(requireContext(),"Succesfully changed username. BTW NOT WORKING YEt.",Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(),"Successfully changed username. BTW NOT WORKING YEt.",Toast.LENGTH_LONG).show()
         }
+
+        binding.logoutButton.setOnClickListener{
+            logout()
+        }
+    }
+
+    private fun logout() {
+        tokenManager.clearToken()
+        Toast.makeText(requireContext(),"Logout Successful",Toast.LENGTH_LONG).show()
+
+        val loginFragment = LoginFragment()
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container_main, loginFragment)
+            .addToBackStack(null)
+            .commit()
+
     }
 
     private fun Context.hideKeyboard(view: View) {

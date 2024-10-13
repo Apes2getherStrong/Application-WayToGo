@@ -38,6 +38,11 @@ class MyRoutesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.addRouteFab.setOnClickListener() {
+            (parentFragment as? RoutesFragment)?.replaceFragment(1, DatabaseMyRouteDetailFragment())
+        }
+
         initSearchView()
         initRecyclerView()
     }

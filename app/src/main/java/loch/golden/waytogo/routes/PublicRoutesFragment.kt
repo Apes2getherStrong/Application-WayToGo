@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
 import loch.golden.waytogo.map.MapViewModel
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
@@ -30,6 +31,7 @@ import loch.golden.waytogo.routes.room.WayToGoDatabase
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.user.tokenmanager.TokenManager
 
 
@@ -69,25 +71,8 @@ class PublicRoutesFragment : Fragment() {
         initRecyclerView()
         observeRouteResponse()
 
-        //binding.recyclerViewRoutes.addOnScrollListener(Rec)
 
     }
-
-
-    private fun isUserAuthenticatedAndTokenValid(): Boolean {
-        val token = tokenManager.getToken()
-        return !token.isNullOrBlank() && !isTokenExpired(token)
-    }
-
-    private fun isTokenExpired(token: String): Boolean {
-        val decodedJWT: DecodedJWT = JWT.decode(token)
-        val expiresAtMillis = decodedJWT.expiresAt.time
-
-        val currentTimeMillis = System.currentTimeMillis()
-
-        return expiresAtMillis < currentTimeMillis
-    }
-
 
     private fun initRecyclerView() {
         recyclerViewRouteAdapter = RecyclerViewRouteAdapter(viewModel, lifecycleScope)

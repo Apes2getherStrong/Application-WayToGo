@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.runBlocking
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
@@ -259,6 +260,15 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         }
+        if (mapLocationsOfRouteEntity.isEmpty()) {
+            Toast.makeText(
+                requireContext(),
+                "Route must have at least one point to be published",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
@@ -284,6 +294,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             } else {
                 Log.d("Warmbier", "cos nie znalazlem imagy")
             }
+
+
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -363,6 +375,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     }
                 }
             }
+            Snackbar.make(binding.root, "Route published successfully!", Snackbar.LENGTH_LONG)
+                .show()
         }
     }
 
@@ -417,16 +431,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private fun isUserLoggedIn(): Boolean {
         val tokenManager = TokenManager(requireContext())
         val token = tokenManager.getToken()
-        return !token.isNullOrEmpty() && !isTokenExpired(token)
+        return !token.isNullOrEmpty() && !tokenManager.isTokenExpired(token)
 
     }
 
-    private fun isTokenExpired(token: String): Boolean {
-        val decodedJWT: DecodedJWT = JWT.decode(token)
-        val expiresAtMillis = decodedJWT.expiresAt?.time ?: return true
-        val currentTimeMillis = System.currentTimeMillis()
-        return expiresAtMillis < currentTimeMillis
-    }
+
 
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
