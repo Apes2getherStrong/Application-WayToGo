@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.util.concurrent.TimeUnit
 
 
 object RetrofitInstance {
@@ -19,6 +20,8 @@ object RetrofitInstance {
 
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
+            .readTimeout(10000, TimeUnit.MILLISECONDS)
+            .pingInterval(3, TimeUnit.SECONDS)
             .addInterceptor(AuthInterceptor(tokenManager))
             .build()
     }
