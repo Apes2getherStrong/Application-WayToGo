@@ -11,14 +11,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
-import kotlinx.coroutines.launch
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.runBlocking
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
@@ -36,14 +34,11 @@ import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import loch.golden.waytogo.user.tokenmanager.TokenManager
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Collections
 import java.util.UUID
 
@@ -183,9 +178,19 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         }
+        if (mapLocationsOfRouteEntity.isEmpty()) {
+            Toast.makeText(
+                requireContext(),
+                "Route must have at least one point to be published",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         routeViewModel.postRoute(routeEntity) { newRoute ->
             isPublished = true
             binding.publishRouteButton.text = "Update Route"
+
 
             mapLocationsOfRouteEntity.forEach { mapLocation ->
                 val mapLocationRequest = MapLocationRequest(
@@ -266,6 +271,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     }
                 }
             }
+            Snackbar.make(binding.root, "Route published successfully!", Snackbar.LENGTH_LONG)
+                .show()
         }
     }
 
@@ -320,16 +327,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private fun isUserLoggedIn(): Boolean {
         val tokenManager = TokenManager(requireContext())
         val token = tokenManager.getToken()
-        return !token.isNullOrEmpty() && !isTokenExpired(token)
+        return !token.isNullOrEmpty() && !tokenManager.isTokenExpired(token)
 
     }
 
-    private fun isTokenExpired(token: String): Boolean {
-        val decodedJWT: DecodedJWT = JWT.decode(token)
-        val expiresAtMillis = decodedJWT.expiresAt?.time ?: return true
-        val currentTimeMillis = System.currentTimeMillis()
-        return expiresAtMillis < currentTimeMillis
-    }
+
 
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
