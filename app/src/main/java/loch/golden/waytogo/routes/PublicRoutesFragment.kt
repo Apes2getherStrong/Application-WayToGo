@@ -62,10 +62,6 @@ class PublicRoutesFragment : Fragment() {
 
         tokenManager = TokenManager(requireContext())
 
-        if (!isUserAuthenticatedAndTokenValid()) {
-            //Snackbar.make(requireActivity().findViewById(android.R.id.content), "Login Successful", Snackbar.LENGTH_SHORT).show()
-            Toast.makeText(requireContext(), "Please log in to view public routes", Toast.LENGTH_LONG).show()
-        }
         initViewModel()
         initSearchView()
         initRecyclerView()
