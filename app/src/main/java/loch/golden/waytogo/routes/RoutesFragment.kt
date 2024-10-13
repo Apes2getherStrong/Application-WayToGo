@@ -8,10 +8,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
+import loch.golden.waytogo.user.LoginFragment
+import loch.golden.waytogo.user.tokenmanager.TokenManager
 import okhttp3.internal.notifyAll
 import kotlin.random.Random
 
@@ -19,6 +24,7 @@ class RoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentRoutesBinding
     private lateinit var pagerAdapter: RoutesViewPagerAdapter
+    private lateinit var tokenManager: TokenManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,15 +43,42 @@ class RoutesFragment : Fragment() {
                 0 -> tab.text = "Public Routes"
                 1 -> tab.text = "My Routes"
             }
+
         }.attach()
 
+        val currentFragment = requireActivity()
+            .supportFragmentManager
+            .findFragmentById(R.id.fragment_container_main)
 
-        binding.addRouteFab.setOnClickListener() {
-            binding.viewPager.setCurrentItem(1, true)
-            replaceFragment(1, DatabaseMyRouteDetailFragment())
+        tokenManager = TokenManager(requireContext())
 
-
+        if(!isUserAuthenticatedAndTokenValid()) {
+            val bottomNav =  requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+            Snackbar.make(
+                view,
+                "LOG IN TO VIEW PUBLIC ROUTES",
+                Snackbar.LENGTH_LONG
+            )
+                .setAction("LOG IN") {
+                    Log.e("currFrag",currentFragment.toString())
+                    if(currentFragment !is LoginFragment) {
+                        navigateToLogin()
+                    }
+                }
+                .setAnchorView(bottomNav)
+                .show()
         }
+    }
+
+    private fun isUserAuthenticatedAndTokenValid(): Boolean {
+        val token = tokenManager.getToken()
+        return !token.isNullOrBlank() && !tokenManager.isTokenExpired(token)
+    }
+
+    private fun navigateToLogin() {
+        val fragmentTransaction  = requireActivity().supportFragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.fragment_container_main, LoginFragment())
+        fragmentTransaction.commit()
     }
 
     fun replaceFragment(position: Int, fragment: Fragment) {
