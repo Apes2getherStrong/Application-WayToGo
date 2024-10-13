@@ -64,7 +64,7 @@ class RouteDetailFragment() : Fragment() {
             })
 
 
-        val routeId = arguments?.getString("id") ?: "" //TODO add error message
+        val routeId = arguments?.getString("id") ?: ""
 
 
         // Fetch route by ID
