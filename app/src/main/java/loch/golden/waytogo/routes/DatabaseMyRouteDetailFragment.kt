@@ -21,8 +21,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.auth0.jwt.JWT
-import com.auth0.jwt.interfaces.DecodedJWT
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.runBlocking
 import loch.golden.waytogo.audio.Audio
@@ -88,7 +86,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         try {
             val inputStream = requireContext().contentResolver.openInputStream(imageUri)
             Log.d("Warmbier", "$IMAGE_DIR/${route.id}$IMAGE_EXTENSION")
-            val outputFile = File(requireContext().filesDir, "$IMAGE_DIR/${route.id}$IMAGE_EXTENSION")
+            val outputFile =
+                File(requireContext().filesDir, "$IMAGE_DIR/${route.id}$IMAGE_EXTENSION")
             val outputFilePath = outputFile.absolutePath
             val outputStream = FileOutputStream(outputFile)
             inputStream?.use { input ->
@@ -237,7 +236,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     }
 
     private fun Context.hideKeyboard(view: View) {
-        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
