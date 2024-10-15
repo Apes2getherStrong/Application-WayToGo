@@ -185,16 +185,7 @@ class RouteDetailFragment() : Fragment() {
 
     }
 
-    private fun clearCache() {
-        val cacheDir = requireContext().cacheDir
-        cacheDir.deleteRecursively()
-    }
-
     override fun onDestroy() {
-        if (mapViewModel.route == null) {
-            clearCache()
-            Log.d("Warmbier", "Clearing cache")
-        }
         super.onDestroy()
     }
 
