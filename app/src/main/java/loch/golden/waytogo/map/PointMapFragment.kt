@@ -147,6 +147,14 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 changeFragmentListener?.changeFragment(2)
             }
         }
+        binding.bottomPanel.creationReturnToEdit.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("id", mapViewModel.route?.id)
+            }
+            parentFragmentManager.commit {
+                changeFragmentListener?.changeFragment(2, bundle)
+            }
+        }
     }
 
 
