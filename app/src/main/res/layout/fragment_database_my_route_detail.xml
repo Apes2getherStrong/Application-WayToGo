@@ -83,6 +83,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/publish_route_button"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_points"
             app:layout_constraintWidth_percent="0.40" />
 
         <Button
@@ -95,6 +96,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/choose_route"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_points"
             app:layout_constraintWidth_percent="0.40" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
