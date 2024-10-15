@@ -34,12 +34,13 @@ class TokenManager (context: Context) {
         return expiresAtMillis < currentTimeMillis
    }
 
-    fun getUserFromJWT(): String? {
+    fun getUserIdFromJWT(): String? {
         val token = getToken()
         return if (token != null) {
             try {
                 val decodedJWT: DecodedJWT = JWT.decode(token)
-                decodedJWT.getClaim("username").asString()
+                val userId = decodedJWT.getClaim("userId").asString()
+                return userId
             } catch (e: Exception) {
                 e.printStackTrace()
                 null

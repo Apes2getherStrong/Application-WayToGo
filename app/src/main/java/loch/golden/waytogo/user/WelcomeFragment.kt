@@ -41,24 +41,24 @@ class WelcomeFragment : Fragment() {
 
         val username = tokenManager.getUsername()
 
-        username?.let { welcome(it) }
+        username?.let {
+            Log.d("Welcome", "Username found: $it")
+            welcome(it)
+        }
+
     }
+
     private fun welcome(username: String) {
-//        routeViewModel.getUserByUserId(userId)
-//        routeViewModel.userResponse.observe(viewLifecycleOwner) { response ->
-//            if (response.isSuccessful) {
-//
-//
-//            }
-//        }
         binding.welcomeText.text = "Welcome, ${username}"
         binding.usernameEditText.setText(username)
 
         binding.saveProfileButton.setOnClickListener{
+            Log.d("savve", "test_save")
             Toast.makeText(requireContext(),"Successfully changed username. BTW NOT WORKING YEt.",Toast.LENGTH_LONG).show()
         }
 
         binding.logoutButton.setOnClickListener{
+            Log.d("Logout", "test_logout")
             logout()
         }
     }
