@@ -120,7 +120,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             if (mapViewModel.inCreationMode) {
                 initCreation(savedInstanceState)
             } else {
-                Log.d("Warmbier", "i am getting here")
                 seekbarManager = SeekbarManagerV2(
                     mapViewModel,
                     binding.expandedPanel.seekbar,
@@ -128,6 +127,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
                 binding.bottomPanel.title.text = mapViewModel.currentPoint?.name
+                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
@@ -295,6 +295,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
                         createPolylineToPoint()
+                        seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                         slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
                     } else
                         Log.d("Warmbier", "FINISH THE ROUTE")
