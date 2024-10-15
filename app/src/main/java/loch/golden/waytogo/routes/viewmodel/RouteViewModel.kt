@@ -69,6 +69,18 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     private val _putRouteMapLocationResponse = MutableLiveData<Response<Void>>()
     val putRouteMapLocationResponse: LiveData<Response<Void>> get() = _putRouteMapLocationResponse
 
+//    private val _deleteRouteResponse = MutableLiveData<Response<Route>>()
+//    val deleteRouteResponse: LiveData<Response<Route>> = _deleteRouteResponse
+//
+//    private val _deleteMapLocationResponse= MutableLiveData<Response<MapLocation>>()
+//    val deleteMapLocationResponse: LiveData<Response<MapLocation>> = _deleteMapLocationResponse
+//
+//    private val _deleteRouteMapLocationResponse = MutableLiveData<Response<RouteMapLocation>>()
+//    val deleteRouteMapLocationResponse: LiveData<Response<RouteMapLocation>> = _deleteRouteMapLocationResponse
+//
+//    private val _deleteAudioResponse = MutableLiveData<Response<Audio>>()
+//    val deleteAudioResponse: LiveData<Response<Audio>> = _deleteAudioResponse
+
 //    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
 //        viewModelScope.launch {
 //            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
@@ -352,5 +364,66 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             }
         }
     }
+
+    fun deleteRouteById(routeId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<Route> = routeRepository.deleteRouteById(routeId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun deleteMapLocationById(mapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<MapLocation> = routeRepository.deleteMapLocationById(mapLocationId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun deleteRouteMapLocationByIdApi(routeMapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<RouteMapLocation> = routeRepository.deleteRouteMapLocationByIdApi(routeMapLocationId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun deleteAudioById(audioId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<Audio> = routeRepository.deleteAudioById(audioId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
 
 }

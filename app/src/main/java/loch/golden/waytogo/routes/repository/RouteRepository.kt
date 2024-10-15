@@ -204,5 +204,21 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
         return RetrofitInstance.apiService.putImageToRoute(routeId, imageFile)
     }
+
+    suspend fun deleteRouteById(routeId: String): Response<Route> {
+        return RetrofitInstance.apiService.deleteRouteById(routeId)
+    }
+
+    suspend fun deleteMapLocationById(mapLocationId: String): Response<MapLocation> {
+        return RetrofitInstance.apiService.deleteMapLocationById(mapLocationId)
+    }
+
+    suspend fun deleteRouteMapLocationByIdApi(routeMapLocationId: String): Response<RouteMapLocation> {
+        return RetrofitInstance.apiService.deleteRouteMapLocationByIdApi(routeMapLocationId)
+    }
+
+    suspend fun deleteAudioById(audioId: String): Response<Audio> {
+        return RetrofitInstance.apiService.deleteAudioById(audioId)
+    }
 }
 
