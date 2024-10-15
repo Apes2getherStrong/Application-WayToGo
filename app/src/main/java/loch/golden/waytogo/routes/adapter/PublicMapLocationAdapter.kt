@@ -42,13 +42,17 @@ class PublicMapLocationAdapter(private val mapPointList: MutableList<MapPoint>) 
 
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val mapLocationTextView: TextView = itemView.findViewById(R.id.name_mapLocation_text_view)
-        private val mapLocationDescription: TextView = itemView.findViewById(R.id.mapLocation_description_text_view)
+        private val mapLocationTextView: TextView =
+            itemView.findViewById(R.id.name_mapLocation_text_view)
+        private val mapLocationDescription: TextView =
+            itemView.findViewById(R.id.mapLocation_description_text_view)
         private val mapLocationImage: ImageView = itemView.findViewById(R.id.image_view_mapLocation)
+        private val mapLocationNumber: TextView = itemView.findViewById(R.id.number)
 
         fun bind(mapPoint: MapPoint) {
             mapLocationTextView.text = mapPoint.name
             mapLocationDescription.text = mapPoint.description
+            mapLocationNumber.text = mapPoint.sequenceNr.toString()
             Log.d("Warmbier", "In binding")
             if (mapPoint.photoPath != null) {
                 Log.d("Warmbier", "In binding: photo not null")

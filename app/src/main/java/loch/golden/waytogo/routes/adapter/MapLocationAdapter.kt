@@ -37,10 +37,12 @@ class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
         private val mapLocationTextView: TextView = itemView.findViewById(R.id.name_mapLocation_text_view)
         private val mapLocationDescription: TextView = itemView.findViewById(R.id.mapLocation_description_text_view)
         private val mapLocationImage: ImageView = itemView.findViewById(R.id.image_view_mapLocation)
+        private val mapLocationNumber: TextView = itemView.findViewById(R.id.number)
 
         fun bind(mapLocation: MapPoint) {
             mapLocationTextView.text = mapLocation.name
             mapLocationDescription.text = mapLocation.description
+            mapLocationNumber.text = mapLocation.sequenceNr.toString()
             if (mapLocation.photoPath != null) {
                 val bitmap = BitmapFactory.decodeFile(mapLocation.photoPath)
                 mapLocationImage.setImageBitmap(bitmap)
