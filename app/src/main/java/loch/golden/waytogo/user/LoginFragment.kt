@@ -2,9 +2,9 @@ package loch.golden.waytogo.user
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +25,6 @@ import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.tokenmanager.TokenManager
 import retrofit2.HttpException
 import java.io.IOException
-import java.util.UUID
 
 
 class LoginFragment : Fragment() {
@@ -71,18 +70,31 @@ class LoginFragment : Fragment() {
             navigateToRegisterFragment()
         }
 
-        val bottomNav =  requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
         routeViewModel.authResponse.observe(viewLifecycleOwner) { authResponse ->
             authResponse?.let {
                 progressDialog.dismiss()
                 tokenManager.saveToken(it.token)
-                val username = tokenManager.getUserFromJWT()
-                username?.let { it1 -> tokenManager.saveUsername(it1) }
-                Snackbar.make(requireView(), "Login Successful", Snackbar.LENGTH_SHORT).setAnchorView(bottomNav).show()
-                navigateToWelcomeFragment()
+                var username: String? = null;
+                val userId = tokenManager.getUserIdFromJWT()
+                userId?.let { it1 -> routeViewModel.getUserByUserId(it1) }
+                routeViewModel.userResponse.observe(viewLifecycleOwner) { response ->
+                    if (response.isSuccessful) {
+                        username = response.body()!!.username;
+                    }
+                    username?.let { it1 ->
+                        tokenManager.saveUsername(it1)
+                        Log.d("save_Username", "username $it1")
+                    }
+                    Snackbar.make(requireView(), "Login Successful", Snackbar.LENGTH_SHORT)
+                        .setAnchorView(bottomNav).show()
+                    navigateToWelcomeFragment()
+                }
+
             } ?: run {
                 progressDialog.dismiss()
-                Snackbar.make(requireView(), "Login Failed", Snackbar.LENGTH_SHORT).setAnchorView(bottomNav).show()
+                Snackbar.make(requireView(), "Login Failed", Snackbar.LENGTH_SHORT)
+                    .setAnchorView(bottomNav).show()
             }
         }
 
@@ -105,7 +117,8 @@ class LoginFragment : Fragment() {
     }
 
     private fun Context.hideKeyboard(view: View) {
-        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
@@ -146,12 +159,14 @@ class LoginFragment : Fragment() {
             ).show()
         } catch (e: Exception) {
             progressDialog.dismiss()
-            Toast.makeText(requireContext(), e.message ?: "Login failed. Incorrect password or login.", Toast.LENGTH_LONG)
+            Toast.makeText(
+                requireContext(),
+                e.message ?: "Login failed. Incorrect password or login.",
+                Toast.LENGTH_LONG
+            )
                 .show()
         }
     }
-
-
 
 
 }
