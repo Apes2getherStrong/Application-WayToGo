@@ -58,6 +58,11 @@ class RouteRepository(private val routeDao: RouteDao) {
         routeDao.deleteRoute(route)
     }
 
+    @WorkerThread
+    suspend fun deleteRouteWithMapLocations(routeUid: String) {
+        routeDao.deleteRouteWithMapLocations(routeUid)
+    }
+
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insertMapLocation(mapLocation: MapLocation) {
@@ -103,6 +108,11 @@ class RouteRepository(private val routeDao: RouteDao) {
     @WorkerThread
     suspend fun updateRouteMapLocationSequenceNrById(mapLocationId: String, newSequenceNr: Int) {
         routeDao.updateRouteMapLocationSequenceNrById(mapLocationId, newSequenceNr)
+    }
+
+    @WorkerThread
+    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation {
+        return routeDao.getRouteMapLocationByMapLocationId(mapLocationId)
     }
 
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
