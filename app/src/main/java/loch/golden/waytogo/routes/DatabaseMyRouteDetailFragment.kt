@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -21,10 +20,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+<<<<<<< Updated upstream
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
+=======
+import com.google.android.material.bottomnavigation.BottomNavigationView
+>>>>>>> Stashed changes
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.runBlocking
+import loch.golden.waytogo.R
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.classes.MapRoute
@@ -57,7 +61,6 @@ import java.util.UUID
 class DatabaseMyRouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentDatabaseMyRouteDetailBinding
-    private lateinit var mapLocationRecyclerView: MapLocationAdapter
     private val routeViewModel: RouteViewModel by viewModels {
         RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
     }
@@ -69,6 +72,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     private val mapLocationIdMap = mutableMapOf<String, String>()
     private val audioIdMap = mutableMapOf<String, String>()
     private val routeMapLocationIdMap = mutableMapOf<String, String>()
+    private var bottomNav: BottomNavigationView? = null
+    private var mapLocationAdapter: MapLocationAdapter? = null
 
     private val getContent =
         this.registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -124,7 +129,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
         binding.addRouteImage.setOnClickListener {
             getContent.launch("image/*")
         }
@@ -184,8 +189,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             (MapPoint(mapLocation, sequenceNr, requireContext()))
                     }
                 }
-                val mapLocationAdapter =
-                    MapLocationAdapter(route.pointList.values.toList().sortedBy { it.sequenceNr })
+                 mapLocationAdapter =
+                    MapLocationAdapter(route.pointList.values.toList().sortedBy { it.sequenceNr }.toMutableList())
 
                 binding.recyclerViewPoints.layoutManager = LinearLayoutManager(requireContext())
 
@@ -193,12 +198,15 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 val itemTouchHelper = ItemTouchHelper(simpleCallBack)
                 itemTouchHelper.attachToRecyclerView(binding.recyclerViewPoints)
             } else {
-                Toast.makeText(requireContext(), "Route not found", Toast.LENGTH_SHORT).show()
+
+                Snackbar.make(
+                    view,
+                    "Route not found",
+                    Snackbar.LENGTH_SHORT
+                ).setAnchorView(bottomNav).show()
             }
 
         }
-
-
 
         binding.backButton.setOnClickListener {
             changeBackFragment()
@@ -254,18 +262,18 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     private fun publishRoute() {
         if (!isUserLoggedIn()) {
-            Toast.makeText(
-                requireContext(),
+            Snackbar.make(
+                view!!,
                 "You need to log in to publish a route",
-                Toast.LENGTH_SHORT
-            ).show()
+                Snackbar.LENGTH_SHORT
+            ).setAnchorView(bottomNav).show()
         }
         if (mapLocationsOfRouteEntity.isEmpty()) {
-            Toast.makeText(
-                requireContext(),
-                "Route must have at least one point to be published",
-                Toast.LENGTH_SHORT
-            ).show()
+            Snackbar.make(
+                view!!,
+                "You need to log in to publish a route",
+                Snackbar.LENGTH_SHORT
+            ).setAnchorView(bottomNav).show()
             return
         }
 
@@ -376,6 +384,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 }
             }
             Snackbar.make(binding.root, "Route published successfully!", Snackbar.LENGTH_LONG)
+                .setAnchorView(bottomNav)
                 .show()
         }
     }
@@ -390,6 +399,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 val sortedPointList = route.pointList.values.toList().sortedBy { it.sequenceNr }
                 val startPosition = viewHolder.bindingAdapterPosition
                 val stopPosition = target.bindingAdapterPosition
+
+
                 sortedPointList[startPosition].sequenceNr = stopPosition + 1
                 sortedPointList[stopPosition].sequenceNr = startPosition + 1
 
@@ -401,10 +412,15 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     sortedPointList[stopPosition].id,
                     startPosition + 1
                 )
-
-                Collections.swap(mapLocationsOfRouteEntity, startPosition, stopPosition)
-                recyclerView.adapter?.notifyItemMoved(startPosition, stopPosition)
-                return true;
+                Collections.swap(sortedPointList, startPosition, stopPosition)
+                val updatedAdapter = MapLocationAdapter(sortedPointList.toMutableList())
+                binding.recyclerViewPoints.adapter = updatedAdapter
+                Log.d("GogoAdapter", recyclerView.adapter.toString())
+                activity?.runOnUiThread {
+                    updatedAdapter.notifyItemMoved(startPosition, stopPosition)
+                    Log.d("GogoNotified","dzicz")
+                }
+                return true
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -427,6 +443,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             }
 
         }
+
 
     private fun isUserLoggedIn(): Boolean {
         val tokenManager = TokenManager(requireContext())

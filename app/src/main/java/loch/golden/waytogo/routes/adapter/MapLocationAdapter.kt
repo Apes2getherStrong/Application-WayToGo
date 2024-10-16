@@ -2,6 +2,7 @@ package loch.golden.waytogo.routes.adapter
 
 import android.graphics.BitmapFactory
 import android.media.Image
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +14,7 @@ import loch.golden.waytogo.R
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
 
-class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
+class MapLocationAdapter(private val mapLocations: MutableList<MapPoint>) :
     RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -33,6 +34,13 @@ class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
         return mapLocations.size
     }
 
+    fun updateMapPointList(newList: List<MapPoint> ) {
+        mapLocations.clear()
+        //mapLocations.addAll(newList)
+        mapLocations.sortedBy { it.sequenceNr }
+        notifyDataSetChanged()
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val mapLocationTextView: TextView = itemView.findViewById(R.id.name_mapLocation_text_view)
         private val mapLocationDescription: TextView = itemView.findViewById(R.id.mapLocation_description_text_view)
@@ -41,6 +49,11 @@ class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
         fun bind(mapLocation: MapPoint) {
             mapLocationTextView.text = mapLocation.name
             mapLocationDescription.text = mapLocation.description
+<<<<<<< Updated upstream
+=======
+            mapLocationNumber.text = mapLocation.sequenceNr.toString()
+            Log.d("Gogo", "inbind $mapLocation")
+>>>>>>> Stashed changes
             if (mapLocation.photoPath != null) {
                 val bitmap = BitmapFactory.decodeFile(mapLocation.photoPath)
                 mapLocationImage.setImageBitmap(bitmap)
