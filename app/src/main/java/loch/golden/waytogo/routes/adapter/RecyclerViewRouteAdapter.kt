@@ -74,11 +74,13 @@ class RecyclerViewRouteAdapter(
         private val descriptionTextView: TextView =
             itemView.findViewById(R.id.description_text_view)
         private val imageView: ImageView = itemView.findViewById(R.id.image_view_route)
+        var delete: ImageView = itemView.findViewById(R.id.remove_image_view)
 
 
         fun bind(route: Route) {
             titleTextView.text = route.name
             descriptionTextView.text = route.description
+            delete.visibility = View.INVISIBLE
             val cachedImage = routeImagesMap[route.routeUid]
             if (cachedImage != null)
                 imageView.setImageBitmap(cachedImage)  // If cached, set it directly
