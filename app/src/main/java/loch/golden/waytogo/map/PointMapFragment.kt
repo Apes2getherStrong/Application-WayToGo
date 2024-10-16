@@ -225,7 +225,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     currentPolyline = newPolyline
                 } catch (e: Exception) {
                     e.printStackTrace().toString()
-                    Toast.makeText(requireContext(), "Can't navigate to point", Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -304,9 +303,14 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 currentPolyline = null
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
-                        createPolylineToPoint()
-                        seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
-                        slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                        try {
+                            createPolylineToPoint()
+                            seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
+                            slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Log.e("Warmbier", e.toString())
+                        }
                     } else
                         Log.d("Warmbier", "FINISH THE ROUTE")
                     Log.d("Warmbier", "The completion")
