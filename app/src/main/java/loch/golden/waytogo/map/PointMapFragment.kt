@@ -46,6 +46,7 @@ import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.navigation.NavigationManager
+import loch.golden.waytogo.routes.DatabaseMyRouteDetailFragment
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.utils.Constants
@@ -106,6 +107,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             mapViewModel.locationManager = LocationManager(requireContext())
             mapViewModel.locationManager!!.startLocationUpdates() //todo move this to activity
         }
+        val reset = arguments?.getBoolean("reset") ?: false
 
         initMapView(savedInstanceState)
 
@@ -127,7 +129,8 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
                 binding.bottomPanel.title.text = mapViewModel.currentPoint?.name
-                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
+                if (reset || mapViewModel.mp == null)
+                    seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
@@ -299,7 +302,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             if (distance <= Constants.AUTOPLAY_DISTANCE) {
                 currentPolyline?.remove()
                 currentPolyline = null
-                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
                         createPolylineToPoint()
@@ -403,13 +405,11 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
-        //seekbarManager.removeCallback()
         seekbarManager?.removeCallbacks()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("LifecycleAlert", "onDestroy")
         routeCreationManager?.onDestroy()
         infoWindowManager?.onDestroy()
         binding.mapView.onDestroy()

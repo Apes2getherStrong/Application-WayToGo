@@ -194,8 +194,10 @@ class RouteDetailFragment() : Fragment() {
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
         mapViewModel.updateCurrentSequenceNr(1)
-        changeFragmentListener?.changeFragment(1)
-
+        val bundle = Bundle().apply {
+            putBoolean("reset", true)
+        }
+        changeFragmentListener?.changeFragment(1, bundle)
     }
 
     private fun changeBackFragment() {
