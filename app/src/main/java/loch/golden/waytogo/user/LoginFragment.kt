@@ -143,27 +143,17 @@ class LoginFragment : Fragment() {
             progressDialog.dismiss()
             when (e.code()) {
                 404 -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Connection error",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Snackbar.make(requireView(), "Connection error", Snackbar.LENGTH_SHORT)
+                        .show()
                 }
             }
         } catch (e: IOException) {
             progressDialog.dismiss()
-            Toast.makeText(
-                requireContext(),
-                "Network error",
-                Toast.LENGTH_LONG
-            ).show()
+            Snackbar.make(requireView(), "Network error", Snackbar.LENGTH_SHORT)
+                .show()
         } catch (e: Exception) {
             progressDialog.dismiss()
-            Toast.makeText(
-                requireContext(),
-                e.message ?: "Login failed. Incorrect password or login.",
-                Toast.LENGTH_LONG
-            )
+            Snackbar.make(requireView(), e.message ?: "Login failed. Incorrect password or login.", Snackbar.LENGTH_SHORT)
                 .show()
         }
     }

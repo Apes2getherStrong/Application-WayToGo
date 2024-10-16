@@ -4,15 +4,16 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import loch.golden.waytogo.R
-import loch.golden.waytogo.classes.MapRoute
 import loch.golden.waytogo.databinding.FragmentWelcomeBinding
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
@@ -23,9 +24,8 @@ class WelcomeFragment : Fragment() {
 
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var tokenManager: TokenManager
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private var bottomNav : BottomNavigationView? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,9 +34,11 @@ class WelcomeFragment : Fragment() {
         binding = FragmentWelcomeBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        bottomNav = requireActivity().findViewById(R.id.bottom_nav)
         tokenManager = TokenManager(requireContext())
 
         val username = tokenManager.getUsername()
@@ -52,12 +54,16 @@ class WelcomeFragment : Fragment() {
         binding.welcomeText.text = "Welcome, ${username}"
         binding.usernameEditText.setText(username)
 
-        binding.saveProfileButton.setOnClickListener{
+        binding.saveProfileButton.setOnClickListener {
             Log.d("savve", "test_save")
-            Toast.makeText(requireContext(),"Successfully changed username. BTW NOT WORKING YEt.",Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Successfully changed username. BTW NOT WORKING YEt.",
+                Toast.LENGTH_LONG
+            ).show()
         }
 
-        binding.logoutButton.setOnClickListener{
+        binding.logoutButton.setOnClickListener {
             Log.d("Logout", "test_logout")
             logout()
         }
@@ -65,7 +71,11 @@ class WelcomeFragment : Fragment() {
 
     private fun logout() {
         tokenManager.clearToken()
-        Toast.makeText(requireContext(),"Logout Successful",Toast.LENGTH_LONG).show()
+        Snackbar.make(
+            requireView(),
+            "Logout successful",
+            Snackbar.LENGTH_SHORT
+        ).setAnchorView(bottomNav).show()
 
         val loginFragment = LoginFragment()
         parentFragmentManager.beginTransaction()
@@ -76,7 +86,8 @@ class WelcomeFragment : Fragment() {
     }
 
     private fun Context.hideKeyboard(view: View) {
-        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }
