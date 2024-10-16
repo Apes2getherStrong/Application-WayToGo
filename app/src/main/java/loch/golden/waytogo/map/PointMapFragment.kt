@@ -214,7 +214,12 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     currentPolyline = newPolyline
                 } catch (e: Exception) {
                     e.printStackTrace().toString()
-                    Toast.makeText(requireContext(), "Can't navigate to point", Toast.LENGTH_SHORT).show()
+                    Snackbar.make(
+                        requireView(),
+                        "Can't navigate to point",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    //Toast.makeText(requireContext(), "Can't navigate to point", Toast.LENGTH_SHORT).show()
                 }
 
             }
