@@ -6,10 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
 import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.adapter.SimpleMyRoutesAdapter
@@ -56,16 +59,33 @@ class MyRoutesFragment : Fragment() {
 
         recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener {
 
-            override fun onItemClick(position: Int, route: Route) {
-                val id = route.routeUid
-                val bundle = Bundle().apply {
-                    putString("id", id)
-                }
-                val fr = DatabaseMyRouteDetailFragment()
-                fr.arguments = bundle // Set the arguments bundle to the fragment
-                (parentFragment as? RoutesFragment)?.replaceFragment(1, fr)
-            }
+            override fun onItemClick(position: Int, route: Route, isDelete: Boolean) {
+                if (isDelete){
+                    val alertDialogBuilder = AlertDialog.Builder(requireContext())
+                    alertDialogBuilder.setTitle("Delete Route")
+                    alertDialogBuilder.setMessage("Are you sure you want to delete this route?")
+                    alertDialogBuilder.setPositiveButton("Delete") { dialog, which ->
+                        routeViewModel.deleteRouteWithMapLocations(route.routeUid)
 
+                        Snackbar.make(view!!, "Route was deleted successfully", Snackbar.LENGTH_SHORT).show()
+                    }
+
+                    alertDialogBuilder.setNegativeButton("Cancel") { dialog, which ->
+                        dialog.cancel()
+                    }
+
+                    alertDialogBuilder.show()
+
+                }else {
+                    val id = route.routeUid
+                    val bundle = Bundle().apply {
+                        putString("id", id)
+                    }
+                    val fr = DatabaseMyRouteDetailFragment()
+                    fr.arguments = bundle // Set the arguments bundle to the fragment
+                    (parentFragment as? RoutesFragment)?.replaceFragment(1, fr)
+                }
+            }
         })
 
         routeViewModel.allRoutes.observe(viewLifecycleOwner) { routes ->
