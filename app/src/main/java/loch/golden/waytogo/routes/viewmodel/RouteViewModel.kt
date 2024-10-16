@@ -109,6 +109,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.deleteRoute(route)
     }
 
+    fun deleteRouteWithMapLocations(routeUid: String) = viewModelScope.launch {
+        routeRepository.deleteRouteWithMapLocations(routeUid)
+    }
+
     fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
         viewModelScope.launch {
             routeRepository.insertMapLocation(mapLocation)
@@ -129,6 +133,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     suspend fun getSequenceNrByMapLocationId(mapLocationId: String): Int {
         return withContext(Dispatchers.IO) {
             routeRepository.getSequenceNrByMapLocationId(mapLocationId)
+        }
+    }
+
+    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation {
+        return withContext(Dispatchers.IO) {
+            routeRepository.getRouteMapLocationByMapLocationId(mapLocationId)
         }
     }
 
