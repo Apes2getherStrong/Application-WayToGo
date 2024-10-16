@@ -6,6 +6,19 @@
     android:layout_height="140dp"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:text="1"
+        android:textAlignment="center"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_view_mapLocation"
@@ -14,7 +27,7 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_route_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/number"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/RoundedCornersImage10Percent" />
 
@@ -26,9 +39,11 @@
         android:layout_marginStart="16dp"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/number"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_image_button"
         app:layout_constraintStart_toEndOf="@id/image_view_mapLocation"
         app:layout_constraintTop_toTopOf="@id/image_view_mapLocation"
+        tools:layout_editor_absoluteX="155dp"
+        tools:layout_editor_absoluteY="16dp"
         tools:text="MapLocation title" />
 
     <TextView
@@ -38,25 +53,26 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textSize="10sp"
-        app:layout_constraintEnd_toStartOf="@id/number"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_image_button"
         app:layout_constraintStart_toEndOf="@id/image_view_mapLocation"
         app:layout_constraintTop_toBottomOf="@id/name_mapLocation_text_view"
         tools:text="MapLocation Description" />
 
-    <TextView
-        android:id="@+id/number"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/drag_handle_image_button"
+        android:layout_width="46dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="104dp"
+        android:contentDescription="Drag Handle"
+        android:foregroundGravity="center"
+        android:paddingStart="4dp"
+        android:src="@drawable/ic_drag_handle_24"
         android:textAlignment="center"
-        android:gravity="center"
-        android:text="1"
-        android:textSize="54sp"
-        android:paddingStart="6dp"
-        android:paddingEnd="4dp"
-        app:layout_constraintStart_toEndOf="@id/name_mapLocation_text_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.796"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
