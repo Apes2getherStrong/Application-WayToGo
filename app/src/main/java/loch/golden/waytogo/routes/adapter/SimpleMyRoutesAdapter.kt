@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
@@ -37,10 +38,14 @@ class SimpleMyRoutesAdapter(
     override fun onBindViewHolder(holder: SimpleViewHolder, position: Int) {
         val route = routes[position]
         holder.bind(route)
-        holder.itemView.setOnClickListener {
-            if (onClickListener != null) {
-                onClickListener!!.onItemClick(position, route)
+        holder.itemView.setOnClickListener { view ->
+            when (view.id) {
+                R.id.remove_image_view -> onClickListener?.onItemClick(position, route, true)
+                else -> onClickListener?.onItemClick(position, route, false)
             }
+        }
+        holder.delete.setOnClickListener {
+            onClickListener?.onItemClick(position,route,true)
         }
     }
 
@@ -55,6 +60,7 @@ class SimpleMyRoutesAdapter(
             itemView.findViewById(R.id.description_text_view)
         private val imageView =
             itemView.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.image_view_route)
+        val delete: ImageView = itemView.findViewById(R.id.remove_image_view)
 
         fun bind(route: Route) {
             titleTextView.text = route.name
@@ -69,6 +75,7 @@ class SimpleMyRoutesAdapter(
             } else {
                 imageView.setImageResource(R.drawable.ic_route_24)  // Optional: Set a placeholder
             }
+
         }
     }
 
@@ -77,7 +84,7 @@ class SimpleMyRoutesAdapter(
     }
 
     interface OnClickListener {
-        fun onItemClick(position: Int, route: Route)
+        fun onItemClick(position: Int, route: Route, isDelete: Boolean)
     }
 
 
