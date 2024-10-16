@@ -44,6 +44,10 @@ class SeekbarManagerV2(
                 }
             }
         }
+        if (mapViewModel.mp != null) {
+            initSeekbar()
+            toggleButtons(mapViewModel.mp!!.isPlaying)
+        }
     }
 
     fun prepareAudio(audioPath: String) {
@@ -57,7 +61,6 @@ class SeekbarManagerV2(
                 seekbar.isEnabled = true
             }
             setOnCompletionListener {
-                Log.d("AudioWarmbier", "stop/release playing")
                 onCompletionListener?.invoke()
                 onCompletionListener = null
                 toggleButtons(false)
@@ -88,7 +91,7 @@ class SeekbarManagerV2(
 
     fun setCustomSeekbar(customSeekbar: View, context: Context) {
         val screenWidth = context.resources.displayMetrics.widthPixels
-        seekbarRunnable = object : Runnable {
+        val customSeekbarRunnable = object : Runnable {
             override fun run() {
                 try {
                     val currentPosition = mapViewModel.mp!!.currentPosition
@@ -107,8 +110,8 @@ class SeekbarManagerV2(
                     Log.e("Warmbier", e.toString())
                 }
             }
-
         }
+        handler.postDelayed(customSeekbarRunnable, 0)
     }
 
 
@@ -119,10 +122,13 @@ class SeekbarManagerV2(
     }
 
     fun resumeAudio() {
-        Log.d("AudioWarmbier", "resume playing")
-        mapViewModel.mp!!.start()
-        toggleButtons(true)
+        if (!mapViewModel.mp!!.isPlaying) {
+            mapViewModel.mp!!.start()
+            toggleButtons(true)
+        }
     }
+
+
 
     private fun toggleButtons(setActive: Boolean) {
         for (button in buttonList) {
@@ -134,4 +140,7 @@ class SeekbarManagerV2(
         this.onCompletionListener = listener
     }
 
+    fun removeCallbacks() {
+        handler.removeCallbacks(seekbarRunnable)
+    }
 }

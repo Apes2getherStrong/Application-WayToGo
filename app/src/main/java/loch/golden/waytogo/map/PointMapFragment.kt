@@ -404,6 +404,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
         //seekbarManager.removeCallback()
+        seekbarManager?.removeCallbacks()
     }
 
     override fun onDestroy() {
