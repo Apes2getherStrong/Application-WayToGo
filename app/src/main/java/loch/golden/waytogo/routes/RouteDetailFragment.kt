@@ -185,16 +185,7 @@ class RouteDetailFragment() : Fragment() {
 
     }
 
-    private fun clearCache() {
-        val cacheDir = requireContext().cacheDir
-        cacheDir.deleteRecursively()
-    }
-
     override fun onDestroy() {
-        if (mapViewModel.route == null) {
-            clearCache()
-            Log.d("Warmbier", "Clearing cache")
-        }
         super.onDestroy()
     }
 
@@ -203,8 +194,10 @@ class RouteDetailFragment() : Fragment() {
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
         mapViewModel.updateCurrentSequenceNr(1)
-        changeFragmentListener?.changeFragment(1)
-
+        val bundle = Bundle().apply {
+            putBoolean("reset", true)
+        }
+        changeFragmentListener?.changeFragment(1, bundle)
     }
 
     private fun changeBackFragment() {

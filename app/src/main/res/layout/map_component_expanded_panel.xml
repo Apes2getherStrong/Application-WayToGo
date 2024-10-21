@@ -78,10 +78,10 @@
             android:id="@+id/description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="64dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/normal_play_pause"
+            app:layout_constraintTop_toBottomOf="@id/image"
             app:layout_constraintWidth_percent="0.7" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -161,8 +161,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="description"
-            android:imeOptions="actionDone"
-            android:inputType=""
+            android:inputType="textMultiLine"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/record_button"

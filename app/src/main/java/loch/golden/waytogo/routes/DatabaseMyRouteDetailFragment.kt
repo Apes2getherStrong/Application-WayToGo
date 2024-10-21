@@ -436,13 +436,15 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     }
 
 
-
     private fun chooseRoute() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         Log.d("Warmbier", route.toString())
         mapViewModel.route = route
         mapViewModel.inCreationMode = true
-        changeFragmentListener?.changeFragment(1)
+        val bundle = Bundle().apply {
+            putBoolean("reset", true)
+        }
+        changeFragmentListener?.changeFragment(1, bundle)
     }
 
     private fun changeBackFragment() {

@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaRecorder
 import android.net.Uri
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -118,7 +119,8 @@ class RouteCreationManager(
                 true
             } else false
         }
-
+        binding.expandedPanel.creationDescription.setImeOptions(EditorInfo.IME_ACTION_DONE)
+        binding.expandedPanel.creationDescription.setRawInputType(InputType.TYPE_CLASS_TEXT)
         binding.expandedPanel.creationDescription.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!

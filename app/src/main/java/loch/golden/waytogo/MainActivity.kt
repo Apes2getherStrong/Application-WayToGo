@@ -181,5 +181,14 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         binding.bottomNav.setOnItemSelectedListener(this)
     }
 
+    private fun clearCache() {
+        val cacheDir = this.cacheDir
+        cacheDir.deleteRecursively()
+    }
+
+    override fun onDestroy() {
+        clearCache()
+        super.onDestroy()
+    }
 
 }

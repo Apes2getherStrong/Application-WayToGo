@@ -46,6 +46,7 @@ import loch.golden.waytogo.map.components.SlidingUpPanelManager
 import loch.golden.waytogo.map.creation.MarkerCreationFragment
 import loch.golden.waytogo.map.creation.RouteCreationManager
 import loch.golden.waytogo.map.navigation.NavigationManager
+import loch.golden.waytogo.routes.DatabaseMyRouteDetailFragment
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.utils.Constants
@@ -106,6 +107,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             mapViewModel.locationManager = LocationManager(requireContext())
             mapViewModel.locationManager!!.startLocationUpdates() //todo move this to activity
         }
+        val reset = arguments?.getBoolean("reset") ?: false
 
         initMapView(savedInstanceState)
 
@@ -120,7 +122,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             if (mapViewModel.inCreationMode) {
                 initCreation(savedInstanceState)
             } else {
-                Log.d("Warmbier", "i am getting here")
                 seekbarManager = SeekbarManagerV2(
                     mapViewModel,
                     binding.expandedPanel.seekbar,
@@ -128,6 +129,8 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 )
                 seekbarManager?.setCustomSeekbar(binding.bottomPanel.customSeekbarProgress, requireContext())
                 binding.bottomPanel.title.text = mapViewModel.currentPoint?.name
+                if (reset || mapViewModel.mp == null)
+                    seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
@@ -145,6 +148,14 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         binding.bottomPanel.buttonChooseRoute.setOnClickListener {
             parentFragmentManager.commit {
                 changeFragmentListener?.changeFragment(2)
+            }
+        }
+        binding.bottomPanel.creationReturnToEdit.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("id", mapViewModel.route?.id)
+            }
+            parentFragmentManager.commit {
+                changeFragmentListener?.changeFragment(2, bundle)
             }
         }
     }
@@ -214,7 +225,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                     currentPolyline = newPolyline
                 } catch (e: Exception) {
                     e.printStackTrace().toString()
-                    Toast.makeText(requireContext(), "Can't navigate to point", Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -291,11 +301,16 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
             if (distance <= Constants.AUTOPLAY_DISTANCE) {
                 currentPolyline?.remove()
                 currentPolyline = null
-                seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
                 seekbarManager?.setOnCompletionListener {
                     if (mapViewModel.updateCurrentSequenceNr(mapViewModel.currentSequenceNr + 1)) {
-                        createPolylineToPoint()
-                        slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                        try {
+                            createPolylineToPoint()
+                            seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
+                            slidingUpPanelManager.updateBottomPanel(mapViewModel.currentPoint)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Log.e("Warmbier", e.toString())
+                        }
                     } else
                         Log.d("Warmbier", "FINISH THE ROUTE")
                     Log.d("Warmbier", "The completion")
@@ -394,12 +409,11 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         super.onStop()
         Log.d("LifecycleAlert", "onStop")
         binding.mapView.onStop()
-        //seekbarManager.removeCallback()
+        seekbarManager?.removeCallbacks()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("LifecycleAlert", "onDestroy")
         routeCreationManager?.onDestroy()
         infoWindowManager?.onDestroy()
         binding.mapView.onDestroy()
