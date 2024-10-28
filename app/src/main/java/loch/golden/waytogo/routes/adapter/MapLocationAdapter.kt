@@ -2,6 +2,7 @@ package loch.golden.waytogo.routes.adapter
 
 import android.graphics.BitmapFactory
 import android.media.Image
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import loch.golden.waytogo.R
 import loch.golden.waytogo.classes.MapPoint
 import loch.golden.waytogo.routes.model.maplocation.MapLocation
+import java.util.Collections
 
 class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
     RecyclerView.Adapter<MapLocationAdapter.ViewHolder>() {
@@ -28,6 +30,13 @@ class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
 
     }
 
+    override fun getItemId(position: Int): Long {
+        return super.getItemId(position)
+    }
+
+    fun swapCollection(start: Int, end: Int) {
+        Collections.swap(mapLocations, start, end)
+    }
 
     override fun getItemCount(): Int {
         return mapLocations.size
@@ -46,6 +55,8 @@ class MapLocationAdapter(private val mapLocations: List<MapPoint>) :
             if (mapLocation.photoPath != null) {
                 val bitmap = BitmapFactory.decodeFile(mapLocation.photoPath)
                 mapLocationImage.setImageBitmap(bitmap)
+            } else {
+                mapLocationImage.setImageResource(R.drawable.ic_route_24)
             }
         }
 

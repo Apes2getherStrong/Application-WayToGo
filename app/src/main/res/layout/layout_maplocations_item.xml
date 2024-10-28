@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="140dp"
-    android:padding="16dp">
+    android:paddingEnd="16dp"
+    android:paddingStart="8dp">
 
     <TextView
         android:id="@+id/number"
@@ -14,6 +15,7 @@
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:text="1"
+        android:alpha="0.65"
         android:textAlignment="center"
         android:textSize="32sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,6 +26,7 @@
         android:id="@+id/image_view_mapLocation"
         android:layout_width="100dp"
         android:layout_height="86dp"
+        android:layout_marginStart="8dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_route_24"
         app:layout_constraintBottom_toBottomOf="parent"
