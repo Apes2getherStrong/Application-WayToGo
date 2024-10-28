@@ -43,8 +43,8 @@
                 android:id="@+id/save_profile_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save profile"
-                android:layout_marginEnd="16dp"/>
+                android:text="Change username"
+                android:layout_marginEnd="16dp" />
 
             <Button
                 android:id="@+id/logout_button"

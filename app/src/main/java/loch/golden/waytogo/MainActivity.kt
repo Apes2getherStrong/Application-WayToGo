@@ -1,9 +1,13 @@
 package loch.golden.waytogo
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -16,13 +20,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.snackbar.Snackbar
 import loch.golden.waytogo.databinding.ActivityMainBinding
 import loch.golden.waytogo.map.OnChangeFragmentListener
-import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.map.PointMapFragment
 import loch.golden.waytogo.routes.RoutesFragment
 import loch.golden.waytogo.routes.api.RetrofitInstance
 import loch.golden.waytogo.routes.utils.Constants
+import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.user.tokenmanager.TokenManager
 import java.io.File
 
@@ -53,6 +58,15 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             insets
         }
         initFolders()
+
+        if (!isInternetAvailable(this)) {
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                "No internet connection. Sprawdź swoje połaczenie przed korzystaniem z aplikacji.",
+                Snackbar.LENGTH_LONG
+            ).setAnchorView(binding.bottomNav)
+                .show()
+        }
 
 
     }
@@ -126,6 +140,19 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             } else {
                 handlePermissions(false)
             }
+        }
+    }
+
+    fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } else {
+            val networkInfo = connectivityManager.activeNetworkInfo
+            return networkInfo != null && networkInfo.isConnected
         }
     }
 
