@@ -14,6 +14,8 @@ import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
 import okhttp3.MultipartBody
+
+
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -61,6 +63,12 @@ interface ApiService {
     suspend fun getUserByUserId(
         @Path("userId") userId: String
     ): Response<User>
+
+    @PUT("users/{userId}")
+    suspend fun putUserByUserId(
+        @Path("userId") userId: String,
+        @Body user: User
+    ): Response<Void>
 
     @GET("mapLocations/{mapLocationId}/image")
     suspend fun getMapLocationImage(

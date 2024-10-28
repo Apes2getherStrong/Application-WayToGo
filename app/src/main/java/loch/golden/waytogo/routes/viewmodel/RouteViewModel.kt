@@ -69,6 +69,9 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     private val _putRouteMapLocationResponse = MutableLiveData<Response<Void>>()
     val putRouteMapLocationResponse: LiveData<Response<Void>> get() = _putRouteMapLocationResponse
 
+    private val _putUserResponse = MutableLiveData<Response<Void>>()
+    val putUserResponse: LiveData<Response<Void>> get() = _putUserResponse
+
 //    private val _deleteRouteResponse = MutableLiveData<Response<Route>>()
 //    val deleteRouteResponse: LiveData<Response<Route>> = _deleteRouteResponse
 //
@@ -116,11 +119,15 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
         viewModelScope.launch {
             routeRepository.insertMapLocation(mapLocation)
-            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr))
+            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr, null))
         }
 
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
+    }
+
+    fun updateRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
+        routeRepository.updateRouteMapLocation(routeMapLocation)
     }
 
     fun deleteMapLocation(mapLocation: MapLocation) =
@@ -180,6 +187,19 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             userResponse.value = response
 
         }
+    }
+
+    fun putUserByUserId(userId: String, user: User) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putUserByUserId(userId,user)
+            _putUserResponse.postValue(response)
+            if (!response.isSuccessful) {
+                Log.e("Update User", "Error: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("Update User", "Exception: ${e.message}")
+        }
+
     }
 
     fun getMapLocationsByRouteId(routeUid: String) {

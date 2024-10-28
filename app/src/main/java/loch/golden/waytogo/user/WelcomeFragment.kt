@@ -18,6 +18,7 @@ import loch.golden.waytogo.databinding.FragmentWelcomeBinding
 import loch.golden.waytogo.routes.RouteMainApplication
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
+import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.user.tokenmanager.TokenManager
 
 class WelcomeFragment : Fragment() {
@@ -25,7 +26,9 @@ class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var tokenManager: TokenManager
     private var bottomNav : BottomNavigationView? = null
-
+    private val routeViewModel: RouteViewModel by viewModels {
+        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,26 +44,39 @@ class WelcomeFragment : Fragment() {
         bottomNav = requireActivity().findViewById(R.id.bottom_nav)
         tokenManager = TokenManager(requireContext())
 
-        val username = tokenManager.getUsername()
+        val user = tokenManager.getUserData()
 
-        username?.let {
-            Log.d("Welcome", "Username found: $it")
-            welcome(it)
+        user?.let {
+            Log.d("Welcome", "Username found: $it.username")
+            welcome(user)
         }
 
     }
 
-    private fun welcome(username: String) {
-        binding.welcomeText.text = "Welcome, ${username}"
-        binding.usernameEditText.setText(username)
+    private fun welcome(user: User) {
+        binding.welcomeText.text = "Welcome, ${user.username}"
+        binding.usernameEditText.setText(user.username)
 
         binding.saveProfileButton.setOnClickListener {
-            Log.d("savve", "test_save")
-            Toast.makeText(
-                requireContext(),
-                "Successfully changed username. BTW NOT WORKING YEt.",
-                Toast.LENGTH_LONG
-            ).show()
+            val newUsername = binding.usernameEditText.text.toString()
+            tokenManager.saveUsername(newUsername)
+            val userId = tokenManager.getUserIdFromJWT()
+            if (userId != null) {
+                val updatedUser = user.copy(username = newUsername )
+                tokenManager.saveUserData(updatedUser)
+
+                routeViewModel.putUserByUserId(userId, updatedUser)
+
+                routeViewModel.putUserResponse.observe(viewLifecycleOwner) { response ->
+                    if (response.isSuccessful) {
+                        Snackbar.make(requireView(), "Username updated successfully!", Snackbar.LENGTH_LONG).setAnchorView(bottomNav).show()
+                    } else {
+                        Snackbar.make(requireView(), "Failed to update username", Snackbar.LENGTH_SHORT).setAnchorView(bottomNav).show()
+                    }
+                }
+            } else {
+                Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_LONG).show()
+            }
         }
 
         binding.logoutButton.setOnClickListener {

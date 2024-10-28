@@ -115,6 +115,11 @@ class RouteRepository(private val routeDao: RouteDao) {
         return routeDao.getRouteMapLocationByMapLocationId(mapLocationId)
     }
 
+    @WorkerThread
+    suspend fun updateRouteMapLocation(routeMapLocation: RouteMapLocation) {
+        return routeDao.updateRouteMapLocation(routeMapLocation)
+    }
+
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login", response.body().toString())
@@ -148,6 +153,10 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     suspend fun getUserByUserId(userId: String): Response<User> {
         return RetrofitInstance.apiService.getUserByUserId(userId)
+    }
+
+    suspend fun putUserByUserId(userId: String, user: User): Response<Void> {
+        return RetrofitInstance.apiService.putUserByUserId(userId, user)
     }
 
     suspend fun getMapLocationsByRouteId(routeId: String): Response<MapLocationListResponse> {
@@ -230,5 +239,7 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun deleteAudioById(audioId: String): Response<Audio> {
         return RetrofitInstance.apiService.deleteAudioById(audioId)
     }
+
+
 }
 
