@@ -109,8 +109,8 @@ class SlidingUpPanelManager(
         if (inCreationMode)
             return
         else {
-            openNormalPanel(mapViewModel.currentPoint)
-            //            binding.slideUpPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            if (mapViewModel.route != null)
+                openNormalPanel(mapViewModel.currentPoint)
         }
 
     }
