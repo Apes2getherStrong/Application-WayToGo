@@ -619,6 +619,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     sortedPointList[stopPosition].id,
                     startPosition + 1
                 )
+                (recyclerView.adapter as? MapLocationAdapter)?.swapCollection(startPosition, stopPosition)
 
                 Collections.swap(mapLocationsOfRouteEntity, startPosition, stopPosition)
                 recyclerView.adapter?.notifyItemMoved(startPosition, stopPosition)
@@ -641,6 +642,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 viewHolder: RecyclerView.ViewHolder
             ) {
                 super.clearView(recyclerView, viewHolder)
+                recyclerView.adapter?.notifyDataSetChanged()
                 viewHolder.itemView.alpha = 1.0f
             }
 
