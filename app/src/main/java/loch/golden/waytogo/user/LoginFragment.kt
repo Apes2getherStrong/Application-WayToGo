@@ -75,17 +75,14 @@ class LoginFragment : Fragment() {
             authResponse?.let {
                 progressDialog.dismiss()
                 tokenManager.saveToken(it.token)
-                var username: String? = null;
                 val userId = tokenManager.getUserIdFromJWT()
                 userId?.let { it1 -> routeViewModel.getUserByUserId(it1) }
                 routeViewModel.userResponse.observe(viewLifecycleOwner) { response ->
                     if (response.isSuccessful) {
-                        username = response.body()!!.username;
+                        val user = response.body()!!
+                        tokenManager.saveUserData(user)
                     }
-                    username?.let { it1 ->
-                        tokenManager.saveUsername(it1)
-                        Log.d("save_Username", "username $it1")
-                    }
+
                     Snackbar.make(requireView(), "Login Successful", Snackbar.LENGTH_SHORT)
                         .setAnchorView(bottomNav).show()
                     navigateToWelcomeFragment()
