@@ -1,25 +1,22 @@
 package loch.golden.waytogo.routes
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
-import loch.golden.waytogo.routes.adapter.RecyclerViewRouteAdapter
 import loch.golden.waytogo.routes.adapter.SimpleMyRoutesAdapter
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
-import java.io.File
 
 class MyRoutesFragment : Fragment() {
 
@@ -29,6 +26,7 @@ class MyRoutesFragment : Fragment() {
     }
     private lateinit var recyclerViewRouteAdapter: SimpleMyRoutesAdapter
     private var allRoutes: List<Route> = emptyList()
+    private var bottomNav: BottomNavigationView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +43,7 @@ class MyRoutesFragment : Fragment() {
         binding.addRouteFab.setOnClickListener() {
             (parentFragment as? RoutesFragment)?.replaceFragment(1, DatabaseMyRouteDetailFragment())
         }
+        bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
 
         initSearchView()
         initRecyclerView()
@@ -60,14 +59,15 @@ class MyRoutesFragment : Fragment() {
         recyclerViewRouteAdapter.setOnClickListener(object : SimpleMyRoutesAdapter.OnClickListener {
 
             override fun onItemClick(position: Int, route: Route, isDelete: Boolean) {
-                if (isDelete){
+                if (isDelete) {
                     val alertDialogBuilder = AlertDialog.Builder(requireContext())
                     alertDialogBuilder.setTitle("Delete Route")
                     alertDialogBuilder.setMessage("Are you sure you want to delete this route?")
                     alertDialogBuilder.setPositiveButton("Delete") { dialog, which ->
                         routeViewModel.deleteRouteWithMapLocations(route.routeUid)
 
-                        Snackbar.make(view!!, "Route was deleted successfully", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(view!!, "Route deleted successfully", Snackbar.LENGTH_SHORT)
+                            .setAnchorView(bottomNav).show()
                     }
 
                     alertDialogBuilder.setNegativeButton("Cancel") { dialog, which ->
@@ -76,7 +76,7 @@ class MyRoutesFragment : Fragment() {
 
                     alertDialogBuilder.show()
 
-                }else {
+                } else {
                     val id = route.routeUid
                     val bundle = Bundle().apply {
                         putString("id", id)
