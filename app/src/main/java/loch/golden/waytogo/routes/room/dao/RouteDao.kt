@@ -97,6 +97,12 @@ interface RouteDao {
     @Query("SELECT * FROM route_map_location WHERE id = :mapLocationId")
     suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation
 
+    @Update
+    suspend fun updateRouteMapLocation(routeMapLocation: RouteMapLocation)
+
+    @Query("UPDATE route_map_location SET externalId = :externalId WHERE route_uid = :routeUid AND id = :id")
+    suspend fun updateExternalId(routeUid: String, id: String, externalId: String)
+
 //    @Transaction
 //    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
 //

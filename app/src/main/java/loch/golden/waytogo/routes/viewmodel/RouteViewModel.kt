@@ -130,6 +130,11 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.updateRouteMapLocation(routeMapLocation)
     }
 
+    fun updateExternalId(routeUid: String, id: String, externalId: String) = viewModelScope.launch {
+        Log.d("Gogo","repoweszlo")
+        routeRepository.updateExternalId(routeUid,id,externalId)
+    }
+
     fun deleteMapLocation(mapLocation: MapLocation) =
         viewModelScope.launch {
             routeRepository.deleteMapLocation(mapLocation)

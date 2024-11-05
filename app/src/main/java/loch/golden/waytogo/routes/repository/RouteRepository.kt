@@ -120,6 +120,12 @@ class RouteRepository(private val routeDao: RouteDao) {
         return routeDao.updateRouteMapLocation(routeMapLocation)
     }
 
+    @WorkerThread
+    suspend fun updateExternalId(routeUid: String, id: String, externalId: String) {
+        Log.d("Gogo","DaoWeszlo")
+        return routeDao.updateExternalId(routeUid,id,externalId)
+    }
+
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login", response.body().toString())
