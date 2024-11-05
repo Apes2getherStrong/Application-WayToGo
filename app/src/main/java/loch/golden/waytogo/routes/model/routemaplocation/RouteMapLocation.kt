@@ -2,6 +2,7 @@ package loch.golden.waytogo.routes.model.routemaplocation
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import com.google.gson.annotations.Expose
 
 @Entity(
     tableName = "route_map_location",
@@ -11,5 +12,6 @@ data class RouteMapLocation(
     @ColumnInfo("route_uid")
     val routeUid: String,
     val id: String,
-    val sequenceNr: Int
+    val sequenceNr: Int,
+    @Expose(serialize = false, deserialize = true) var externalId: String?
 )

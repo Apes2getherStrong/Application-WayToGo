@@ -1,7 +1,9 @@
 package loch.golden.waytogo.routes.model.maplocation
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.Expose
 import loch.golden.waytogo.classes.MapPoint
 
 @Entity(tableName = "map_location_table")
@@ -11,7 +13,8 @@ data class MapLocation(
     val name: String,
     val description: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    @Expose(serialize = false, deserialize = true) var externalId: String?
 //    val createdDate: Any?,
 //    val updateDate: Any?
 ){
@@ -21,6 +24,7 @@ data class MapLocation(
         mapPoint.description!!,
         mapPoint.position.latitude,
         mapPoint.position.longitude,
+        null
     )
 
     constructor(mapLocationRequest: MapLocationRequest) :this(
@@ -28,6 +32,7 @@ data class MapLocation(
         mapLocationRequest.name,
         mapLocationRequest.description,
         mapLocationRequest.coordinates.coordinates[0],
-        mapLocationRequest.coordinates.coordinates[1]
+        mapLocationRequest.coordinates.coordinates[1],
+        null
     )
 }
