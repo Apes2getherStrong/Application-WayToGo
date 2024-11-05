@@ -99,6 +99,18 @@
             app:layout_constraintTop_toBottomOf="@id/recycler_view_points"
             app:layout_constraintWidth_percent="0.40" />
 
+        <Button
+            android:id="@+id/delete_published_route"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:text="Delete published route"
+            app:layout_constraintTop_toBottomOf="@id/choose_route"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.60" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
