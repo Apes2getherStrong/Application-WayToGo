@@ -41,6 +41,7 @@
 
             <Button
                 android:id="@+id/save_profile_button"
+                style="@style/Widget.Material3.Button.ElevatedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Change username"
@@ -48,6 +49,7 @@
 
             <Button
                 android:id="@+id/logout_button"
+                style="@style/Widget.Material3.Button.ElevatedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Logout" />
