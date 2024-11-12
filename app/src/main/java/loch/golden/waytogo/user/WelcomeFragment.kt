@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -51,6 +52,14 @@ class WelcomeFragment : Fragment() {
             welcome(user)
         }
 
+        binding.usernameEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.usernameEditText.clearFocus()
+                this.requireContext().hideKeyboard(binding.usernameEditText)
+                true
+            } else false
+        }
+
     }
 
     private fun welcome(user: User) {
@@ -59,6 +68,7 @@ class WelcomeFragment : Fragment() {
 
         binding.saveProfileButton.setOnClickListener {
             val newUsername = binding.usernameEditText.text.toString()
+            binding.welcomeText.text = "Welcome, ${newUsername}"
             tokenManager.saveUsername(newUsername)
             val userId = tokenManager.getUserIdFromJWT()
             if (userId != null) {
