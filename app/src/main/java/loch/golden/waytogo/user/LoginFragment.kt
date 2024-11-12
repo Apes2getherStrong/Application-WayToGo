@@ -63,7 +63,8 @@ class LoginFragment : Fragment() {
             val authRequest = AuthRequest(username, password)
 
             login(authRequest)
-
+            this.requireContext().hideKeyboard(binding.username)
+            this.requireContext().hideKeyboard(binding.password)
         }
 
         binding.registerText.setOnClickListener {

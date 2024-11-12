@@ -54,6 +54,9 @@ class RegisterFragment : Fragment() {
             if (validateRegister(user)) {
                 register(user)
             }
+            this.requireContext().hideKeyboard(binding.login)
+            this.requireContext().hideKeyboard(binding.username)
+            this.requireContext().hideKeyboard(binding.password)
         }
         routeViewModel.registerResponse.observe(viewLifecycleOwner) { registerResponse ->
             registerResponse?.let {

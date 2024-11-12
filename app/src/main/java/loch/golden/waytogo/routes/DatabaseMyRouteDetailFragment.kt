@@ -572,6 +572,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     audioRequest
                 )
                 routeViewModel.postAudioFile(UUID.randomUUID().toString(), audioMultiPartBody)
+
             }
 
             val imageFile = File(
