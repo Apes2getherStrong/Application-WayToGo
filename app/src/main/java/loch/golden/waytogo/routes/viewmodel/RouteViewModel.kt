@@ -94,6 +94,18 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 //            routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
 //        }
 
+    fun putAudioById(audioId: String, audio: Audio) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putAudioById(audioId, audio)
+            _putAudioResponse.postValue(response)
+            if (!response.isSuccessful) {
+                Log.e("Update User", "Error: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("Update User", "Exception: ${e.message}")
+        }
+    }
+
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
             routeFromDb.value = routeRepository.getRouteFromDbById(routeUid)
