@@ -156,15 +156,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             if (routeWithLocationsFromDb != null) {
                 routeEntity = routeWithLocationsFromDb.route
 
-                if(routeEntity.externalId != null) {
-                    binding.publishRouteButton.text = "Update Published Route"
-                    binding.deletePublishedRoute.visibility = View.VISIBLE
-
-                }else {
-                    binding.publishRouteButton.text = "Publish Route"
-                    binding.deletePublishedRoute.visibility = View.GONE
-
-                }
+                updateButtons()
 
                 val outputFile = File(
                     requireContext().filesDir,
@@ -257,6 +249,18 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     }
 
+    private fun updateButtons() {
+        if(routeEntity.externalId != null) {
+            binding.publishRouteButton.text = "Update Published Route"
+            binding.deletePublishedRoute.visibility = View.VISIBLE
+
+        }else {
+            binding.publishRouteButton.text = "Publish Route"
+            binding.deletePublishedRoute.visibility = View.GONE
+
+        }
+    }
+
     private fun Context.hideKeyboard(view: View) {
         val inputMethodManager =
             getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -275,38 +279,53 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     }
 
     private fun deletePublishedRoute() {
-
         lifecycleScope.launch {
             try {
                 mapLocationsOfRouteEntity.forEach { mapLocation ->
-
-                    routeViewModel.deleteMapLocationById(mapLocation.externalId!!,
-                        onSuccess = { Log.d("DeleteMapLocation", "MapLocation deleted: ${mapLocation.externalId}") },
+                    routeViewModel.deleteMapLocationById(
+                        mapLocation.externalId ?: "",
+                        onSuccess = {
+                            Log.d("DeleteMapLocation", "MapLocation deleted: ${mapLocation.externalId}")
+                        },
                         onFailure = { error -> Log.e("DeleteMapLocation", error) }
                     )
+
                     val routeMapLocation = routeViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
-                    routeViewModel.deleteRouteMapLocationByIdApi(routeMapLocation.externalId ?: "",
-                        onSuccess = { Log.d("DeleteRouteMapLocation", "RouteMapLocation deleted: ${routeMapLocation.externalId}") },
+                    routeViewModel.deleteRouteMapLocationByIdApi(
+                        routeMapLocation.externalId ?: "",
+                        onSuccess = {
+                            Log.d("DeleteRouteMapLocation", "RouteMapLocation deleted: ${routeMapLocation.externalId}")
+                        },
                         onFailure = { error -> Log.e("DeleteRouteMapLocation", error) }
                     )
                 }
 
-                routeViewModel.deleteRouteById(routeEntity.externalId!!,
-                    onSuccess = {
-                        Snackbar.make(binding.root, "Route deleted successfully!", Snackbar.LENGTH_LONG)
-                            .setAnchorView(bottomNav)
-                            .show()
-                        Log.d("DeleteRoute", "Route deleted: ${routeEntity.externalId!!}")
-                    },
-                    onFailure = { error -> Log.e("DeleteRoute", error) }
-                )
+                val result = routeViewModel.deleteRouteById(routeEntity.externalId!!)
+                if (result.isSuccess) {
+                    Log.d("DeleteRoute", "Route deleted: ${routeEntity.externalId}")
 
+                    routeEntity.externalId = null
+                    routeViewModel.updateRouteExternalId(routeEntity.routeUid, routeEntity.externalId)
+
+                    updateButtons()
+
+                    Snackbar.make(binding.root, "Route deleted successfully!", Snackbar.LENGTH_LONG)
+                        .setAnchorView(bottomNav)
+                        .show()
+                } else {
+                    Log.e("DeleteRoute", "Failed to delete route: ${result.exceptionOrNull()?.message}")
+                    Snackbar.make(binding.root, "Failed to delete route!", Snackbar.LENGTH_LONG)
+                        .setAnchorView(bottomNav)
+                        .show()
+                }
             } catch (e: Exception) {
                 Log.e("DeleteCompleteRoute", "Error while deleting route: ${e.message}")
             }
         }
 
+
     }
+
 
     private fun publishRoute() {
         bottomNav =  requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
