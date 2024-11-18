@@ -80,6 +80,32 @@ interface RouteDao {
     @Query("UPDATE route_map_location SET sequenceNr = :newSequenceNr WHERE id = :mapLocationId")
     suspend fun updateRouteMapLocationSequenceNrById(mapLocationId: String, newSequenceNr: Int)
 
+    @Transaction
+    suspend fun deleteRouteWithMapLocations(routeUid: String) {
+        val routeWithMapLocations = getRouteWithMapLocations(routeUid)
+
+        routeWithMapLocations.mapLocations.forEach { mapLocation ->
+            val routeMapLocation = getRouteMapLocationByMapLocationId(mapLocation.id)
+            deleteRouteMapLocation(routeMapLocation)
+
+            deleteMapLocation(mapLocation)
+        }
+
+        deleteRoute(routeWithMapLocations.route)
+    }
+
+    @Query("SELECT * FROM route_map_location WHERE id = :mapLocationId")
+    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation
+
+    @Update
+    suspend fun updateRouteMapLocation(routeMapLocation: RouteMapLocation)
+
+    @Query("UPDATE route_map_location SET externalId = :externalId WHERE route_uid = :routeUid AND id = :id")
+    suspend fun updateExternalIdRouteMapLocation(routeUid: String, id: String, externalId: String)
+
+    @Query("UPDATE route_table SET externalId = :externalId WHERE route_uid = :routeUid")
+    suspend fun updateRouteExternalId(routeUid: String, externalId: String?)
+
 //    @Transaction
 //    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
 //

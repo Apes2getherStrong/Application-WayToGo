@@ -1,5 +1,6 @@
 package loch.golden.waytogo.routes
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,6 +17,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.selects.select
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRoutesBinding
+import loch.golden.waytogo.map.OnChangeFragmentListener
 import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.user.tokenmanager.TokenManager
 import okhttp3.internal.notifyAll
@@ -26,6 +28,7 @@ class RoutesFragment : Fragment() {
     private lateinit var binding: FragmentRoutesBinding
     private lateinit var pagerAdapter: RoutesViewPagerAdapter
     private lateinit var tokenManager: TokenManager
+    private var changeFragmentListener: OnChangeFragmentListener? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,6 +36,15 @@ class RoutesFragment : Fragment() {
     ): View {
         binding = FragmentRoutesBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnChangeFragmentListener) {
+            changeFragmentListener = context
+        } else {
+            throw RuntimeException("$context must implement OnNavigateToMapListener")
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,6 +90,7 @@ class RoutesFragment : Fragment() {
                 .setAnchorView(bottomNav)
                 .show()
         }
+
     }
 
     private fun isUserAuthenticatedAndTokenValid(): Boolean {
@@ -86,9 +99,7 @@ class RoutesFragment : Fragment() {
     }
 
     private fun navigateToLogin() {
-        val fragmentTransaction  = requireActivity().supportFragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.fragment_container_main, LoginFragment())
-        fragmentTransaction.commit()
+        changeFragmentListener?.changeFragment(3)
     }
 
     fun replaceFragment(position: Int, fragment: Fragment) {

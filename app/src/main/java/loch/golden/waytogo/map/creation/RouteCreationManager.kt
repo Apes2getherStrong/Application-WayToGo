@@ -172,7 +172,8 @@ class RouteCreationManager(
             marker.title!!,
             "",
             marker.position.latitude,
-            marker.position.longitude
+            marker.position.longitude,
+            null
         )
         val sequenceNr = mapViewModel.route!!.pointList.size + 1
         routeViewModel.insertMapLocation(mapLocation, routeId, sequenceNr)
@@ -196,7 +197,8 @@ class RouteCreationManager(
                         marker.title!!,
                         "",
                         marker.position.latitude,
-                        marker.position.longitude
+                        marker.position.longitude,
+                        null
                     )
                 )
                 mapViewModel.route?.pointList?.remove(markerId)

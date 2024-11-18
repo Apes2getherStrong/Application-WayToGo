@@ -2,21 +2,24 @@ package loch.golden.waytogo.routes.api
 
 import loch.golden.waytogo.audio.Audio
 import loch.golden.waytogo.audio.AudioListResponse
+import loch.golden.waytogo.routes.model.maplocation.MapLocation
 import loch.golden.waytogo.routes.model.maplocation.MapLocationListResponse
 import loch.golden.waytogo.routes.model.maplocation.MapLocationRequest
 import loch.golden.waytogo.routes.model.route.Route
 import loch.golden.waytogo.routes.model.route.RouteListResponse
+import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.routes.utils.Constants
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.user.model.auth.AuthRequest
 import loch.golden.waytogo.user.model.auth.AuthResponse
 import okhttp3.MultipartBody
-import okhttp3.Request
-import okhttp3.RequestBody
+
+
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -61,6 +64,12 @@ interface ApiService {
         @Path("userId") userId: String
     ): Response<User>
 
+    @PUT("users/{userId}")
+    suspend fun putUserByUserId(
+        @Path("userId") userId: String,
+        @Body user: User
+    ): Response<Void>
+
     @GET("mapLocations/{mapLocationId}/image")
     suspend fun getMapLocationImage(
         @Path("mapLocationId") mapLocationId: String
@@ -88,7 +97,7 @@ interface ApiService {
 
     @PUT("routes/{routeId}")
     suspend fun putRouteById(
-        @Path("routeId")routeId: String,
+        @Path("routeId") routeId: String,
         @Body route: Route
     ): Response<Void>
 
@@ -99,9 +108,9 @@ interface ApiService {
 
     @PUT("mapLocations/{mapLocationId}")
     suspend fun putMapLocationById(
-        @Path("mapLocationId")mapLocationId: String,
-        @Body mapLocation:MapLocationRequest
-    ):Response <Void>
+        @Path("mapLocationId") mapLocationId: String,
+        @Body mapLocation: MapLocationRequest
+    ): Response<Void>
 
     @POST("routeMapLocations")
     suspend fun postRouteMapLocation(
@@ -110,7 +119,7 @@ interface ApiService {
 
     @PUT("routeMapLocations/{routeMapLocationId}")
     suspend fun putRouteMapLocationById(
-        @Path("routeMapLocationId")routeMapLocationId: String,
+        @Path("routeMapLocationId") routeMapLocationId: String,
         @Body routeMapLocation: RouteMapLocationRequest
     ): Response<Void>
 
@@ -120,7 +129,8 @@ interface ApiService {
     @PUT("audios/{audioId}")
     suspend fun putAudioById(
         @Path("audioId") audioId: String,
-        @Body audio: Audio): Response<Void>
+        @Body audio: Audio
+    ): Response<Void>
 
     @Multipart
     @POST("audios/{audioId}/audio")
@@ -142,4 +152,24 @@ interface ApiService {
         @Path("routeId") routeId: String,
         @Part imageFile: MultipartBody.Part
     )
+
+    @DELETE("routes/{routeId}")
+    suspend fun deleteRouteById(
+        @Path("routeId") routeId: String
+    ): Response<Route>
+
+    @DELETE("mapLocations/{mapLocationId}")
+    suspend fun deleteMapLocationById(
+        @Path("mapLocationId") mapLocationId: String
+    ): Response<MapLocation>
+
+    @DELETE("routeMapLocations/{routeMapLocationId}")
+    suspend fun deleteRouteMapLocationByIdApi(
+        @Path("routeMapLocationId") routeMapLocationId: String
+    ) : Response<RouteMapLocation>
+
+    @DELETE("audios/{audioId}")
+    suspend fun deleteAudioById(
+        @Path("audioId") audioId: String
+    ): Response<Audio>
 }

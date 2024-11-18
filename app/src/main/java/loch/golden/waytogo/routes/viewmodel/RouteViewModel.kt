@@ -69,6 +69,21 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     private val _putRouteMapLocationResponse = MutableLiveData<Response<Void>>()
     val putRouteMapLocationResponse: LiveData<Response<Void>> get() = _putRouteMapLocationResponse
 
+    private val _putUserResponse = MutableLiveData<Response<Void>>()
+    val putUserResponse: LiveData<Response<Void>> get() = _putUserResponse
+
+//    private val _deleteRouteResponse = MutableLiveData<Response<Route>>()
+//    val deleteRouteResponse: LiveData<Response<Route>> = _deleteRouteResponse
+//
+//    private val _deleteMapLocationResponse= MutableLiveData<Response<MapLocation>>()
+//    val deleteMapLocationResponse: LiveData<Response<MapLocation>> = _deleteMapLocationResponse
+//
+//    private val _deleteRouteMapLocationResponse = MutableLiveData<Response<RouteMapLocation>>()
+//    val deleteRouteMapLocationResponse: LiveData<Response<RouteMapLocation>> = _deleteRouteMapLocationResponse
+//
+//    private val _deleteAudioResponse = MutableLiveData<Response<Audio>>()
+//    val deleteAudioResponse: LiveData<Response<Audio>> = _deleteAudioResponse
+
 //    fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) =
 //        viewModelScope.launch {
 //            routeRepository.insertRouteWithMapLocations(routeWithMapLocations)
@@ -78,6 +93,18 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
 //        viewModelScope.launch {
 //            routeRepository.deleteRouteWithMapLocations(routeWithMapLocations)
 //        }
+
+    fun putAudioById(audioId: String, audio: Audio) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putAudioById(audioId, audio)
+            _putAudioResponse.postValue(response)
+            if (!response.isSuccessful) {
+                Log.e("Update User", "Error: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("Update User", "Exception: ${e.message}")
+        }
+    }
 
     fun getRouteFromDbById(routeUid: String) {
         viewModelScope.launch {
@@ -97,14 +124,31 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.deleteRoute(route)
     }
 
+    fun deleteRouteWithMapLocations(routeUid: String) = viewModelScope.launch {
+        routeRepository.deleteRouteWithMapLocations(routeUid)
+    }
+
     fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
         viewModelScope.launch {
             routeRepository.insertMapLocation(mapLocation)
-            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr))
+            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr, null))
         }
 
     fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
         routeRepository.updateMapLocation(mapLocation)
+    }
+
+    fun updateRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
+        routeRepository.updateRouteMapLocation(routeMapLocation)
+    }
+
+    fun updateExternalId(routeUid: String, id: String, externalId: String) = viewModelScope.launch {
+        Log.d("Gogo","repoweszlo")
+        routeRepository.updateExternalId(routeUid,id,externalId)
+    }
+
+    fun updateRouteExternalId(routeUid: String, externalId: String?) = viewModelScope.launch {
+        routeRepository.updateRouteExternalId(routeUid,externalId)
     }
 
     fun deleteMapLocation(mapLocation: MapLocation) =
@@ -117,6 +161,12 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
     suspend fun getSequenceNrByMapLocationId(mapLocationId: String): Int {
         return withContext(Dispatchers.IO) {
             routeRepository.getSequenceNrByMapLocationId(mapLocationId)
+        }
+    }
+
+    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation {
+        return withContext(Dispatchers.IO) {
+            routeRepository.getRouteMapLocationByMapLocationId(mapLocationId)
         }
     }
 
@@ -158,6 +208,19 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             userResponse.value = response
 
         }
+    }
+
+    fun putUserByUserId(userId: String, user: User) = viewModelScope.launch {
+        try {
+            val response = routeRepository.putUserByUserId(userId,user)
+            _putUserResponse.postValue(response)
+            if (!response.isSuccessful) {
+                Log.e("Update User", "Error: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("Update User", "Exception: ${e.message}")
+        }
+
     }
 
     fun getMapLocationsByRouteId(routeUid: String) {
@@ -352,5 +415,64 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
             }
         }
     }
+
+    suspend fun deleteRouteById(routeId: String): Result<Unit> {
+        return try {
+            val response: Response<Route> = routeRepository.deleteRouteById(routeId)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Delete failed, response code: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun deleteMapLocationById(mapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<MapLocation> = routeRepository.deleteMapLocationById(mapLocationId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun deleteRouteMapLocationByIdApi(routeMapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<RouteMapLocation> = routeRepository.deleteRouteMapLocationByIdApi(routeMapLocationId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun deleteAudioById(audioId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response: Response<Audio> = routeRepository.deleteAudioById(audioId)
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure("Delete failed, response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error")
+            }
+        }
+    }
+
 
 }

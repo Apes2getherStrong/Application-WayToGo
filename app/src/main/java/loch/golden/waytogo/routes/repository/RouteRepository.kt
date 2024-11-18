@@ -19,9 +19,7 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
 import retrofit2.Response
-import java.io.IOException
 
 class RouteRepository(private val routeDao: RouteDao) {
 
@@ -56,6 +54,11 @@ class RouteRepository(private val routeDao: RouteDao) {
     @WorkerThread
     suspend fun deleteRoute(route: Route) {
         routeDao.deleteRoute(route)
+    }
+
+    @WorkerThread
+    suspend fun deleteRouteWithMapLocations(routeUid: String) {
+        routeDao.deleteRouteWithMapLocations(routeUid)
     }
 
     @Suppress("RedundantSuspendModifier")
@@ -105,6 +108,27 @@ class RouteRepository(private val routeDao: RouteDao) {
         routeDao.updateRouteMapLocationSequenceNrById(mapLocationId, newSequenceNr)
     }
 
+    @WorkerThread
+    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation {
+        return routeDao.getRouteMapLocationByMapLocationId(mapLocationId)
+    }
+
+    @WorkerThread
+    suspend fun updateRouteMapLocation(routeMapLocation: RouteMapLocation) {
+        return routeDao.updateRouteMapLocation(routeMapLocation)
+    }
+
+    @WorkerThread
+    suspend fun updateExternalId(routeUid: String, id: String, externalId: String) {
+        Log.d("Gogo","DaoWeszlo")
+        return routeDao.updateExternalIdRouteMapLocation(routeUid,id,externalId)
+    }
+
+    @WorkerThread
+    suspend fun updateRouteExternalId(routeUid: String, externalId: String?) {
+        return routeDao.updateRouteExternalId(routeUid,externalId)
+    }
+
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
         val response = RetrofitInstance.apiService.login(authRequest)
         Log.d("Login", response.body().toString())
@@ -138,6 +162,10 @@ class RouteRepository(private val routeDao: RouteDao) {
 
     suspend fun getUserByUserId(userId: String): Response<User> {
         return RetrofitInstance.apiService.getUserByUserId(userId)
+    }
+
+    suspend fun putUserByUserId(userId: String, user: User): Response<Void> {
+        return RetrofitInstance.apiService.putUserByUserId(userId, user)
     }
 
     suspend fun getMapLocationsByRouteId(routeId: String): Response<MapLocationListResponse> {
@@ -204,5 +232,23 @@ class RouteRepository(private val routeDao: RouteDao) {
     suspend fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
         return RetrofitInstance.apiService.putImageToRoute(routeId, imageFile)
     }
+
+    suspend fun deleteRouteById(routeId: String): Response<Route> {
+        return RetrofitInstance.apiService.deleteRouteById(routeId)
+    }
+
+    suspend fun deleteMapLocationById(mapLocationId: String): Response<MapLocation> {
+        return RetrofitInstance.apiService.deleteMapLocationById(mapLocationId)
+    }
+
+    suspend fun deleteRouteMapLocationByIdApi(routeMapLocationId: String): Response<RouteMapLocation> {
+        return RetrofitInstance.apiService.deleteRouteMapLocationByIdApi(routeMapLocationId)
+    }
+
+    suspend fun deleteAudioById(audioId: String): Response<Audio> {
+        return RetrofitInstance.apiService.deleteAudioById(audioId)
+    }
+
+
 }
 

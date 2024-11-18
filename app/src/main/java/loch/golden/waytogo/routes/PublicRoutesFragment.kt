@@ -33,6 +33,7 @@ import loch.golden.waytogo.routes.viewmodel.RouteViewModel
 import loch.golden.waytogo.routes.viewmodel.RouteViewModelFactory
 import loch.golden.waytogo.user.LoginFragment
 import loch.golden.waytogo.user.tokenmanager.TokenManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 
 class PublicRoutesFragment : Fragment() {
@@ -75,6 +76,10 @@ class PublicRoutesFragment : Fragment() {
         binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
         binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            refreshData()
+        }
+
         recyclerViewRouteAdapter.setOnClickListener(object :
             RecyclerViewRouteAdapter.OnClickListener {
             override fun onItemClick(position: Int, route: Route) {
@@ -88,6 +93,27 @@ class PublicRoutesFragment : Fragment() {
             }
         })
 
+    }
+
+    private fun refreshData() {
+        binding.swipeRefreshLayout.isRefreshing = true
+
+        lifecycleScope.launch {
+            try {
+                viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                    recyclerViewRouteAdapter.submitData(pagingData)
+                }
+            } catch (e: Exception) {
+                Log.e("RefreshData", "Error refreshing data: ${e.message}")
+                //Toast.makeText(context, "Failed to refresh data", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
+        }
+
+        binding.swipeRefreshLayout.postDelayed({
+            binding.swipeRefreshLayout.isRefreshing = false
+        }, 2000)
     }
 
     private fun initViewModel() {
