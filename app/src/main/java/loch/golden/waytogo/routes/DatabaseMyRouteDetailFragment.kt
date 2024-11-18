@@ -144,7 +144,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             })
 
         val routeId = arguments?.getString("id") ?: run {
-            val route = Route(UUID.randomUUID().toString(), "My Route", "",null)
+            val route = Route(UUID.randomUUID().toString(), "My Route", "", null)
             routeViewModel.insert(route)
             route.routeUid
         }
@@ -291,23 +291,33 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     )
 
                     val routeMapLocation = routeViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
-                    routeViewModel.deleteRouteMapLocationByIdApi(routeMapLocation.externalId ?: "",
-                        onSuccess = { Log.d("DeleteRouteMapLocation", "RouteMapLocation deleted: ${routeMapLocation.externalId}") },
+                    routeViewModel.deleteRouteMapLocationByIdApi(
+                        routeMapLocation.externalId ?: "",
+                        onSuccess = {
+                            Log.d("DeleteRouteMapLocation", "RouteMapLocation deleted: ${routeMapLocation.externalId}")
+                        },
                         onFailure = { error -> Log.e("DeleteRouteMapLocation", error) }
                     )
                 }
 
-                routeViewModel.deleteRouteById(routeEntity.externalId!!,
-                    onSuccess = {
-                        Snackbar.make(binding.root, "Route deleted successfully!", Snackbar.LENGTH_LONG)
-                        Snackbar.make(binding.root, "Route unpublished successfully!", Snackbar.LENGTH_LONG)
-                            .setAnchorView(bottomNav)
-                            .show()
-                        Log.d("DeleteRoute", "Route deleted: ${routeEntity.externalId!!}")
-                    },
-                    onFailure = { error -> Log.e("DeleteRoute", error) }
-                )
+                val result = routeViewModel.deleteRouteById(routeEntity.externalId!!)
+                if (result.isSuccess) {
+                    Log.d("DeleteRoute", "Route deleted: ${routeEntity.externalId}")
 
+                    routeEntity.externalId = null
+                    routeViewModel.updateRouteExternalId(routeEntity.routeUid, routeEntity.externalId)
+
+                    updateButtons()
+
+                    Snackbar.make(binding.root, "Route deleted successfully!", Snackbar.LENGTH_LONG)
+                        .setAnchorView(bottomNav)
+                        .show()
+                } else {
+                    Log.e("DeleteRoute", "Failed to delete route: ${result.exceptionOrNull()?.message}")
+                    Snackbar.make(binding.root, "Failed to delete route!", Snackbar.LENGTH_LONG)
+                        .setAnchorView(bottomNav)
+                        .show()
+                }
             } catch (e: Exception) {
                 Log.e("DeleteCompleteRoute", "Error while deleting route: ${e.message}")
             }
@@ -318,7 +328,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
 
     private fun publishRoute() {
-        bottomNav =  requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
         if (!isUserLoggedIn()) {
             Snackbar.make(binding.root, "You need to log in to publish a route", Snackbar.LENGTH_LONG)
                 .setAnchorView(bottomNav)
@@ -330,7 +340,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 .show()
             return
         }
-        if(routeEntity.externalId == null){
+        if (routeEntity.externalId == null) {
             routeViewModel.postRoute(routeEntity) { newRoute ->
                 routeEntity.externalId = newRoute.routeUid
                 binding.publishRouteButton.text = "Update Published Route"
@@ -399,12 +409,16 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
 
                             //routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
-                            Log.d("GogoNewRouteMapLocation",newRouteMapLocation.id)
+                            Log.d("GogoNewRouteMapLocation", newRouteMapLocation.id)
                             routeMapLocation.externalId = newRouteMapLocation.id
-                            Log.d("GogoNewRouteMapLocation",routeMapLocation.externalId!!)
+                            Log.d("GogoNewRouteMapLocation", routeMapLocation.externalId!!)
                             //routeViewModel.updateRouteMapLocation(routeMapLocation)
 
-                            routeViewModel.updateExternalId(routeEntity.routeUid,mapLocation.id,newRouteMapLocation.id)
+                            routeViewModel.updateExternalId(
+                                routeEntity.routeUid,
+                                mapLocation.id,
+                                newRouteMapLocation.id
+                            )
                             val audio = Audio(
                                 UUID.randomUUID().toString(),
                                 newMapLocation.name + "audio",
@@ -469,8 +483,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     .setAnchorView(bottomNav)
                     .show()
             }
-        }else {
-            lifecycleScope.launch{
+        } else {
+            lifecycleScope.launch {
                 updatePublish()
             }
         }
@@ -501,7 +515,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         mapLocationsOfRouteEntity.forEach { mapLocation ->
 
             val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
-            var routeTest = Route(routeEntity.externalId!!,routeEntity.name,routeEntity.description,null)
+            var routeTest = Route(routeEntity.externalId!!, routeEntity.name, routeEntity.description, null)
             Log.d("GogoMapLocations", mapLocationIdMap[mapLocation.id].toString())
             val mapLocationId = mapLocation.externalId
 
@@ -519,67 +533,21 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 val routeMapLocationId = routeViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
 
 
-                    //TODO tutaj sprawdzic czy napewno tak bo te mapLocationRequest i routeEntity id moga sie nei zgadzac
-                    val routeMapLocation = RouteMapLocationRequest(
-                        routeMapLocationId.externalId!!,
-                        mapLocationRequest,
-                        routeTest,
-                        sequenceNr
-                    )
-                    //tutaj zmiana na external zamiast .id chyba
-                    routeViewModel.putRouteMapLocationById(routeMapLocationId.externalId!!, routeMapLocation)
-                    Log.d("RouteMapLocation", "Updated RouteMapLocation ID: ${routeMapLocationId.id}")
+                //TODO tutaj sprawdzic czy napewno tak bo te mapLocationRequest i routeEntity id moga sie nei zgadzac
+                val routeMapLocation = RouteMapLocationRequest(
+                    routeMapLocationId.externalId!!,
+                    mapLocationRequest,
+                    routeTest,
+                    sequenceNr
+                )
+                //tutaj zmiana na external zamiast .id chyba
+                routeViewModel.putRouteMapLocationById(routeMapLocationId.externalId!!, routeMapLocation)
+                Log.d("RouteMapLocation", "Updated RouteMapLocation ID: ${routeMapLocationId.id}")
 
 
-                    routeViewModel.getAudioByMapLocationId(mapLocationId)
-
-                    routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
-                        audioResponse?.body()?.content?.let { audios ->
-                            for (audio in audios) {
-                                Log.d("GogoAudio", audio.toString())
-                                val audioFile = File(
-                                    requireContext().filesDir,
-                                    "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
-                                )
-
-                                Log.d("Dzicz", audioFile.absolutePath);
-                                if (audioFile.exists()) {
-                                    Log.d("AudioRequest", "Exists")
-                                    val audioRequest =
-                                        RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
-                                    val audioMultiPartBody =
-                                        MultipartBody.Part.createFormData(
-                                            "file",
-                                            audioFile.name,
-                                            audioFile.asRequestBody()
-                                        )
-                                    routeViewModel.postAudioFile(audio.id, audioMultiPartBody)
-                                    routeViewModel.putAudioById(audio.id,audio)
-                                } else {
-                                    Log.d("AudioRequest", "Nie mo")
-                                }
-                            }
-                        }
-                    }
-
-//                    routeViewModel.audioFile.observe(viewLifecycleOwner) { response ->
-//                        if (response.bytes.isSuccessful) {
-//                            val audioBytes = response.bytes.body()
-//                            if (audioBytes != null) {
-//                                val tempAudioFile = File.createTempFile("temp_audio", ".3gp", requireContext().cacheDir)
-//                                val fos = FileOutputStream(tempAudioFile)
-//                                fos.write(audioBytes)
-//                                route.pointList[response.mapLocationId]?.audioPath = tempAudioFile.absolutePath
-//                                fos.close()
-//                            }
-//                        }
-//                    }
-
-
-
-
-
-            }else {
+                routeViewModel.getAudioByMapLocationId(mapLocationId)
+                postNewAudio(mapLocationRequest, mapLocation)
+            } else {
                 //dodane 21:39
                 val mapLocationRequest = MapLocationRequest(
                     mapLocation.id,
@@ -598,7 +566,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                         routeTest,
                         sequenceNr
                     )
-                    Log.d("GogoExternalId",routeEntity.externalId!!)
+                    Log.d("GogoExternalId", routeEntity.externalId!!)
                     //tutaj zmienic
                     val routeMapLocation =
                         RouteMapLocation(
@@ -610,83 +578,17 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     routeViewModel.postRouteMapLocation(newRouteMapLocation) { createdRouteMapLocation ->
                         routeMapLocationIdMap[mapLocation.id] = createdRouteMapLocation.id
                         routeMapLocation.externalId = createdRouteMapLocation.id
-                        routeViewModel.updateExternalId(routeEntity.routeUid, mapLocation.id, createdRouteMapLocation.id)
+                        routeViewModel.updateExternalId(
+                            routeEntity.routeUid,
+                            mapLocation.id,
+                            createdRouteMapLocation.id
+                        )
                         Log.d("RouteMapLocation", "Created new RouteMapLocation ID: ${createdRouteMapLocation.id}")
 
-                        val audio = Audio(
-                            UUID.randomUUID().toString(),
-                            newMapLocation.name + "audio",
-                            null,
-                            null,
-                            newMapLocation
-                        )
-                        routeViewModel.postAudio(audio) { newAudio ->
-                            audioIdMap[newMapLocation.id] = newAudio.id
-                            val audioFile = File(
-                                requireContext().filesDir,
-                                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
-                            )
-
-                            Log.d("Dzicz", audioFile.absolutePath);
-                            if (audioFile.exists()) {
-                                Log.d("AudioRequest", "Exists")
-                                val audioRequest =
-                                    RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
-                                val audioMultiPartBody =
-                                    MultipartBody.Part.createFormData(
-                                        "file",
-                                        audioFile.name,
-                                        audioFile.asRequestBody()
-                                    )
-                                Log.d("AUDIO ID", newAudio.id)
-                                routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
-                            } else {
-                                Log.d("AudioRequest", "Nie mo")
-                            }
-                            //To chyba nie potrzebne
-//                            val imageFile = File(
-//                                requireContext().filesDir,
-//                                "${IMAGE_DIR}/${mapLocation.id}${IMAGE_EXTENSION}"
-//                            )
-//
-//                            if (imageFile.exists()) {
-//                                Log.d("Image", "Exists")
-//                                val imageRequest =
-//                                    RequestBody.create("image/jpg".toMediaTypeOrNull(), imageFile)
-//                                val imageMultiPartBody =
-//                                    MultipartBody.Part.createFormData(
-//                                        "file",
-//                                        imageFile.name,
-//                                        imageRequest
-//                                    )
-//                                routeViewModel.putImageToMapLocation(
-//                                    newMapLocation.id,
-//                                    imageMultiPartBody
-//                                )
-//                            } else {
-//                                Log.d("Image", "Nie mo")
-//                            }
-
-                        }
+                        postNewAudio(newMapLocation, mapLocation)
                     }
                 }
             }
-
-            val audioFile = File(
-                requireContext().filesDir,
-                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
-            )
-            if (audioFile.exists()) {
-                val audioRequest = RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
-                val audioMultiPartBody = MultipartBody.Part.createFormData(
-                    "file",
-                    audioFile.name,
-                    audioRequest
-                )
-                routeViewModel.postAudioFile(UUID.randomUUID().toString(), audioMultiPartBody)
-
-            }
-
             val imageFile = File(
                 requireContext().filesDir,
                 "${IMAGE_DIR}/${mapLocation.id}${IMAGE_EXTENSION}"
@@ -701,14 +603,60 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 routeViewModel.putImageToMapLocation(mapLocationId!!, imageMultiPartBody)
             }
         }
+        routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
+            audioResponse?.body()?.content?.let { audios ->
+                for (audio in audios) {
+                    Log.d("GogiUsuwa", audio.toString())
+                    routeViewModel.deleteAudioById(
+                        audio.id,
+                        onSuccess = { Log.d("GogiUsuwa", "gogi usunal") },
+                        onFailure = { Log.d("GogiUsuwa", "gogi nie usunal") },
+                    )
+                }
 
+            }
+        }
         Snackbar.make(binding.root, "Route updated successfully!", Snackbar.LENGTH_LONG).setAnchorView(bottomNav).show()
-
 
 
     }
 
+    private fun postNewAudio(
+        newMapLocation: MapLocationRequest,
+        mapLocation: MapLocation
+    ) {
+        val audio = Audio(
+            UUID.randomUUID().toString(),
+            newMapLocation.name + "audio",
+            null,
+            null,
+            newMapLocation
+        )
+        routeViewModel.postAudio(audio) { newAudio ->
+            audioIdMap[newMapLocation.id] = newAudio.id
+            val audioFile = File(
+                requireContext().filesDir,
+                "${Constants.AUDIO_DIR}/${mapLocation.id}${Constants.AUDIO_EXTENSION}"
+            )
 
+            Log.d("Dzicz", audioFile.absolutePath);
+            if (audioFile.exists()) {
+                Log.d("AudioRequest", "Exists")
+                val audioRequest =
+                    RequestBody.create("audio/3gp".toMediaTypeOrNull(), audioFile)
+                val audioMultiPartBody =
+                    MultipartBody.Part.createFormData(
+                        "file",
+                        audioFile.name,
+                        audioFile.asRequestBody()
+                    )
+                Log.d("AUDIO ID", newAudio.id)
+                routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
+            } else {
+                Log.d("AudioRequest", "Nie mo")
+            }
+        }
+    }
 
 
     private var simpleCallBack =
@@ -774,10 +722,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         Log.d("Warmbier", route.toString())
         mapViewModel.route = route
         mapViewModel.inCreationMode = true
-        val bundle = Bundle().apply {
-            putBoolean("reset", true)
-        }
-        changeFragmentListener?.changeFragment(1, bundle)
+        changeFragmentListener?.changeFragment(1)
     }
 
     private fun changeBackFragment() {
