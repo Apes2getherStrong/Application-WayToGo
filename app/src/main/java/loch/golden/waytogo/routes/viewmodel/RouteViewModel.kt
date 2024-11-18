@@ -147,6 +147,10 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         routeRepository.updateExternalId(routeUid,id,externalId)
     }
 
+    fun updateRouteExternalId(routeUid: String, externalId: String?) = viewModelScope.launch {
+        routeRepository.updateRouteExternalId(routeUid,externalId)
+    }
+
     fun deleteMapLocation(mapLocation: MapLocation) =
         viewModelScope.launch {
             routeRepository.deleteMapLocation(mapLocation)
@@ -412,18 +416,16 @@ class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel()
         }
     }
 
-    fun deleteRouteById(routeId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val response: Response<Route> = routeRepository.deleteRouteById(routeId)
-                if (response.isSuccessful) {
-                    onSuccess()
-                } else {
-                    onFailure("Delete failed, response code: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                onFailure(e.message ?: "Error")
+    suspend fun deleteRouteById(routeId: String): Result<Unit> {
+        return try {
+            val response: Response<Route> = routeRepository.deleteRouteById(routeId)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Delete failed, response code: ${response.code()}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

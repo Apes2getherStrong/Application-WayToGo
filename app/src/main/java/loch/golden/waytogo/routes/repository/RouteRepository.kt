@@ -19,9 +19,7 @@ import loch.golden.waytogo.routes.model.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.user.model.User
 import loch.golden.waytogo.routes.room.dao.RouteDao
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
 import retrofit2.Response
-import java.io.IOException
 
 class RouteRepository(private val routeDao: RouteDao) {
 
@@ -123,7 +121,12 @@ class RouteRepository(private val routeDao: RouteDao) {
     @WorkerThread
     suspend fun updateExternalId(routeUid: String, id: String, externalId: String) {
         Log.d("Gogo","DaoWeszlo")
-        return routeDao.updateExternalId(routeUid,id,externalId)
+        return routeDao.updateExternalIdRouteMapLocation(routeUid,id,externalId)
+    }
+
+    @WorkerThread
+    suspend fun updateRouteExternalId(routeUid: String, externalId: String?) {
+        return routeDao.updateRouteExternalId(routeUid,externalId)
     }
 
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
