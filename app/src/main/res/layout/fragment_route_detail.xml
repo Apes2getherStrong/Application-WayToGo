@@ -10,7 +10,7 @@
         android:id="@+id/fragment_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".routes.RouteDetailFragment">
+        tools:context=".fragments.route.views.global.RouteDetailFragment">
 
 
         <Button

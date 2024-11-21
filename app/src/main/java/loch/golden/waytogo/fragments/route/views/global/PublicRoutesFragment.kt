@@ -1,0 +1,159 @@
+package loch.golden.waytogo.fragments.route.views.global
+
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.filter
+import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
+import loch.golden.waytogo.viewmodels.MapViewModel
+import loch.golden.waytogo.fragments.route.components.adapters.RecyclerViewRouteAdapter
+import loch.golden.waytogo.fragments.route.views.RoutesFragment
+import loch.golden.waytogo.room.entity.route.Route
+import loch.golden.waytogo.repositories.RouteRepository
+import loch.golden.waytogo.room.WayToGoDatabase
+import loch.golden.waytogo.room.dao.RouteDao
+import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
+import loch.golden.waytogo.fragments.user.components.TokenManager
+
+
+class PublicRoutesFragment : Fragment() {
+
+    private lateinit var binding: FragmentPublicRoutesBinding
+    private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
+    private val mapViewModel by activityViewModels<MapViewModel>()
+    private lateinit var routeViewModel: RouteViewModel
+    private val viewModel by viewModels<RouteViewModel>()
+    private val appScope = CoroutineScope(SupervisorJob())
+    private val routeDao: RouteDao by lazy {
+        WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
+    }
+    private lateinit var tokenManager: TokenManager
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentPublicRoutesBinding.inflate(inflater, container, false)
+        Log.d("Warmbier", container?.id.toString())
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        tokenManager = TokenManager(requireContext())
+
+        initViewModel()
+        initSearchView()
+        initRecyclerView()
+        observeRouteResponse()
+
+
+    }
+
+    private fun initRecyclerView() {
+        recyclerViewRouteAdapter = RecyclerViewRouteAdapter(viewModel, lifecycleScope)
+        binding.recyclerViewRoutes.adapter = recyclerViewRouteAdapter
+        binding.recyclerViewRoutes.layoutManager = LinearLayoutManager(requireContext())
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            refreshData()
+        }
+
+        recyclerViewRouteAdapter.setOnClickListener(object :
+            RecyclerViewRouteAdapter.OnClickListener {
+            override fun onItemClick(position: Int, route: Route) {
+                val id = route.routeUid
+                val bundle = Bundle().apply {
+                    putString("id", id)
+                }
+                val fr = RouteDetailFragment()
+                fr.arguments = bundle
+                (parentFragment as? RoutesFragment)?.replaceFragment(0, fr)
+            }
+        })
+
+    }
+
+    private fun refreshData() {
+        binding.swipeRefreshLayout.isRefreshing = true
+
+        lifecycleScope.launch {
+            try {
+                viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                    recyclerViewRouteAdapter.submitData(pagingData)
+                }
+            } catch (e: Exception) {
+                Log.e("RefreshData", "Error refreshing data: ${e.message}")
+                //Toast.makeText(context, "Failed to refresh data", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
+        }
+
+        binding.swipeRefreshLayout.postDelayed({
+            binding.swipeRefreshLayout.isRefreshing = false
+        }, 2000)
+    }
+
+    private fun initViewModel() {
+        val repository = RouteRepository(routeDao)
+        val routeViewModelFactory = RouteViewModelFactory(repository)
+        routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
+
+    }
+
+    private fun observeRouteResponse() {
+        lifecycleScope.launch {
+            viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                recyclerViewRouteAdapter.submitData(pagingData)
+
+            }
+        }
+
+
+    }
+
+    private fun initSearchView() {
+
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                search(newText)
+                return true
+            }
+        })
+    }
+
+    private fun search(query: String?) {
+        query?.let { searchedQuery ->
+            lifecycleScope.launch {
+                viewModel.getRoutes(0, 20).collectLatest { pagingData ->
+                    val filteredRoutes = pagingData.filter { route ->
+                        route.name.contains(searchedQuery, ignoreCase = true)
+                    }
+                    recyclerViewRouteAdapter.submitData(filteredRoutes)
+                }
+            }
+        }
+    }
+
+}
+
