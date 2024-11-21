@@ -22,13 +22,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import loch.golden.waytogo.databinding.ActivityMainBinding
-import loch.golden.waytogo.map.OnChangeFragmentListener
-import loch.golden.waytogo.map.PointMapFragment
-import loch.golden.waytogo.routes.RoutesFragment
-import loch.golden.waytogo.routes.api.RetrofitInstance
-import loch.golden.waytogo.routes.utils.Constants
-import loch.golden.waytogo.user.LoginFragment
-import loch.golden.waytogo.user.tokenmanager.TokenManager
+import loch.golden.waytogo.utils.OnChangeFragmentListener
+import loch.golden.waytogo.fragments.map.views.PointMapFragment
+import loch.golden.waytogo.fragments.route.views.RoutesFragment
+import loch.golden.waytogo.services.services.RetrofitInstance
+import loch.golden.waytogo.utils.Constants
+import loch.golden.waytogo.fragments.user.views.LoginFragment
+import loch.golden.waytogo.fragments.user.components.TokenManager
+import loch.golden.waytogo.utils.Permissions
 import java.io.File
 
 

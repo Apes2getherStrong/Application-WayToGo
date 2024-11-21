@@ -5,7 +5,7 @@
     android:id="@+id/frame_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".routes.PublicRoutesFragment">
+    tools:context=".fragments.route.views.global.PublicRoutesFragment">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
