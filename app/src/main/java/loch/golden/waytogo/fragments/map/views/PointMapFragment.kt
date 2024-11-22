@@ -45,6 +45,7 @@ import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.viewmodels.MapViewModel
 import loch.golden.waytogo.viewmodels.RouteViewModel
 import loch.golden.waytogo.viewmodels.classes.MapPoint
+import javax.inject.Inject
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -56,6 +57,9 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel: MapViewModel by activityViewModels()
+    @Inject
+    lateinit var navigationManager: NavigationManager
+
     private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
     private val googleMapSetup = CompletableDeferred<Unit>()
@@ -67,7 +71,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
     private var infoWindowManager: InfoWindowManager? = null
     private var routeCreationManager: RouteCreationManager? = null
 
-    private var navigationManager: NavigationManager? = null
     private var currentPolyline: Polyline? = null
 
     private val markerList: MutableList<Marker?> = mutableListOf()
@@ -117,7 +120,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
                 binding.bottomPanel.title.text = mapViewModel.currentPoint?.name
                 if (reset || mapViewModel.mp == null)
                     seekbarManager?.prepareAudio(mapViewModel.currentPoint!!.audioPath!!)
-                navigationManager = NavigationManager(mapViewModel)
                 observeLocation()
             }
         } else {

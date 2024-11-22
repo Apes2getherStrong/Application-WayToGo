@@ -9,11 +9,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import loch.golden.waytogo.fragments.map.components.navigation.LocationManager
+import loch.golden.waytogo.fragments.map.components.navigation.NavigationManager
 import loch.golden.waytogo.fragments.user.components.TokenManager
 import loch.golden.waytogo.room.WayToGoDatabase
 import loch.golden.waytogo.room.dao.RouteDao
 import loch.golden.waytogo.services.components.AuthInterceptor
 import loch.golden.waytogo.services.services.ApiService
+import loch.golden.waytogo.services.services.GoogleApiService
 import loch.golden.waytogo.utils.Constants.Companion.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -30,14 +32,13 @@ object AppModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
+            .baseUrl(BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
     }
 
-    // Provide OkHttpClient (Optional, for customization)
     @Provides
     @Singleton
     fun provideOkHttpClient(tokenManager: TokenManager): OkHttpClient {
@@ -48,7 +49,6 @@ object AppModule {
             .build()
     }
 
-    // Provide TokenManager (assuming it's some class that stores/authenticates tokens)
     @Provides
     @Singleton
     fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
@@ -60,6 +60,16 @@ object AppModule {
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideGoogleApiService(): GoogleApiService {
+        return Retrofit.Builder()
+            .baseUrl(Constants.GOOGLE_API_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build().create(GoogleApiService::class.java)
+    }
+
 
     @Provides
     @Singleton
@@ -85,6 +95,12 @@ object AppModule {
         val locationManager = LocationManager(context)
         locationManager.startLocationUpdates()
         return locationManager
+    }
+
+    @Provides
+    @Singleton
+    fun provideNavigationManager(apiService: GoogleApiService): NavigationManager {
+        return NavigationManager(apiService)
     }
 
 }
