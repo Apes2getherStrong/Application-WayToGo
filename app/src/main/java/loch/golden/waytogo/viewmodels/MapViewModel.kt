@@ -3,11 +3,16 @@ package loch.golden.waytogo.viewmodels
 import android.media.MediaPlayer
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.CameraPosition
+import dagger.hilt.android.lifecycle.HiltViewModel
 import loch.golden.waytogo.viewmodels.classes.MapPoint
 import loch.golden.waytogo.viewmodels.classes.MapRoute
 import loch.golden.waytogo.fragments.map.components.navigation.LocationManager
+import javax.inject.Inject
 
-class MapViewModel : ViewModel() {
+@HiltViewModel
+class MapViewModel @Inject constructor(
+    val locationManager: LocationManager
+) : ViewModel() {
     var cameraPosition: CameraPosition? = null
     var route: MapRoute? = null
     var inCreationMode = false
@@ -15,8 +20,6 @@ class MapViewModel : ViewModel() {
 
     var currentSequenceNr = 1
     var currentPoint: MapPoint? = null
-
-    var locationManager: LocationManager? = null
 
 
     fun updateCurrentSequenceNr(sequenceNr: Int): Boolean {

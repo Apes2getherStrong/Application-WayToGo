@@ -11,9 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.appolica.interactiveinfowindow.InfoWindow
 import com.appolica.interactiveinfowindow.InfoWindow.MarkerSpecification
@@ -28,36 +28,34 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import loch.golden.waytogo.R
-import loch.golden.waytogo.viewmodels.classes.MapPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
-import loch.golden.waytogo.viewmodels.MapViewModel
-import loch.golden.waytogo.utils.OnChangeFragmentListener
-import loch.golden.waytogo.fragments.map.components.creation.PointInfoWindowAdapter
-import loch.golden.waytogo.fragments.map.components.navigation.LocationManager
 import loch.golden.waytogo.fragments.map.components.SeekbarManagerV2
 import loch.golden.waytogo.fragments.map.components.SlidingUpPanelManager
+import loch.golden.waytogo.fragments.map.components.creation.PointInfoWindowAdapter
 import loch.golden.waytogo.fragments.map.components.creation.RouteCreationManager
 import loch.golden.waytogo.fragments.map.components.navigation.NavigationManager
-import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.utils.Constants
+import loch.golden.waytogo.utils.OnChangeFragmentListener
+import loch.golden.waytogo.viewmodels.MapViewModel
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
+import loch.golden.waytogo.viewmodels.classes.MapPoint
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-
+@AndroidEntryPoint
 class PointMapFragment() : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //viewmodel tied to parent activity - MainActivity
-    private lateinit var mapViewModel: MapViewModel
+    private val mapViewModel: MapViewModel by activityViewModels()
     private lateinit var binding: FragmentMapBinding
     private lateinit var googleMap: GoogleMap
     private val googleMapSetup = CompletableDeferred<Unit>()
@@ -74,9 +72,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels()
 
     private var changeFragmentListener: OnChangeFragmentListener? = null
     override fun onAttach(context: Context) {
@@ -97,11 +93,6 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
-        if (mapViewModel.locationManager == null) {
-            mapViewModel.locationManager = LocationManager(requireContext())
-            mapViewModel.locationManager!!.startLocationUpdates() //todo move this to activity
-        }
         val reset = arguments?.getBoolean("reset") ?: false
 
         initMapView(savedInstanceState)
@@ -109,7 +100,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         slidingUpPanelManager = SlidingUpPanelManager(binding, mapViewModel)
         setUpListeners()
 
-
+        Log.d("DaggerWarmbier", mapViewModel.route.toString())
         if (mapViewModel.route != null) {
             binding.bottomPanel.title.visibility = View.VISIBLE
             binding.bottomPanel.playButton.visibility = View.VISIBLE

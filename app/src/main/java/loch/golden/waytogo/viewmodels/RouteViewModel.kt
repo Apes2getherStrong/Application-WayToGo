@@ -10,6 +10,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -31,8 +32,12 @@ import loch.golden.waytogo.services.dto.auth.AuthResponse
 import loch.golden.waytogo.viewmodels.components.RoutePagingSource
 import okhttp3.MultipartBody
 import retrofit2.Response
+import javax.inject.Inject
 
-class RouteViewModel(private val routeRepository: RouteRepository) : ViewModel() {
+@HiltViewModel
+class RouteViewModel @Inject constructor(
+    private val routeRepository: RouteRepository
+) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
     val userDTOResponse: MutableLiveData<Response<UserDTO>> = MutableLiveData()

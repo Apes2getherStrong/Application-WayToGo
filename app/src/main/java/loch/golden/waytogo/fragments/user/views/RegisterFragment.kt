@@ -14,6 +14,7 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRegisterBinding
 import loch.golden.waytogo.utils.RouteMainApplication
@@ -22,13 +23,11 @@ import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.services.dto.user.UserDTO
 import java.util.UUID
 
-
+@AndroidEntryPoint
 class RegisterFragment : Fragment() {
 
     private lateinit var binding: FragmentRegisterBinding
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels ()
     private var bottomNav : BottomNavigationView? = null
 
 

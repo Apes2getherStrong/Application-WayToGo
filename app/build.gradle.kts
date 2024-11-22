@@ -6,6 +6,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
+
 }
 
 
@@ -74,7 +77,9 @@ dependencies {
     implementation("com.appolica:interactive-info-window-android:1.1.0")
     implementation("com.google.code.gson:gson:2.9.0")
 
-
+    //Dagger
+    implementation ("com.google.dagger:hilt-android:2.48")
+    kapt ("com.google.dagger:hilt-android-compiler:2.48")
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

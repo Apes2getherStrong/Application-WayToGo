@@ -6,20 +6,23 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.google.gson.Gson
 import loch.golden.waytogo.services.dto.user.UserDTO
+import javax.inject.Inject
 
-class TokenManager (context: Context) {
+class TokenManager @Inject constructor(
+    context: Context
+) {
 
-    private val prefs : SharedPreferences= context.getSharedPreferences("auth",Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val gson = Gson()
-    fun saveToken(token : String) {
+    fun saveToken(token: String) {
         with(prefs.edit()) {
             putString("auth_token", token)
             apply()
         }
     }
 
-    fun getToken() : String? {
-        return prefs.getString("auth_token",null);
+    fun getToken(): String? {
+        return prefs.getString("auth_token", null);
     }
 
     fun clearToken() {
@@ -43,12 +46,12 @@ class TokenManager (context: Context) {
         return userJson?.let { gson.fromJson(it, UserDTO::class.java) }
     }
 
-   fun isTokenExpired(token: String): Boolean {
+    fun isTokenExpired(token: String): Boolean {
         val decodedJWT: DecodedJWT = JWT.decode(token)
         val expiresAtMillis = decodedJWT.expiresAt?.time ?: return true
         val currentTimeMillis = System.currentTimeMillis()
         return expiresAtMillis < currentTimeMillis
-   }
+    }
 
     fun getUserIdFromJWT(): String? {
         val token = getToken()

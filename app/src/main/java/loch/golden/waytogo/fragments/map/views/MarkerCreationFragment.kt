@@ -5,11 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.google.android.gms.maps.model.Marker
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.databinding.FragmentMapBinding
 import loch.golden.waytogo.databinding.FragmentMarkerCreationBinding
-import androidx.lifecycle.ViewModelProvider
 import loch.golden.waytogo.fragments.map.components.creation.RouteCreationManager
 import loch.golden.waytogo.viewmodels.MapViewModel
 
@@ -20,10 +21,7 @@ class MarkerCreationFragment(
 ) : Fragment() {
 
     private lateinit var binding: FragmentMarkerCreationBinding
-    private lateinit var mapViewModel: MapViewModel
-    private val id by lazy {
-        marker?.snippet
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -34,7 +32,6 @@ class MarkerCreationFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mapViewModel = ViewModelProvider(requireActivity()).get(MapViewModel::class.java)
 
         binding.checlkbox.setOnClickListener {
             marker?.isDraggable = !binding.checlkbox.isChecked

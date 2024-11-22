@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentWelcomeBinding
 import loch.golden.waytogo.utils.RouteMainApplication
@@ -22,14 +23,13 @@ import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.services.dto.user.UserDTO
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
+@AndroidEntryPoint
 class WelcomeFragment : Fragment() {
 
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var tokenManager: TokenManager
     private var bottomNav : BottomNavigationView? = null
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
