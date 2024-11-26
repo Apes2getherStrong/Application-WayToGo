@@ -19,7 +19,6 @@ import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentLoginBinding
 import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.services.dto.auth.AuthRequest
 import loch.golden.waytogo.fragments.user.components.TokenManager
 import retrofit2.HttpException

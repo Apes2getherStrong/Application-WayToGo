@@ -27,7 +27,6 @@ import loch.golden.waytogo.repositories.RouteRepository
 import loch.golden.waytogo.room.WayToGoDatabase
 import loch.golden.waytogo.room.dao.RouteDao
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
 @AndroidEntryPoint
@@ -35,10 +34,7 @@ class PublicRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentPublicRoutesBinding
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
-    private val mapViewModel by activityViewModels<MapViewModel>()
-    private lateinit var routeViewModel: RouteViewModel
     private val viewModel by viewModels<RouteViewModel>()
-    private val appScope = CoroutineScope(SupervisorJob())
     private lateinit var tokenManager: TokenManager
 
 

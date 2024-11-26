@@ -19,7 +19,6 @@ import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentWelcomeBinding
 import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.services.dto.user.UserDTO
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
