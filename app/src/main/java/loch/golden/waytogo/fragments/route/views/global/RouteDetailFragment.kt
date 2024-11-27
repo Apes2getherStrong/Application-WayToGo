@@ -18,7 +18,7 @@ import loch.golden.waytogo.fragments.route.components.adapters.PublicMapLocation
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
 import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.viewmodels.MapViewModel
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import loch.golden.waytogo.viewmodels.classes.MapPoint
 import loch.golden.waytogo.viewmodels.classes.MapRoute
 import java.io.File
@@ -28,7 +28,7 @@ import java.io.FileOutputStream
 class RouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
-    private val routeViewModel: RouteViewModel by viewModels()
+    private val backendViewModel: BackendViewModel by viewModels()
     private val mapViewModel: MapViewModel by activityViewModels()
     private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
@@ -66,10 +66,10 @@ class RouteDetailFragment() : Fragment() {
 
 
         // Fetch route by ID
-        routeViewModel.getRouteById(routeId)
+        backendViewModel.getRouteById(routeId)
 
         // Observe route response
-        routeViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
+        backendViewModel.myRouteResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
                 route = MapRoute(
                     response.body()!!.routeUid,
@@ -82,10 +82,10 @@ class RouteDetailFragment() : Fragment() {
 
 
                 // Fetch map locations by route ID
-                routeViewModel.getMapLocationsByRouteId(routeId)
+                backendViewModel.getMapLocationsByRouteId(routeId)
             }
-            routeViewModel.getRouteImage(routeId)
-            routeViewModel.currentRouteImage.observe(viewLifecycleOwner) { response ->
+            backendViewModel.getRouteImage(routeId)
+            backendViewModel.currentRouteImage.observe(viewLifecycleOwner) { response ->
                 if (response.isSuccessful) {
                     Log.d("Warmbier", "Rut: is Succesful")
                     val imageBytes = response.body()
@@ -112,14 +112,14 @@ class RouteDetailFragment() : Fragment() {
         // Observe map locations response
 
         var sequenceNr = 0 //TODO this works but maybe not all the time should make seperate fetch for sequence nr
-        routeViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
+        backendViewModel.myMapLocationsResponse.observe(viewLifecycleOwner) { response ->
             if (response.isSuccessful) {
                 response.body()?.content?.let { mapLocations ->
                     for (mapLocation in mapLocations) {
                         val mapPoint = MapPoint(mapLocation, ++sequenceNr)
                         route.pointList[mapLocation.id] = mapPoint
-                        routeViewModel.getAudioByMapLocationId(mapLocation.id)
-                        routeViewModel.getMapLocationImage(mapLocation.id)
+                        backendViewModel.getAudioByMapLocationId(mapLocation.id)
+                        backendViewModel.getMapLocationImage(mapLocation.id)
                     }
                 }
                 val mapLocationAdapter =
@@ -131,16 +131,16 @@ class RouteDetailFragment() : Fragment() {
         }
 
         // Observe audio response
-        routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
+        backendViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
             audioResponse?.body()?.content?.let { audios ->
                 for (audio in audios) {
-                    routeViewModel.getAudioFile(audio.id, audio.mapLocationRequest.id)
+                    backendViewModel.getAudioFile(audio.id, audio.mapLocationRequest.id)
                 }
             }
         }
         //TODO move these componenets to seperate functions
 
-        routeViewModel.audioFile.observe(viewLifecycleOwner) { response ->
+        backendViewModel.audioFile.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
                 val audioBytes = response.bytes.body()
                 if (audioBytes != null) {
@@ -153,7 +153,7 @@ class RouteDetailFragment() : Fragment() {
             }
         }
 
-        routeViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
+        backendViewModel.currentMapImage.observe(viewLifecycleOwner) { response ->
             if (response.bytes.isSuccessful) {
                 val imageBytes = response.bytes.body()
                 if (imageBytes != null) {

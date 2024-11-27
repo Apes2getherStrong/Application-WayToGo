@@ -43,7 +43,8 @@ import loch.golden.waytogo.utils.Constants.Companion.IMAGE_DIR
 import loch.golden.waytogo.utils.Constants.Companion.IMAGE_EXTENSION
 import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.viewmodels.MapViewModel
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
+import loch.golden.waytogo.viewmodels.LocalViewModel
 import loch.golden.waytogo.viewmodels.classes.MapPoint
 import loch.golden.waytogo.viewmodels.classes.MapRoute
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -61,7 +62,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentDatabaseMyRouteDetailBinding
     private lateinit var mapLocationRecyclerView: MapLocationAdapter
-    private val routeViewModel: RouteViewModel by viewModels()
+    private val backendViewModel: BackendViewModel by viewModels()
+    private val localViewModel: LocalViewModel by viewModels()
     private val mapViewModel: MapViewModel by activityViewModels()
     private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
@@ -143,14 +145,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
 
         val routeId = arguments?.getString("id") ?: run {
             val route = Route(UUID.randomUUID().toString(), "My Route", "", null)
-            routeViewModel.insert(route)
+            localViewModel.insert(route)
             route.routeUid
         }
 
 
 
-        routeViewModel.getRouteWithMapLocations(routeId)
-        routeViewModel.routeWithLocationsFromDb.observe(viewLifecycleOwner) { routeWithLocationsFromDb ->
+        localViewModel.getRouteWithMapLocations(routeId)
+        localViewModel.routeWithLocationsFromDb.observe(viewLifecycleOwner) { routeWithLocationsFromDb ->
             if (routeWithLocationsFromDb != null) {
                 routeEntity = routeWithLocationsFromDb.route
 
@@ -183,7 +185,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 routeWithLocationsFromDb.mapLocations.let {
                     for (mapLocation in it) {
                         val sequenceNr =
-                            runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+                            runBlocking { localViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
                         Log.d("Warmbier", "Sequence Nr $sequenceNr name: ${mapLocation.name}")
                         route.pointList[mapLocation.id] =
                             (MapPoint(mapLocation, sequenceNr, requireContext()))
@@ -272,7 +274,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         if (newRouteName != routeEntity.name || newRouteDescription != routeEntity.description) {
             routeEntity.name = newRouteName
             routeEntity.description = newRouteDescription
-            routeViewModel.updateRoute(routeEntity)
+            localViewModel.updateRoute(routeEntity)
         }
     }
 
@@ -280,7 +282,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
         lifecycleScope.launch {
             try {
                 mapLocationsOfRouteEntity.forEach { mapLocation ->
-                    routeViewModel.deleteMapLocationById(
+                    backendViewModel.deleteMapLocationById(
                         mapLocation.externalId ?: "",
                         onSuccess = {
                             Log.d("DeleteMapLocation", "MapLocation deleted: ${mapLocation.externalId}")
@@ -288,8 +290,8 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                         onFailure = { error -> Log.e("DeleteMapLocation", error) }
                     )
 
-                    val routeMapLocation = routeViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
-                    routeViewModel.deleteRouteMapLocationByIdApi(
+                    val routeMapLocation = localViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
+                    backendViewModel.deleteRouteMapLocationByIdApi(
                         routeMapLocation.externalId ?: "",
                         onSuccess = {
                             Log.d("DeleteRouteMapLocation", "RouteMapLocation deleted: ${routeMapLocation.externalId}")
@@ -298,12 +300,12 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     )
                 }
 
-                val result = routeViewModel.deleteRouteById(routeEntity.externalId!!)
+                val result = backendViewModel.deleteRouteById(routeEntity.externalId!!)
                 if (result.isSuccess) {
                     Log.d("DeleteRoute", "Route deleted: ${routeEntity.externalId}")
 
                     routeEntity.externalId = null
-                    routeViewModel.updateRouteExternalId(routeEntity.routeUid, routeEntity.externalId)
+                    localViewModel.updateRouteExternalId(routeEntity.routeUid, routeEntity.externalId)
 
                     updateButtons()
 
@@ -339,12 +341,12 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             return
         }
         if (routeEntity.externalId == null) {
-            routeViewModel.postRoute(routeEntity) { newRoute ->
+            backendViewModel.postRoute(routeEntity) { newRoute ->
                 routeEntity.externalId = newRoute.routeUid
                 binding.publishRouteButton.text = "Update Published Route"
                 binding.deletePublishedRoute.visibility = View.VISIBLE
                 Log.d("GogoRoute", routeEntity.toString())
-                routeViewModel.updateRoute(routeEntity)
+                localViewModel.updateRoute(routeEntity)
                 Log.d("GogoRoute", routeEntity.toString())
                 Log.d("Warmbier", newRoute.toString())
                 val routeImageFile = File(
@@ -361,7 +363,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             routeImageFile.name,
                             imageRequest
                         )
-                    routeViewModel.putImageToRoute(
+                    backendViewModel.putImageToRoute(
                         newRoute.routeUid,
                         imageMultiPartBody
                     )
@@ -377,14 +379,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                         Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                     )
                     val sequenceNr =
-                        runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+                        runBlocking { localViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
                     Log.d("GogoMapLocations", mapLocationIdMap[mapLocation.id].toString())
                     Log.d("GogoMapLocations1", mapLocation.id)
 
-                    routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
+                    backendViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                         mapLocationIdMap[mapLocation.id] = newMapLocation.id
                         mapLocation.externalId = newMapLocation.id
-                        routeViewModel.updateMapLocation(mapLocation)
+                        localViewModel.updateMapLocation(mapLocation)
                         Log.d("GogoMapLocations", mapLocationIdMap[mapLocation.id].toString())
                         val routeMapLocationRequest =
                             RouteMapLocationRequest(
@@ -403,7 +405,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             )
 
 
-                        routeViewModel.postRouteMapLocation(routeMapLocationRequest) { newRouteMapLocation ->
+                        backendViewModel.postRouteMapLocation(routeMapLocationRequest) { newRouteMapLocation ->
 
 
                             //routeMapLocationIdMap[newMapLocation.id] = newRouteMapLocation.id
@@ -412,7 +414,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             Log.d("GogoNewRouteMapLocation", routeMapLocation.externalId!!)
                             //routeViewModel.updateRouteMapLocation(routeMapLocation)
 
-                            routeViewModel.updateExternalId(
+                            localViewModel.updateExternalId(
                                 routeEntity.routeUid,
                                 mapLocation.id,
                                 newRouteMapLocation.id
@@ -424,7 +426,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                                 null,
                                 newMapLocation
                             )
-                            routeViewModel.postAudio(audioDTO) { newAudio ->
+                            backendViewModel.postAudio(audioDTO) { newAudio ->
                                 audioIdMap[newMapLocation.id] = newAudio.id
                                 val audioFile = File(
                                     requireContext().filesDir,
@@ -443,7 +445,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                                             audioFile.asRequestBody()
                                         )
                                     Log.d("AUDIO ID", newAudio.id)
-                                    routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
+                                    backendViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
                                 } else {
                                     Log.d("AudioRequest", "Nie mo")
                                 }
@@ -463,7 +465,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                                             imageFile.name,
                                             imageRequest
                                         )
-                                    routeViewModel.putImageToMapLocation(
+                                    backendViewModel.putImageToMapLocation(
                                         newMapLocation.id,
                                         imageMultiPartBody
                                     )
@@ -490,7 +492,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
     }
 
     private suspend fun updatePublish() {
-        routeViewModel.putRouteById(routeEntity.externalId!!, routeEntity)
+        backendViewModel.putRouteById(routeEntity.externalId!!, routeEntity)
         Log.d("Gogo", routeEntity.toString())
 
         val routeImageFile = File(
@@ -505,14 +507,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 routeImageFile.name,
                 imageRequest
             )
-            routeViewModel.putImageToRoute(routeEntity.externalId!!, imageMultiPartBody)
+            backendViewModel.putImageToRoute(routeEntity.externalId!!, imageMultiPartBody)
         } else {
             Log.d("Warmbier", "Route image not found")
         }
         Log.d("GogoMapLocations", mapLocationsOfRouteEntity.toString())
         mapLocationsOfRouteEntity.forEach { mapLocation ->
 
-            val sequenceNr = runBlocking { routeViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
+            val sequenceNr = runBlocking { localViewModel.getSequenceNrByMapLocationId(mapLocation.id) }
             var routeTest = Route(routeEntity.externalId!!, routeEntity.name, routeEntity.description, null)
             Log.d("GogoMapLocations", mapLocationIdMap[mapLocation.id].toString())
             val mapLocationId = mapLocation.externalId
@@ -526,9 +528,9 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                 )
                 //TODO tutaj tez chyba mapLocationRequest stworyc ale z externalId jako id
-                routeViewModel.putMapLocationById(mapLocationId, mapLocationRequest)
+                backendViewModel.putMapLocationById(mapLocationId, mapLocationRequest)
 
-                val routeMapLocationId = routeViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
+                val routeMapLocationId = localViewModel.getRouteMapLocationByMapLocationId(mapLocation.id)
 
 
                 //TODO tutaj sprawdzic czy napewno tak bo te mapLocationRequest i routeEntity id moga sie nei zgadzac
@@ -539,11 +541,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     sequenceNr
                 )
                 //tutaj zmiana na external zamiast .id chyba
-                routeViewModel.putRouteMapLocationById(routeMapLocationId.externalId!!, routeMapLocation)
+                backendViewModel.putRouteMapLocationById(routeMapLocationId.externalId!!, routeMapLocation)
                 Log.d("RouteMapLocation", "Updated RouteMapLocation ID: ${routeMapLocationId.id}")
 
 
-                routeViewModel.getAudioByMapLocationId(mapLocationId)
+                backendViewModel.getAudioByMapLocationId(mapLocationId)
                 postNewAudio(mapLocationRequest, mapLocation)
             } else {
                 //dodane 21:39
@@ -553,10 +555,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     mapLocation.description,
                     Coordinates("Point", arrayOf(mapLocation.latitude, mapLocation.longitude))
                 )
-                routeViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
+                backendViewModel.postMapLocation(mapLocationRequest) { newMapLocation ->
                     mapLocationIdMap[mapLocation.id] = newMapLocation.id
                     mapLocation.externalId = newMapLocation.id
-                    routeViewModel.updateMapLocation(mapLocation)
+                    localViewModel.updateMapLocation(mapLocation)
                     //tutaj zmienic newRoute czyli routeTest // 21:45 zmiana z routeEntity na routeTest
                     val newRouteMapLocation = RouteMapLocationRequest(
                         UUID.randomUUID().toString(),
@@ -573,10 +575,10 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                             sequenceNr,
                             null
                         )
-                    routeViewModel.postRouteMapLocation(newRouteMapLocation) { createdRouteMapLocation ->
+                    backendViewModel.postRouteMapLocation(newRouteMapLocation) { createdRouteMapLocation ->
                         routeMapLocationIdMap[mapLocation.id] = createdRouteMapLocation.id
                         routeMapLocation.externalId = createdRouteMapLocation.id
-                        routeViewModel.updateExternalId(
+                        localViewModel.updateExternalId(
                             routeEntity.routeUid,
                             mapLocation.id,
                             createdRouteMapLocation.id
@@ -598,14 +600,14 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                     imageFile.name,
                     imageRequest
                 )
-                routeViewModel.putImageToMapLocation(mapLocationId!!, imageMultiPartBody)
+                backendViewModel.putImageToMapLocation(mapLocationId!!, imageMultiPartBody)
             }
         }
-        routeViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
+        backendViewModel.audioResponse.observe(viewLifecycleOwner) { audioResponse ->
             audioResponse?.body()?.content?.let { audios ->
                 for (audio in audios) {
                     Log.d("GogiUsuwa", audio.toString())
-                    routeViewModel.deleteAudioById(
+                    backendViewModel.deleteAudioById(
                         audio.id,
                         onSuccess = { Log.d("GogiUsuwa", "gogi usunal") },
                         onFailure = { Log.d("GogiUsuwa", "gogi nie usunal") },
@@ -630,7 +632,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
             null,
             newMapLocation
         )
-        routeViewModel.postAudio(audioDTO) { newAudio ->
+        backendViewModel.postAudio(audioDTO) { newAudio ->
             audioIdMap[newMapLocation.id] = newAudio.id
             val audioFile = File(
                 requireContext().filesDir,
@@ -649,7 +651,7 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                         audioFile.asRequestBody()
                     )
                 Log.d("AUDIO ID", newAudio.id)
-                routeViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
+                backendViewModel.postAudioFile(newAudio.id, audioMultiPartBody)
             } else {
                 Log.d("AudioRequest", "Nie mo")
             }
@@ -670,11 +672,11 @@ class DatabaseMyRouteDetailFragment() : Fragment() {
                 sortedPointList[startPosition].sequenceNr = stopPosition + 1
                 sortedPointList[stopPosition].sequenceNr = startPosition + 1
 
-                routeViewModel.updateRouteMapLocationSequenceNrById(
+                localViewModel.updateRouteMapLocationSequenceNrById(
                     sortedPointList[startPosition].id,
                     stopPosition + 1
                 )
-                routeViewModel.updateRouteMapLocationSequenceNrById(
+                localViewModel.updateRouteMapLocationSequenceNrById(
                     sortedPointList[stopPosition].id,
                     startPosition + 1
                 )

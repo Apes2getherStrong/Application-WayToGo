@@ -17,8 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentWelcomeBinding
-import loch.golden.waytogo.utils.RouteMainApplication
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import loch.golden.waytogo.services.dto.user.UserDTO
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
@@ -28,7 +27,7 @@ class WelcomeFragment : Fragment() {
     private lateinit var binding: FragmentWelcomeBinding
     private lateinit var tokenManager: TokenManager
     private var bottomNav : BottomNavigationView? = null
-    private val routeViewModel: RouteViewModel by viewModels()
+    private val backendViewModel: BackendViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,9 +73,9 @@ class WelcomeFragment : Fragment() {
                 val updatedUser = userDTO.copy(username = newUsername )
                 tokenManager.saveUserData(updatedUser)
 
-                routeViewModel.putUserByUserId(userId, updatedUser)
+                backendViewModel.putUserByUserId(userId, updatedUser)
 
-                routeViewModel.putUserResponse.observe(viewLifecycleOwner) { response ->
+                backendViewModel.putUserResponse.observe(viewLifecycleOwner) { response ->
                     if (response.isSuccessful) {
                         Snackbar.make(requireView(), "Username updated successfully!", Snackbar.LENGTH_LONG).setAnchorView(bottomNav).show()
                     } else {

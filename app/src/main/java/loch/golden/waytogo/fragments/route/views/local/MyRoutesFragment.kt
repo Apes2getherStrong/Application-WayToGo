@@ -17,13 +17,13 @@ import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
 import loch.golden.waytogo.fragments.route.components.adapters.SimpleMyRoutesAdapter
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
 import loch.golden.waytogo.room.entity.route.Route
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.LocalViewModel
 
 @AndroidEntryPoint
 class MyRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentMyRoutesBinding
-    private val routeViewModel: RouteViewModel by viewModels ()
+    private val localViewModel: LocalViewModel by viewModels ()
     private lateinit var recyclerViewRouteAdapter: SimpleMyRoutesAdapter
     private var allRoutes: List<Route> = emptyList()
     private var bottomNav: BottomNavigationView? = null
@@ -64,7 +64,7 @@ class MyRoutesFragment : Fragment() {
                     alertDialogBuilder.setTitle("Delete Route")
                     alertDialogBuilder.setMessage("Are you sure you want to delete this route?")
                     alertDialogBuilder.setPositiveButton("Delete") { dialog, which ->
-                        routeViewModel.deleteRouteWithMapLocations(route.routeUid)
+                        localViewModel.deleteRouteWithMapLocations(route.routeUid)
 
                         Snackbar.make(view!!, "Route deleted successfully", Snackbar.LENGTH_SHORT)
                             .setAnchorView(bottomNav).show()
@@ -88,7 +88,7 @@ class MyRoutesFragment : Fragment() {
             }
         })
 
-        routeViewModel.allRoutes.observe(viewLifecycleOwner) { routes ->
+        localViewModel.allRoutes.observe(viewLifecycleOwner) { routes ->
             allRoutes = routes
             recyclerViewRouteAdapter.setRoutes(routes)
         }

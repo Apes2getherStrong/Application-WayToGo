@@ -3,10 +3,10 @@ package loch.golden.waytogo.viewmodels.components
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import loch.golden.waytogo.room.entity.route.Route
-import loch.golden.waytogo.repositories.RouteRepository
+import loch.golden.waytogo.repositories.BackendRepository
 import retrofit2.HttpException
 
-class RoutePagingSource(private val repository: RouteRepository) : PagingSource<Int, Route>() {
+class RoutePagingSource(private val repository: BackendRepository) : PagingSource<Int, Route>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Route> {
         val pageNumber = params.key ?: 1

@@ -15,11 +15,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.R
 import loch.golden.waytogo.room.entity.route.Route
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import retrofit2.Response
 
 class RecyclerViewRouteAdapter(
-    val viewModel: RouteViewModel,
+    val viewModel: BackendViewModel,
     val lifecycleScope: CoroutineScope
 ) :
     PagingDataAdapter<Route, RecyclerViewRouteAdapter.RouteViewHolder>(ROUTE_DIFF_CALLBACK) {

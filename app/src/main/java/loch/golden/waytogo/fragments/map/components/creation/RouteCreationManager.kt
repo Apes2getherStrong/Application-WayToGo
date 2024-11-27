@@ -27,7 +27,7 @@ import loch.golden.waytogo.fragments.map.views.PointMapFragment
 import loch.golden.waytogo.fragments.map.views.MarkerCreationFragment
 import loch.golden.waytogo.room.entity.maplocation.MapLocation
 import loch.golden.waytogo.utils.Constants
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.LocalViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -37,7 +37,7 @@ class RouteCreationManager(
     private val binding: FragmentMapBinding,
     private val infoWindowManager: InfoWindowManager,
     private val fragment: PointMapFragment,
-    private val routeViewModel: RouteViewModel,
+    private val localViewModel: LocalViewModel,
     private val mapViewModel: MapViewModel
 ) : OnMarkerDragListener {
 
@@ -114,7 +114,7 @@ class RouteCreationManager(
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
                 mapPoint.name = binding.expandedPanel.creationTitle.text.toString()
-                routeViewModel.updateMapLocation(MapLocation(mapPoint))
+                localViewModel.updateMapLocation(MapLocation(mapPoint))
                 binding.expandedPanel.creationTitle.clearFocus()
                 fragment.requireContext().hideKeyboard(binding.expandedPanel.creationTitle)
                 true
@@ -126,7 +126,7 @@ class RouteCreationManager(
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val mapPoint = mapViewModel.route!!.pointList[currentMarkerId]!!
                 mapPoint.description = binding.expandedPanel.creationDescription.text.toString()
-                routeViewModel.updateMapLocation(MapLocation(mapPoint))
+                localViewModel.updateMapLocation(MapLocation(mapPoint))
                 binding.expandedPanel.creationDescription.clearFocus()
                 fragment.requireContext().hideKeyboard(binding.expandedPanel.creationDescription)
                 true
@@ -177,7 +177,7 @@ class RouteCreationManager(
             null
         )
         val sequenceNr = mapViewModel.route!!.pointList.size + 1
-        routeViewModel.insertMapLocation(mapLocation, routeId, sequenceNr)
+        localViewModel.insertMapLocation(mapLocation, routeId, sequenceNr)
         mapViewModel.route!!.pointList[markerId] = MapPoint(mapLocation, sequenceNr)
         creationMarkerMap[markerId] = marker
         infoWindowMap[markerId] = infoWindow
@@ -192,7 +192,7 @@ class RouteCreationManager(
                 val markerId = marker?.snippet!!
                 creationMarkerMap.remove(markerId)
                 hideInfoWindow(markerId)
-                routeViewModel.deleteMapLocation( //TODO do it only by id
+                localViewModel.deleteMapLocation( //TODO do it only by id
                     MapLocation(
                         markerId,
                         marker.title!!,
@@ -307,7 +307,7 @@ class RouteCreationManager(
         infoWindowMap[id]!!.position = marker.position
         val mapPoint = mapViewModel.route!!.pointList[id]!!
         mapPoint.position = marker.position
-        routeViewModel.updateMapLocation(MapLocation(mapPoint))
+        localViewModel.updateMapLocation(MapLocation(mapPoint))
     }
 
     override fun onMarkerDragStart(marker: Marker) {

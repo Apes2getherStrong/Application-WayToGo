@@ -17,8 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentLoginBinding
-import loch.golden.waytogo.utils.RouteMainApplication
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import loch.golden.waytogo.services.dto.auth.AuthRequest
 import loch.golden.waytogo.fragments.user.components.TokenManager
 import retrofit2.HttpException
@@ -28,7 +27,7 @@ import java.io.IOException
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
-    private val routeViewModel: RouteViewModel by viewModels ()
+    private val backendViewModel: BackendViewModel by viewModels ()
     private lateinit var progressDialog: AlertDialog
     private lateinit var tokenManager: TokenManager
     override fun onCreateView(
@@ -68,13 +67,13 @@ class LoginFragment : Fragment() {
         }
 
         val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
-        routeViewModel.authResponse.observe(viewLifecycleOwner) { authResponse ->
+        backendViewModel.authResponse.observe(viewLifecycleOwner) { authResponse ->
             authResponse?.let {
                 progressDialog.dismiss()
                 tokenManager.saveToken(it.token)
                 val userId = tokenManager.getUserIdFromJWT()
-                userId?.let { it1 -> routeViewModel.getUserByUserId(it1) }
-                routeViewModel.userDTOResponse.observe(viewLifecycleOwner) { response ->
+                userId?.let { it1 -> backendViewModel.getUserByUserId(it1) }
+                backendViewModel.userDTOResponse.observe(viewLifecycleOwner) { response ->
                     if (response.isSuccessful) {
                         val user = response.body()!!
                         tokenManager.saveUserData(user)
@@ -132,7 +131,7 @@ class LoginFragment : Fragment() {
         progressDialog.show()
 
         try {
-            routeViewModel.login(authRequest)
+            backendViewModel.login(authRequest)
         } catch (e: HttpException) {
             progressDialog.dismiss()
             when (e.code()) {

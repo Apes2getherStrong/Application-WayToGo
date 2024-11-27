@@ -42,8 +42,8 @@ import loch.golden.waytogo.fragments.map.components.creation.RouteCreationManage
 import loch.golden.waytogo.fragments.map.components.navigation.NavigationManager
 import loch.golden.waytogo.utils.Constants
 import loch.golden.waytogo.utils.OnChangeFragmentListener
+import loch.golden.waytogo.viewmodels.LocalViewModel
 import loch.golden.waytogo.viewmodels.MapViewModel
-import loch.golden.waytogo.viewmodels.RouteViewModel
 import loch.golden.waytogo.viewmodels.classes.MapPoint
 import javax.inject.Inject
 import kotlin.math.atan2
@@ -52,11 +52,12 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 @AndroidEntryPoint
-class PointMapFragment() : Fragment(), OnMapReadyCallback,
+class PointMapFragment : Fragment(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //viewmodel tied to parent activity - MainActivity
     private val mapViewModel: MapViewModel by activityViewModels()
+
     @Inject
     lateinit var navigationManager: NavigationManager
 
@@ -75,7 +76,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
     private val markerList: MutableList<Marker?> = mutableListOf()
 
-    private val routeViewModel: RouteViewModel by viewModels()
+    private val localViewModel: LocalViewModel by viewModels()
 
     private var changeFragmentListener: OnChangeFragmentListener? = null
     override fun onAttach(context: Context) {
@@ -174,10 +175,10 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         }
 
         mapViewModel.cameraPosition?.let {
-            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!));
+            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mapViewModel.cameraPosition!!))
         } ?: run {
             lifecycleScope.launch(Dispatchers.IO) {
-                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
+                val myLocation = mapViewModel.locationManager.awaitMyLocation()
                 withContext(Dispatchers.Main) {
                     val cameraPosition = CameraPosition.builder()
                         .target(myLocation)
@@ -199,11 +200,11 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
     private fun createPolylineToPoint() {
         lifecycleScope.launch {
             if (mapViewModel.route != null) {
-                val myLocation = mapViewModel.locationManager!!.awaitMyLocation()
+                val myLocation = mapViewModel.locationManager.awaitMyLocation()
                 try {
-                    val polyPoints = navigationManager!!.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
+                    val polyPoints = navigationManager.getPolyline(myLocation, mapViewModel.currentPoint!!.position)
                     val polylineOptions = PolylineOptions().apply {
-                        polyPoints.forEach() { polyPoint ->
+                        polyPoints.forEach { polyPoint ->
                             add(polyPoint)
                         }
                         color(Color.BLUE)
@@ -222,7 +223,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
 
 
     private fun populateMap(mapPoints: Map<String, MapPoint>) {
-        for ((id, mapPoint) in mapPoints) {
+        for ((_, mapPoint) in mapPoints) {
             val marker = googleMap.addMarker(
                 MarkerOptions()
                     .position(mapPoint.position)
@@ -239,9 +240,9 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
         infoWindowManager?.onParentViewCreated(binding.mapViewContainer, savedInstanceState)
 
         routeCreationManager =
-            RouteCreationManager(binding, infoWindowManager!!, this, routeViewModel, mapViewModel)
+            RouteCreationManager(binding, infoWindowManager!!, this, localViewModel, mapViewModel)
 
-        lifecycleScope.launch { // wait till googlemaps is initialized
+        lifecycleScope.launch { // wait till google maps is initialized
             googleMapSetup.await()
             googleMap.setOnMarkerDragListener(routeCreationManager)
             routeCreationManager?.startExisting(mapViewModel.route!!.id, markerList)
@@ -278,7 +279,7 @@ class PointMapFragment() : Fragment(), OnMapReadyCallback,
     }
 
     private fun observeLocation() {
-        mapViewModel.locationManager!!.currentLocation.observe(viewLifecycleOwner) { newValue ->
+        mapViewModel.locationManager.currentLocation.observe(viewLifecycleOwner) { newValue ->
             Log.d("Warmbier", "New location: $newValue")
             val distance = calculateDistance(
                 newValue.latitude,

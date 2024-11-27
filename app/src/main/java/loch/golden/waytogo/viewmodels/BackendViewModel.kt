@@ -25,7 +25,7 @@ import loch.golden.waytogo.room.entity.route.Route
 import loch.golden.waytogo.room.entity.routemaplocation.RouteMapLocation
 import loch.golden.waytogo.services.dto.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.viewmodels.classes.IdByteArray
-import loch.golden.waytogo.repositories.RouteRepository
+import loch.golden.waytogo.repositories.BackendRepository
 import loch.golden.waytogo.services.dto.user.UserDTO
 import loch.golden.waytogo.services.dto.auth.AuthRequest
 import loch.golden.waytogo.services.dto.auth.AuthResponse
@@ -35,8 +35,8 @@ import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
-class RouteViewModel @Inject constructor(
-    private val routeRepository: RouteRepository
+class BackendViewModel @Inject constructor(
+    private val backendRepository: BackendRepository
 ) : ViewModel() {
 
     //val routeResponse: MutableLiveData<Response<RouteListResponse>> = MutableLiveData()
@@ -44,9 +44,6 @@ class RouteViewModel @Inject constructor(
     val myRouteResponse: MutableLiveData<Response<Route>> = MutableLiveData()
     val myMapLocationsResponse: MutableLiveData<Response<MapLocationListResponse>> =
         MutableLiveData()
-    val allRoutes: LiveData<List<Route>> = routeRepository.allRoutes.asLiveData()
-    val routeWithLocationsFromDb: MutableLiveData<RouteWithMapLocations> = MutableLiveData()
-    val routeFromDb: MutableLiveData<Route> = MutableLiveData()
     val currentRouteImage: MutableLiveData<Response<ByteArray>> = MutableLiveData()
     val mapLocationAudios: MutableLiveData<Response<List<String>>> = MutableLiveData()
     val authResponse: MutableLiveData<AuthResponse?> = MutableLiveData()
@@ -98,7 +95,7 @@ class RouteViewModel @Inject constructor(
 
     fun putAudioById(audioId: String, audioDTO: AudioDTO) = viewModelScope.launch {
         try {
-            val response = routeRepository.putAudioById(audioId, audioDTO)
+            val response = backendRepository.putAudioById(audioId, audioDTO)
             _putAudioResponse.postValue(response)
             if (!response.isSuccessful) {
                 Log.e("Update User", "Error: ${response.errorBody()?.string()}")
@@ -108,81 +105,6 @@ class RouteViewModel @Inject constructor(
         }
     }
 
-    fun getRouteFromDbById(routeUid: String) {
-        viewModelScope.launch {
-            routeFromDb.value = routeRepository.getRouteFromDbById(routeUid)
-        }
-    }
-
-    fun insert(route: Route) = viewModelScope.launch {
-        routeRepository.insert(route)
-    }
-
-    fun updateRoute(route: Route) = viewModelScope.launch {
-        routeRepository.updateRoute(route)
-    }
-
-    fun deleteRoute(route: Route) = viewModelScope.launch {
-        routeRepository.deleteRoute(route)
-    }
-
-    fun deleteRouteWithMapLocations(routeUid: String) = viewModelScope.launch {
-        routeRepository.deleteRouteWithMapLocations(routeUid)
-    }
-
-    fun insertMapLocation(mapLocation: MapLocation, routeId: String, sequenceNr: Int) =
-        viewModelScope.launch {
-            routeRepository.insertMapLocation(mapLocation)
-            routeRepository.insertRouteMapLocation(RouteMapLocation(routeId, mapLocation.id, sequenceNr, null))
-        }
-
-    fun updateMapLocation(mapLocation: MapLocation) = viewModelScope.launch {
-        routeRepository.updateMapLocation(mapLocation)
-    }
-
-    fun updateRouteMapLocation(routeMapLocation: RouteMapLocation) = viewModelScope.launch {
-        routeRepository.updateRouteMapLocation(routeMapLocation)
-    }
-
-    fun updateExternalId(routeUid: String, id: String, externalId: String) = viewModelScope.launch {
-        Log.d("Gogo","repoweszlo")
-        routeRepository.updateExternalId(routeUid,id,externalId)
-    }
-
-    fun updateRouteExternalId(routeUid: String, externalId: String?) = viewModelScope.launch {
-        routeRepository.updateRouteExternalId(routeUid,externalId)
-    }
-
-    fun deleteMapLocation(mapLocation: MapLocation) =
-        viewModelScope.launch {
-            routeRepository.deleteMapLocation(mapLocation)
-            routeRepository.deleteRouteMapLocationById(mapLocation.id)
-
-        }
-
-    suspend fun getSequenceNrByMapLocationId(mapLocationId: String): Int {
-        return withContext(Dispatchers.IO) {
-            routeRepository.getSequenceNrByMapLocationId(mapLocationId)
-        }
-    }
-
-    suspend fun getRouteMapLocationByMapLocationId(mapLocationId: String): RouteMapLocation {
-        return withContext(Dispatchers.IO) {
-            routeRepository.getRouteMapLocationByMapLocationId(mapLocationId)
-        }
-    }
-
-    fun updateRouteMapLocationSequenceNrById(mapLocationId: String, newSequenceNr: Int) {
-        viewModelScope.launch {
-            routeRepository.updateRouteMapLocationSequenceNrById(mapLocationId, newSequenceNr)
-        }
-    }
-
-    fun getRouteWithMapLocations(routeUid: String) {
-        viewModelScope.launch {
-            routeWithLocationsFromDb.value = routeRepository.getRouteWithMapLocations(routeUid)
-        }
-    }
 
     fun getRoutes(pageNumber: Int, pageSize: Int): Flow<PagingData<Route>> {
         return Pager(
@@ -190,7 +112,7 @@ class RouteViewModel @Inject constructor(
                 pageSize = pageSize,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { RoutePagingSource(routeRepository) }
+            pagingSourceFactory = { RoutePagingSource(backendRepository) }
         )
             .flow
             .cachedIn(viewModelScope)
@@ -198,7 +120,7 @@ class RouteViewModel @Inject constructor(
 
     fun getRouteById(routeUid: String) {
         viewModelScope.launch {
-            val response = routeRepository.getRouteById(routeUid)
+            val response = backendRepository.getRouteById(routeUid)
             myRouteResponse.value = response
 
         }
@@ -206,7 +128,7 @@ class RouteViewModel @Inject constructor(
 
     fun getUserByUserId(userId: String) {
         viewModelScope.launch {
-            val response = routeRepository.getUserByUserId(userId)
+            val response = backendRepository.getUserByUserId(userId)
             userDTOResponse.value = response
 
         }
@@ -214,7 +136,7 @@ class RouteViewModel @Inject constructor(
 
     fun putUserByUserId(userId: String, userDTO: UserDTO) = viewModelScope.launch {
         try {
-            val response = routeRepository.putUserByUserId(userId,userDTO)
+            val response = backendRepository.putUserByUserId(userId,userDTO)
             _putUserResponse.postValue(response)
             if (!response.isSuccessful) {
                 Log.e("Update User", "Error: ${response.errorBody()?.string()}")
@@ -227,40 +149,40 @@ class RouteViewModel @Inject constructor(
 
     fun getMapLocationsByRouteId(routeUid: String) {
         viewModelScope.launch {
-            val response = routeRepository.getMapLocationsByRouteId(routeUid)
+            val response = backendRepository.getMapLocationsByRouteId(routeUid)
             myMapLocationsResponse.value = response
         }
     }
 
     fun getRouteImage(routeUid: String) {
         viewModelScope.launch {
-            val currentImageBytes = routeRepository.getRouteImage(routeUid)
+            val currentImageBytes = backendRepository.getRouteImage(routeUid)
             currentRouteImage.value = currentImageBytes
         }
     }
 
     suspend fun getBlockingRouteImage(routeUid: String): Response<ByteArray> {
         return withContext(Dispatchers.IO) {
-            routeRepository.getRouteImage(routeUid)
+            backendRepository.getRouteImage(routeUid)
         }
     }
 
     fun getMapLocationImage(mapLocationId: String) {
         viewModelScope.launch {
-            val currentImageBytes = routeRepository.getMapLocationImage(mapLocationId)
+            val currentImageBytes = backendRepository.getMapLocationImage(mapLocationId)
             _currentMapImage.value = IdByteArray(mapLocationId, currentImageBytes)
         }
     }
 
     fun getMapLocationAudios(mapLocationId: String) {
         viewModelScope.launch {
-            mapLocationAudios.value = routeRepository.getMapLocationAudios(mapLocationId)
+            mapLocationAudios.value = backendRepository.getMapLocationAudios(mapLocationId)
         }
     }
 
     fun postAudio(audioDTO: AudioDTO, callback: (AudioDTO) -> Unit) {
         viewModelScope.launch {
-            val response = routeRepository.postAudio(audioDTO)
+            val response = backendRepository.postAudio(audioDTO)
             if (response.isSuccessful) {
                 response.body()?.let { newAudio ->
                     callback(newAudio)
@@ -274,7 +196,7 @@ class RouteViewModel @Inject constructor(
     fun getAudioFile(audioId: String, mapLocationId: String) {
         viewModelScope.launch {
 
-            val response = routeRepository.getAudioFile(audioId)
+            val response = backendRepository.getAudioFile(audioId)
             _audioFile.value = IdByteArray(mapLocationId, response)
 
         }
@@ -282,14 +204,14 @@ class RouteViewModel @Inject constructor(
 
     fun getAudioByMapLocationId(mapLocationId: String) {
         viewModelScope.launch {
-            audioResponse.value = routeRepository.getAudioByMapLocationId(mapLocationId)
+            audioResponse.value = backendRepository.getAudioByMapLocationId(mapLocationId)
         }
     }
 
     fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
         viewModelScope.launch {
             try {
-                routeRepository.postAudioFile(audioId, audioFile)
+                backendRepository.postAudioFile(audioId, audioFile)
             } catch (e: Exception) {
                 Log.d("Nie dziala audio", e.toString())
             }
@@ -299,7 +221,7 @@ class RouteViewModel @Inject constructor(
     fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
         viewModelScope.launch {
             try {
-                routeRepository.putImageToMapLocation(mapLocationId, imageFile)
+                backendRepository.putImageToMapLocation(mapLocationId, imageFile)
             } catch (e: Exception) {
                 Log.d("Nie dziala image", e.toString())
             }
@@ -310,7 +232,7 @@ class RouteViewModel @Inject constructor(
     fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
         viewModelScope.launch {
             try {
-                routeRepository.putImageToRoute(routeId, imageFile)
+                backendRepository.putImageToRoute(routeId, imageFile)
             } catch (e: Exception) {
                 Log.d("Warmbier", " kurde bele image ruta nie dziala $e")
             }
@@ -320,7 +242,7 @@ class RouteViewModel @Inject constructor(
 
     fun postRoute(route: Route, callback: (Route) -> Unit) = viewModelScope.launch {
         try {
-            val response = routeRepository.postRoute(route)
+            val response = backendRepository.postRoute(route)
             if (response.isSuccessful) {
                 response.body()?.let { newRoute ->
                     callback(newRoute)
@@ -336,7 +258,7 @@ class RouteViewModel @Inject constructor(
 
     fun putRouteById(routeId: String, route: Route) = viewModelScope.launch {
         try {
-            val response = routeRepository.putRouteById(routeId, route)
+            val response = backendRepository.putRouteById(routeId, route)
             _putRouteResponse.postValue(response)
             if (!response.isSuccessful) {
                 Log.e("putRouteById", "Error: ${response.errorBody()?.string()}")
@@ -350,7 +272,7 @@ class RouteViewModel @Inject constructor(
     fun postMapLocation(mapLocation: MapLocationRequest, callback: (MapLocationRequest) -> Unit) =
         viewModelScope.launch {
             try {
-                val response = routeRepository.postMapLocation(mapLocation)
+                val response = backendRepository.postMapLocation(mapLocation)
                 if (response.isSuccessful) {
                     response.body()?.let { newMapLocation ->
                         callback(newMapLocation)
@@ -366,7 +288,7 @@ class RouteViewModel @Inject constructor(
 
     fun putMapLocationById(mapLocationId: String, mapLocation: MapLocationRequest) = viewModelScope.launch {
         try {
-            val response = routeRepository.putMapLocationById(mapLocationId, mapLocation)
+            val response = backendRepository.putMapLocationById(mapLocationId, mapLocation)
             _putMapLocationResponse.postValue(response)
         } catch (e: Exception) {
             Log.e("putMapLocationById", "Exception: ${e.message}")
@@ -376,7 +298,7 @@ class RouteViewModel @Inject constructor(
 
     fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest, callback: (RouteMapLocationRequest) -> Unit) =
         viewModelScope.launch {
-            val response = routeRepository.postRouteMapLocation(routeMapLocation)
+            val response = backendRepository.postRouteMapLocation(routeMapLocation)
             if (response.isSuccessful) {
                 response.body()?.let { newRouteMapLocation ->
                     callback(newRouteMapLocation)
@@ -387,7 +309,7 @@ class RouteViewModel @Inject constructor(
     fun putRouteMapLocationById(routeMapLocationId: String, routeMapLocation: RouteMapLocationRequest) =
         viewModelScope.launch {
             try {
-                val response = routeRepository.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
+                val response = backendRepository.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
                 _putRouteMapLocationResponse.postValue(response)
             } catch (e: Exception) {
                 Log.e("putRouteMapLocationById", "Exception: ${e.message}")
@@ -396,7 +318,7 @@ class RouteViewModel @Inject constructor(
 
     fun login(authRequest: AuthRequest) {
         viewModelScope.launch {
-            val response = routeRepository.login(authRequest)
+            val response = backendRepository.login(authRequest)
             if (response.isSuccessful) {
                 authResponse.postValue(response.body())
             }
@@ -408,7 +330,7 @@ class RouteViewModel @Inject constructor(
 
     fun register(userDTO: UserDTO) {
         viewModelScope.launch {
-            val response = routeRepository.register(userDTO)
+            val response = backendRepository.register(userDTO)
             if(response.isSuccessful) {
                 registerResponse.postValue(response.body())
             }
@@ -420,7 +342,7 @@ class RouteViewModel @Inject constructor(
 
     suspend fun deleteRouteById(routeId: String): Result<Unit> {
         return try {
-            val response: Response<Route> = routeRepository.deleteRouteById(routeId)
+            val response: Response<Route> = backendRepository.deleteRouteById(routeId)
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
@@ -434,7 +356,7 @@ class RouteViewModel @Inject constructor(
     fun deleteMapLocationById(mapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response: Response<MapLocation> = routeRepository.deleteMapLocationById(mapLocationId)
+                val response: Response<MapLocation> = backendRepository.deleteMapLocationById(mapLocationId)
                 if (response.isSuccessful) {
                     onSuccess()
                 } else {
@@ -449,7 +371,7 @@ class RouteViewModel @Inject constructor(
     fun deleteRouteMapLocationByIdApi(routeMapLocationId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response: Response<RouteMapLocation> = routeRepository.deleteRouteMapLocationByIdApi(routeMapLocationId)
+                val response: Response<RouteMapLocation> = backendRepository.deleteRouteMapLocationByIdApi(routeMapLocationId)
                 if (response.isSuccessful) {
                     onSuccess()
                 } else {
@@ -464,7 +386,7 @@ class RouteViewModel @Inject constructor(
     fun deleteAudioById(audioId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response: Response<AudioDTO> = routeRepository.deleteAudioById(audioId)
+                val response: Response<AudioDTO> = backendRepository.deleteAudioById(audioId)
                 if (response.isSuccessful) {
                     onSuccess()
                 } else {

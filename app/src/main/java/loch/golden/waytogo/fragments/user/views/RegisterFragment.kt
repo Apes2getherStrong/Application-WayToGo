@@ -17,8 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentRegisterBinding
-import loch.golden.waytogo.utils.RouteMainApplication
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import loch.golden.waytogo.services.dto.user.UserDTO
 import java.util.UUID
 
@@ -26,7 +25,7 @@ import java.util.UUID
 class RegisterFragment : Fragment() {
 
     private lateinit var binding: FragmentRegisterBinding
-    private val routeViewModel: RouteViewModel by viewModels ()
+    private val backendViewModel: BackendViewModel by viewModels ()
     private var bottomNav : BottomNavigationView? = null
 
 
@@ -56,7 +55,7 @@ class RegisterFragment : Fragment() {
             this.requireContext().hideKeyboard(binding.username)
             this.requireContext().hideKeyboard(binding.password)
         }
-        routeViewModel.registerResponse.observe(viewLifecycleOwner) { registerResponse ->
+        backendViewModel.registerResponse.observe(viewLifecycleOwner) { registerResponse ->
             registerResponse?.let {
                 Snackbar.make(view, "Registration Successful", Snackbar.LENGTH_SHORT)
                     .setAnchorView(bottomNav).show()
@@ -105,7 +104,7 @@ class RegisterFragment : Fragment() {
 
     private fun register(userDTO: UserDTO) {
         try {
-            routeViewModel.register(userDTO)
+            backendViewModel.register(userDTO)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), e.toString(), Toast.LENGTH_LONG).show()
         }

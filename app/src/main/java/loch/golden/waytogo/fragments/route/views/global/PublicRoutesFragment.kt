@@ -7,26 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import loch.golden.waytogo.databinding.FragmentPublicRoutesBinding
-import loch.golden.waytogo.viewmodels.MapViewModel
 import loch.golden.waytogo.fragments.route.components.adapters.RecyclerViewRouteAdapter
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
 import loch.golden.waytogo.room.entity.route.Route
-import loch.golden.waytogo.repositories.RouteRepository
-import loch.golden.waytogo.room.WayToGoDatabase
-import loch.golden.waytogo.room.dao.RouteDao
-import loch.golden.waytogo.viewmodels.RouteViewModel
+import loch.golden.waytogo.viewmodels.BackendViewModel
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
 @AndroidEntryPoint
@@ -34,7 +26,7 @@ class PublicRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentPublicRoutesBinding
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
-    private val viewModel by viewModels<RouteViewModel>()
+    private val viewModel by viewModels<BackendViewModel>()
     private lateinit var tokenManager: TokenManager
 
 
