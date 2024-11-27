@@ -3,37 +3,31 @@ package loch.golden.waytogo.repositories
 import android.util.Log
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
-import loch.golden.waytogo.services.dto.audio.AudioDTO
-import loch.golden.waytogo.services.dto.audio.AudioListResponse
-import loch.golden.waytogo.services.services.RetrofitInstance
-import loch.golden.waytogo.services.dto.auth.AuthRequest
-import loch.golden.waytogo.services.dto.auth.AuthResponse
+import loch.golden.waytogo.room.dao.RouteDao
 import loch.golden.waytogo.room.entity.maplocation.MapLocation
-import loch.golden.waytogo.services.dto.maplocation.MapLocationListResponse
-import loch.golden.waytogo.services.dto.maplocation.MapLocationRequest
 import loch.golden.waytogo.room.entity.relations.RouteWithMapLocations
 import loch.golden.waytogo.room.entity.route.Route
-import loch.golden.waytogo.services.dto.route.RouteListResponse
 import loch.golden.waytogo.room.entity.routemaplocation.RouteMapLocation
+import loch.golden.waytogo.services.dto.audio.AudioDTO
+import loch.golden.waytogo.services.dto.audio.AudioListResponse
+import loch.golden.waytogo.services.dto.auth.AuthRequest
+import loch.golden.waytogo.services.dto.auth.AuthResponse
+import loch.golden.waytogo.services.dto.maplocation.MapLocationListResponse
+import loch.golden.waytogo.services.dto.maplocation.MapLocationRequest
+import loch.golden.waytogo.services.dto.route.RouteListResponse
 import loch.golden.waytogo.services.dto.routemaplocation.RouteMapLocationRequest
 import loch.golden.waytogo.services.dto.user.UserDTO
-import loch.golden.waytogo.room.dao.RouteDao
+import loch.golden.waytogo.services.services.ApiService
 import okhttp3.MultipartBody
 import retrofit2.Response
+import javax.inject.Inject
 
-class RouteRepository(private val routeDao: RouteDao) {
+class RouteRepository @Inject constructor(
+    private val routeDao: RouteDao,
+    private val apiService: ApiService
+) {
 
     val allRoutes: Flow<List<Route>> = routeDao.getAllRoutes()
-
-//    @WorkerThread
-//    suspend fun insertRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
-//        routeDao.insertRouteWithMapLocations(routeWithMapLocations)
-//    }
-//
-//    @WorkerThread
-//    suspend fun deleteRouteWithMapLocations(routeWithMapLocations: RouteWithMapLocations) {
-//        routeDao.deleteRouteWithMapLocations(routeWithMapLocations)
-//    }
 
     @WorkerThread
     suspend fun getRouteFromDbById(routeUid: String): Route {
@@ -130,123 +124,123 @@ class RouteRepository(private val routeDao: RouteDao) {
     }
 
     suspend fun login(authRequest: AuthRequest): Response<AuthResponse> {
-        val response = RetrofitInstance.apiService.login(authRequest)
+        val response = apiService.login(authRequest)
         Log.d("Login", response.body().toString())
         return response
 
     }
 
     suspend fun register(userDTO: UserDTO): Response<UserDTO> {
-        val response = RetrofitInstance.apiService.register(userDTO)
+        val response = apiService.register(userDTO)
         Log.d("Register", response.body().toString())
         return response
     }
 
     suspend fun getAudioFile(audioId: String): Response<ByteArray> {
-        val response = RetrofitInstance.apiService.getAudioFile(audioId)
+        val response = apiService.getAudioFile(audioId)
         return Response.success(response.body()?.bytes())
 
     }
 
     suspend fun getAudioByMapLocationId(mapLocationId: String): Response<AudioListResponse> {
-        return RetrofitInstance.apiService.getAudioByMapLocationId(mapLocationId)
+        return apiService.getAudioByMapLocationId(mapLocationId)
     }
 
     suspend fun getRoutes(pageNumber: Int, pageSize: Int): Response<RouteListResponse> {
-        return RetrofitInstance.apiService.getRoutes(pageNumber, pageSize)
+        return apiService.getRoutes(pageNumber, pageSize)
     }
 
     suspend fun getRouteById(routeUid: String): Response<Route> {
-        return RetrofitInstance.apiService.getRouteById(routeUid)
+        return apiService.getRouteById(routeUid)
     }
 
     suspend fun getUserByUserId(userId: String): Response<UserDTO> {
-        return RetrofitInstance.apiService.getUserByUserId(userId)
+        return apiService.getUserByUserId(userId)
     }
 
     suspend fun putUserByUserId(userId: String, userDTO: UserDTO): Response<Void> {
-        return RetrofitInstance.apiService.putUserByUserId(userId, userDTO)
+        return apiService.putUserByUserId(userId, userDTO)
     }
 
     suspend fun getMapLocationsByRouteId(routeId: String): Response<MapLocationListResponse> {
-        return RetrofitInstance.apiService.getMapLocationsByRouteId(routeId)
+        return apiService.getMapLocationsByRouteId(routeId)
     }
 
     suspend fun getRouteImage(routeId: String): Response<ByteArray> {
-        val response = RetrofitInstance.apiService.getRouteImage(routeId)
+        val response = apiService.getRouteImage(routeId)
         return Response.success(response.body()?.bytes())
     }
 
     suspend fun getMapLocationImage(mapLocationId: String): Response<ByteArray> {
-        val response = RetrofitInstance.apiService.getMapLocationImage(mapLocationId)
+        val response = apiService.getMapLocationImage(mapLocationId)
         return Response.success(response.body()?.bytes())
     }
 
     suspend fun getMapLocationAudios(mapLocationId: String): Response<List<String>> {
-        return RetrofitInstance.apiService.getMapLocationAudios(mapLocationId)
+        return apiService.getMapLocationAudios(mapLocationId)
     }
 
     suspend fun postRoute(route: Route): Response<Route> {
-        return RetrofitInstance.apiService.postRoute(route)
+        return apiService.postRoute(route)
     }
 
     suspend fun putRouteById(routeId: String, route: Route): Response<Void> {
-        return RetrofitInstance.apiService.putRouteById(routeId, route)
+        return apiService.putRouteById(routeId, route)
     }
 
     suspend fun postMapLocation(mapLocation: MapLocationRequest): Response<MapLocationRequest> {
-        return RetrofitInstance.apiService.postMapLocation(mapLocation)
+        return apiService.postMapLocation(mapLocation)
     }
 
     suspend fun putMapLocationById(mapLocationId: String, mapLocation: MapLocationRequest): Response<Void> {
-        return RetrofitInstance.apiService.putMapLocationById(mapLocationId, mapLocation)
+        return apiService.putMapLocationById(mapLocationId, mapLocation)
     }
 
     suspend fun postRouteMapLocation(routeMapLocation: RouteMapLocationRequest): Response<RouteMapLocationRequest> {
-        return RetrofitInstance.apiService.postRouteMapLocation(routeMapLocation)
+        return apiService.postRouteMapLocation(routeMapLocation)
     }
 
     suspend fun putRouteMapLocationById(
         routeMapLocationId: String,
         routeMapLocation: RouteMapLocationRequest
     ): Response<Void> {
-        return RetrofitInstance.apiService.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
+        return apiService.putRouteMapLocationById(routeMapLocationId, routeMapLocation)
     }
 
     suspend fun postAudio(audioDTO: AudioDTO): Response<AudioDTO> {
-        return RetrofitInstance.apiService.postAudio(audioDTO)
+        return apiService.postAudio(audioDTO)
     }
 
     suspend fun putAudioById(audioId: String, audioDTO: AudioDTO): Response<Void> {
-        return RetrofitInstance.apiService.putAudioById(audioId, audioDTO)
+        return apiService.putAudioById(audioId, audioDTO)
     }
 
     suspend fun postAudioFile(audioId: String?, audioFile: MultipartBody.Part) {
-        return RetrofitInstance.apiService.postAudioFile(audioId, audioFile)
+        return apiService.postAudioFile(audioId, audioFile)
     }
 
     suspend fun putImageToMapLocation(mapLocationId: String, imageFile: MultipartBody.Part) {
-        return RetrofitInstance.apiService.putImageToMapLocation(mapLocationId, imageFile)
+        return apiService.putImageToMapLocation(mapLocationId, imageFile)
     }
 
     suspend fun putImageToRoute(routeId: String, imageFile: MultipartBody.Part) {
-        return RetrofitInstance.apiService.putImageToRoute(routeId, imageFile)
+        return apiService.putImageToRoute(routeId, imageFile)
     }
 
     suspend fun deleteRouteById(routeId: String): Response<Route> {
-        return RetrofitInstance.apiService.deleteRouteById(routeId)
+        return apiService.deleteRouteById(routeId)
     }
 
     suspend fun deleteMapLocationById(mapLocationId: String): Response<MapLocation> {
-        return RetrofitInstance.apiService.deleteMapLocationById(mapLocationId)
+        return apiService.deleteMapLocationById(mapLocationId)
     }
 
     suspend fun deleteRouteMapLocationByIdApi(routeMapLocationId: String): Response<RouteMapLocation> {
-        return RetrofitInstance.apiService.deleteRouteMapLocationByIdApi(routeMapLocationId)
+        return apiService.deleteRouteMapLocationByIdApi(routeMapLocationId)
     }
 
     suspend fun deleteAudioById(audioId: String): Response<AudioDTO> {
-        return RetrofitInstance.apiService.deleteAudioById(audioId)
+        return apiService.deleteAudioById(audioId)
     }
 
 

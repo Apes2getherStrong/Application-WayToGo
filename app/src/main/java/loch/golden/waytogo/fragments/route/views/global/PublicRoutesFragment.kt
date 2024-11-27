@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
@@ -26,21 +27,14 @@ import loch.golden.waytogo.repositories.RouteRepository
 import loch.golden.waytogo.room.WayToGoDatabase
 import loch.golden.waytogo.room.dao.RouteDao
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.fragments.user.components.TokenManager
 
-
+@AndroidEntryPoint
 class PublicRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentPublicRoutesBinding
     private lateinit var recyclerViewRouteAdapter: RecyclerViewRouteAdapter
-    private val mapViewModel by activityViewModels<MapViewModel>()
-    private lateinit var routeViewModel: RouteViewModel
     private val viewModel by viewModels<RouteViewModel>()
-    private val appScope = CoroutineScope(SupervisorJob())
-    private val routeDao: RouteDao by lazy {
-        WayToGoDatabase.getDatabase(requireContext(), appScope).getRouteDao()
-    }
     private lateinit var tokenManager: TokenManager
 
 
@@ -57,7 +51,6 @@ class PublicRoutesFragment : Fragment() {
 
         tokenManager = TokenManager(requireContext())
 
-        initViewModel()
         initSearchView()
         initRecyclerView()
         observeRouteResponse()
@@ -108,13 +101,6 @@ class PublicRoutesFragment : Fragment() {
         binding.swipeRefreshLayout.postDelayed({
             binding.swipeRefreshLayout.isRefreshing = false
         }, 2000)
-    }
-
-    private fun initViewModel() {
-        val repository = RouteRepository(routeDao)
-        val routeViewModelFactory = RouteViewModelFactory(repository)
-        routeViewModel = ViewModelProvider(this, routeViewModelFactory)[RouteViewModel::class.java]
-
     }
 
     private fun observeRouteResponse() {

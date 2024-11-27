@@ -3,16 +3,19 @@ package loch.golden.waytogo.fragments.map.components.navigation
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.JsonParser
 import loch.golden.waytogo.BuildConfig
-import loch.golden.waytogo.services.services.GoogleApiRetrofitInstance
-import loch.golden.waytogo.viewmodels.MapViewModel
+import loch.golden.waytogo.services.services.GoogleApiService
+import javax.inject.Inject
 
-class NavigationManager(private val mapViewModel: MapViewModel) {
+class NavigationManager @Inject constructor(
+
+    private val apiService: GoogleApiService
+) {
 
 
     suspend fun getPolyline(from: LatLng, to: LatLng): ArrayList<LatLng> {
         val fromStr = "${from.latitude},${from.longitude}"
         val toStr = "${to.latitude},${to.longitude}"
-        val jsonResponse = GoogleApiRetrofitInstance.apiService.getPolyline( //todo add try catch
+        val jsonResponse = apiService.getPolyline( //todo add try catch
             fromStr,
             toStr,
             "walking",

@@ -21,22 +21,24 @@ import androidx.fragment.app.commit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.databinding.ActivityMainBinding
-import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.fragments.map.views.PointMapFragment
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
-import loch.golden.waytogo.services.services.RetrofitInstance
-import loch.golden.waytogo.utils.Constants
-import loch.golden.waytogo.fragments.user.views.LoginFragment
 import loch.golden.waytogo.fragments.user.components.TokenManager
+import loch.golden.waytogo.fragments.user.views.LoginFragment
+import loch.golden.waytogo.utils.Constants
+import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.utils.Permissions
 import java.io.File
+import javax.inject.Inject
 
-
-class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
+@AndroidEntryPoint
+class MainActivity() : AppCompatActivity(), NavigationBarView.OnItemSelectedListener,
     ActivityCompat.OnRequestPermissionsResultCallback, OnChangeFragmentListener {
 
-    private lateinit var tokenManager: TokenManager
+    @Inject
+    lateinit var tokenManager: TokenManager
     private lateinit var binding: ActivityMainBinding
     private var dialog: AlertDialog? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,8 +46,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        tokenManager = TokenManager(this)
-        RetrofitInstance.getTokenManager(tokenManager)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
             val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
 

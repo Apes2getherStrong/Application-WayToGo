@@ -11,21 +11,19 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentMyRoutesBinding
-import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.fragments.route.components.adapters.SimpleMyRoutesAdapter
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
 import loch.golden.waytogo.room.entity.route.Route
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 
+@AndroidEntryPoint
 class MyRoutesFragment : Fragment() {
 
     private lateinit var binding: FragmentMyRoutesBinding
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels ()
     private lateinit var recyclerViewRouteAdapter: SimpleMyRoutesAdapter
     private var allRoutes: List<Route> = emptyList()
     private var bottomNav: BottomNavigationView? = null

@@ -9,32 +9,29 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import loch.golden.waytogo.viewmodels.classes.MapPoint
-import loch.golden.waytogo.viewmodels.classes.MapRoute
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.databinding.FragmentRouteDetailBinding
-import loch.golden.waytogo.viewmodels.MapViewModel
-import loch.golden.waytogo.utils.OnChangeFragmentListener
-import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.fragments.route.components.adapters.PublicMapLocationAdapter
 import loch.golden.waytogo.fragments.route.views.RoutesFragment
+import loch.golden.waytogo.utils.OnChangeFragmentListener
+import loch.golden.waytogo.viewmodels.MapViewModel
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
+import loch.golden.waytogo.viewmodels.classes.MapPoint
+import loch.golden.waytogo.viewmodels.classes.MapRoute
 import java.io.File
 import java.io.FileOutputStream
 
-
+@AndroidEntryPoint
 class RouteDetailFragment() : Fragment() {
 
     private lateinit var binding: FragmentRouteDetailBinding
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels()
+    private val mapViewModel: MapViewModel by activityViewModels()
     private var changeFragmentListener: OnChangeFragmentListener? = null
     private lateinit var route: MapRoute
-    private lateinit var mapViewModel: MapViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +52,6 @@ class RouteDetailFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
         //handle back press
         activity?.onBackPressedDispatcher?.addCallback(
             viewLifecycleOwner,
@@ -193,6 +189,7 @@ class RouteDetailFragment() : Fragment() {
         Log.d("Warmbier", route.toString())
         mapViewModel.inCreationMode = false
         mapViewModel.route = route
+        Log.d("DaggerWarmbier", mapViewModel.route.toString())
         mapViewModel.updateCurrentSequenceNr(1)
         val bundle = Bundle().apply {
             putBoolean("reset", true)

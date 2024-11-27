@@ -14,23 +14,21 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.R
 import loch.golden.waytogo.databinding.FragmentLoginBinding
 import loch.golden.waytogo.utils.RouteMainApplication
 import loch.golden.waytogo.viewmodels.RouteViewModel
-import loch.golden.waytogo.viewmodels.factory.RouteViewModelFactory
 import loch.golden.waytogo.services.dto.auth.AuthRequest
 import loch.golden.waytogo.fragments.user.components.TokenManager
 import retrofit2.HttpException
 import java.io.IOException
 
-
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
-    private val routeViewModel: RouteViewModel by viewModels {
-        RouteViewModelFactory((requireActivity().application as RouteMainApplication).repository)
-    }
+    private val routeViewModel: RouteViewModel by viewModels ()
     private lateinit var progressDialog: AlertDialog
     private lateinit var tokenManager: TokenManager
     override fun onCreateView(
