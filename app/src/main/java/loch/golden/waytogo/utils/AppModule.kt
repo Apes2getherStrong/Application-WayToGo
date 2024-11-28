@@ -1,6 +1,5 @@
 package loch.golden.waytogo.utils
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import dagger.Module
@@ -8,14 +7,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import loch.golden.waytogo.fragments.map.components.navigation.LocationManager
-import loch.golden.waytogo.fragments.map.components.navigation.NavigationManager
-import loch.golden.waytogo.fragments.user.components.TokenManager
-import loch.golden.waytogo.room.WayToGoDatabase
-import loch.golden.waytogo.room.dao.RouteDao
-import loch.golden.waytogo.services.components.AuthInterceptor
-import loch.golden.waytogo.services.services.ApiService
-import loch.golden.waytogo.services.services.GoogleApiService
+import loch.golden.waytogo.access.services.components.AuthInterceptor
+import loch.golden.waytogo.access.services.services.ApiService
+import loch.golden.waytogo.access.services.services.GoogleApiService
+import loch.golden.waytogo.data.room.WayToGoDatabase
+import loch.golden.waytogo.data.room.dao.RouteDao
+import loch.golden.waytogo.presentation.fragments.map.components.navigation.LocationManager
+import loch.golden.waytogo.presentation.fragments.map.components.navigation.NavigationManager
+import loch.golden.waytogo.presentation.fragments.user.components.TokenManager
 import loch.golden.waytogo.utils.Constants.Companion.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

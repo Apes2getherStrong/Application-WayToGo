@@ -23,10 +23,10 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import loch.golden.waytogo.databinding.ActivityMainBinding
-import loch.golden.waytogo.fragments.map.views.PointMapFragment
-import loch.golden.waytogo.fragments.route.views.RoutesFragment
-import loch.golden.waytogo.fragments.user.components.TokenManager
-import loch.golden.waytogo.fragments.user.views.LoginFragment
+import loch.golden.waytogo.presentation.fragments.map.views.PointMapFragment
+import loch.golden.waytogo.presentation.fragments.route.views.RoutesFragment
+import loch.golden.waytogo.presentation.fragments.user.components.TokenManager
+import loch.golden.waytogo.presentation.fragments.user.views.LoginFragment
 import loch.golden.waytogo.utils.Constants
 import loch.golden.waytogo.utils.OnChangeFragmentListener
 import loch.golden.waytogo.utils.Permissions
